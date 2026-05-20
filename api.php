@@ -317,7 +317,7 @@ final class ConfigRepo
 }
 
 /* ============================================================================
- | NOTIFICADOR  (Telegram Bot — gratis, sin cuentas de pago)
+ | NOTIFICADOR  (Email via Resend API — gratis, solo se configura una vez)
  ============================================================================ */
 
 final class Notificador
@@ -325,62 +325,57 @@ final class Notificador
     private ConfigRepo $cfg;
     public function __construct() { $this->cfg = new ConfigRepo(); }
 
-    // ── Telegram Bot API ──────────────────────────────────────────────
-    private function tgPost(string $method, array $params): array
+    // ── Resend API (resend.com — 3000 emails/mes gratis) ─────────────
+    private function enviarEmail(string $para, string $asunto, string $cuerpo): array
     {
-        $token = trim($this->cfg->get('tg_token'));
-        if ($token === '') return ['ok' => false, 'error' => 'Bot no configurado.'];
+        $apiKey = trim($this->cfg->get('resend_api_key'));
+        $from   = trim($this->cfg->get('resend_from', 'FrioSeguro <alertas@frioseguro.app>'));
 
-        $ch = curl_init("https://api.telegram.org/bot{$token}/{$method}");
+        if ($apiKey === '') return ['ok' => false, 'error' => 'API key de Resend no configurada en config.local.php'];
+
+        $ch = curl_init('https://api.resend.com/emails');
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => json_encode($params),
-            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS     => json_encode([
+                'from'    => $from,
+                'to'      => [$para],
+                'subject' => $asunto,
+                'text'    => $cuerpo,
+            ]),
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $apiKey,
+                'Content-Type: application/json',
+            ],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 15,
             CURLOPT_SSL_VERIFYPEER => false,
         ]);
-        $res = curl_exec($ch);
-        $err = curl_error($ch);
+
+        $res  = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
         curl_close($ch);
 
-        if ($res === false) return ['ok' => false, 'error' => $err];
+        if ($res === false || $err) return ['ok' => false, 'error' => "Red: $err"];
         $json = json_decode($res, true);
-        return $json ?? ['ok' => false, 'error' => 'Respuesta invalida'];
-    }
-
-    // Obtiene los últimos mensajes al bot para buscar el chat_id del usuario
-    public function buscarChatId(): array
-    {
-        $r = $this->tgPost('getUpdates', ['limit' => 20, 'offset' => -20]);
-        if (!($r['ok'] ?? false)) return $r;
-
-        $updates = array_reverse($r['result'] ?? []);
-        foreach ($updates as $u) {
-            $chat = $u['message']['chat'] ?? $u['callback_query']['message']['chat'] ?? null;
-            if ($chat) {
-                $nombre = trim(($chat['first_name'] ?? '') . ' ' . ($chat['last_name'] ?? ''));
-                return ['ok' => true, 'chat_id' => (string)$chat['id'], 'nombre' => $nombre];
-            }
-        }
-        return ['ok' => false, 'error' => 'No se encontro ningún mensaje. Abre el bot y envía /start primero.'];
+        if ($code === 200 || $code === 201) return ['ok' => true];
+        return ['ok' => false, 'error' => ($json['message'] ?? $json['name'] ?? "HTTP $code")];
     }
 
     public function enviarSMS(string $mensaje): bool
     {
-        $chatId = trim($this->cfg->get('tg_chat_id'));
-        if ($chatId === '') return false;
-        $r = $this->tgPost('sendMessage', ['chat_id' => $chatId, 'text' => $mensaje]);
-        return $r['ok'] ?? false;
+        $para = trim($this->cfg->get('alerta_email'));
+        if ($para === '') return false;
+        return $this->enviarEmail($para, '⚠️ FríoSeguro — Alerta', $mensaje)['ok'];
     }
 
     public function probarSMS(string $mensaje): array
     {
-        $chatId = trim($this->cfg->get('tg_chat_id'));
-        if ($chatId === '') return ['ok' => false, 'error' => 'Primero conecta tu Telegram con el botón de abajo.'];
-        $r = $this->tgPost('sendMessage', ['chat_id' => $chatId, 'text' => $mensaje]);
-        if ($r['ok'] ?? false) return ['ok' => true, 'mensaje' => 'Mensaje enviado a Telegram. Revisa tu celular.'];
-        return ['ok' => false, 'error' => $r['description'] ?? 'Error desconocido'];
+        $para = trim($this->cfg->get('alerta_email'));
+        if ($para === '') return ['ok' => false, 'error' => 'Ingresa un correo electrónico en la configuración.'];
+        $r = $this->enviarEmail($para, '✅ FríoSeguro — Prueba', $mensaje);
+        if ($r['ok']) return ['ok' => true, 'mensaje' => "Correo enviado a $para. Revisa tu bandeja de entrada."];
+        return $r;
     }
 
     public function alertar(string $tipo, string $descripcion, float $valor, string $viajeId, array $extra = []): void
@@ -1985,16 +1980,7 @@ try {
 
     if ($method === 'GET' && $uri === '/config') {
         $map = (new ConfigRepo())->toMap();
-        unset($map['tg_token']); // no exponer el token del bot
-        // Agregar nombre del bot si está configurado
-        $token = trim((new ConfigRepo())->get('tg_token'));
-        if ($token !== '') {
-            $ch = curl_init("https://api.telegram.org/bot{$token}/getMe");
-            curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER=>true, CURLOPT_TIMEOUT=>5, CURLOPT_SSL_VERIFYPEER=>false]);
-            $r = json_decode(curl_exec($ch) ?: '{}', true);
-            curl_close($ch);
-            if ($r['ok'] ?? false) $map['tg_bot_username'] = $r['result']['username'] ?? '';
-        }
+        unset($map['resend_api_key']); // no exponer la API key
         respond($map);
     }
 
@@ -2002,7 +1988,8 @@ try {
         $data = jsonBody();
         $cfg  = new ConfigRepo();
         $permitidos = [
-            'tg_chat_id','sms_activo','tg_token',
+            'alerta_email','sms_activo',
+            'resend_api_key','resend_from',
             'idioma','nombre_sistema',
         ];
         foreach ($permitidos as $k) {
@@ -2017,13 +2004,6 @@ try {
         respond(['ok' => $result['ok'], 'mensaje' => $result['mensaje'] ?? $result['error'] ?? 'Error.']);
     }
 
-    if ($method === 'GET' && $uri === '/config/telegram-buscar') {
-        $result = (new Notificador())->buscarChatId();
-        if ($result['ok'] ?? false) {
-            (new ConfigRepo())->set('tg_chat_id', $result['chat_id']);
-        }
-        respond($result);
-    }
 
     /* =========================
        404
