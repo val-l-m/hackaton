@@ -1,5 +1,8 @@
 // ── STATE ──────────────────────────────────────────────
 let ruralMode=false,queueCount=0,alertCount=0;
+
+// ── IDs de alertas ya notificadas por correo (evita duplicados en el cliente) ──
+const _alertasNotificadas = new Set();
 let heroMap,dashMap,vMarker,offPoly,waitMsg;
 let v102Line=null,v102OffLine=null,v102AlertMarkers=[];
 let tempChart,donutChart;
@@ -244,9 +247,51 @@ function fetchAlertas(){
           <div class="al-med">${a.medicamento||'—'}</div>
           <span class="al-badge ${bg} badge">${val}</span>
         </div>`;
+
+        // ── Notificar por correo alertas nuevas ──────────────────
+        notificarAlertaCorreo(a);
       });
     })
     .catch(()=>{});
+}
+
+/**
+ * Envía una alerta por correo si no ha sido notificada aún en esta sesión.
+ * El servidor tiene un cooldown adicional para evitar spam entre sesiones.
+ * Solo notifica tipos críticos: temperatura_critica, temperatura_riesgo,
+ * puerta_abierta, perdida_senal, lote_comprometido.
+ */
+function notificarAlertaCorreo(alerta) {
+  // Clave única: tipo + id de la alerta (o tipo + timestamp si no hay id)
+  const clave = `${alerta.tipo}_${alerta.id || alerta.timestamp}`;
+
+  // Ya notificamos esta alerta en la sesión actual → ignorar
+  if (_alertasNotificadas.has(clave)) return;
+
+  // Solo notificar tipos de alerta críticos
+  const tiposNotificar = ['temperatura_critica','temperatura_riesgo',
+                          'puerta_abierta','perdida_senal','lote_comprometido'];
+  if (!tiposNotificar.includes(alerta.tipo)) return;
+
+  _alertasNotificadas.add(clave);
+
+  fetch('/mail/enviar_alerta_correo.php', {
+    method:  'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      tipo:        alerta.tipo,
+      vehiculo:    alerta.vehiculo_id    || '—',
+      valor:       alerta.valor          ?? null,
+      medicamento: alerta.medicamento    || '—',
+      viaje_id:    alerta.viaje_id       || '—',
+      descripcion: alerta.descripcion    || alerta.tipo.replace(/_/g,' '),
+      lat:         alerta.latitud        ?? null,
+      lng:         alerta.longitud       ?? null,
+    })
+  })
+  .then(r => r.json())
+  .then(r => { if(r.ok) console.log('[correo]', r.mensaje); })
+  .catch(()=>{});
 }
 
 // ── MAP DATA FROM API ─────────────────────────────────────

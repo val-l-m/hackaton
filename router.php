@@ -13,6 +13,12 @@ if (str_starts_with($uri, '/api')) {
     return true;
 }
 
+// Rutas de correo → mail/
+if (str_starts_with($uri, '/mail/') && file_exists(__DIR__ . $uri)) {
+    require __DIR__ . $uri;
+    return true;
+}
+
 // Archivos estáticos existentes → servirlos directamente
 $file = __DIR__ . $uri;
 if ($uri !== '/' && file_exists($file) && !is_dir($file)) {

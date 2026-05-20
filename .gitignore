@@ -2,3 +2,4 @@ config.local.php
 frioseguro.db
 .claude/
 offline_queue.json
+mail/config_correo.php
