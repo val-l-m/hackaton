@@ -331,11 +331,65 @@ final class Notificador
         return @mail($destino, $asunto, $mensaje, $headers);
     }
 
+    // ── WhatsApp via Twilio (cURL — funciona en XAMPP) ───────────────
+    private function twilioWA(string $to, string $body): array
+    {
+        $sid   = trim($this->cfg->get('twilio_sid'));
+        $token = trim($this->cfg->get('twilio_token'));
+        $from  = trim($this->cfg->get('twilio_wa_from'));
+
+        if ($sid === '' || $token === '' || $from === '') {
+            return ['ok' => false, 'error' => 'Faltan credenciales Twilio (SID, Token o número WhatsApp).'];
+        }
+
+        // Normalizar números: agregar prefijo whatsapp:
+        $toAddr   = 'whatsapp:' . (str_starts_with($to,   'whatsapp:') ? substr($to,   10) : $to);
+        $fromAddr = 'whatsapp:' . (str_starts_with($from, 'whatsapp:') ? substr($from, 10) : $from);
+
+        $url = "https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json";
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_USERPWD        => "$sid:$token",
+            CURLOPT_POSTFIELDS     => http_build_query(['To' => $toAddr, 'From' => $fromAddr, 'Body' => $body]),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 20,
+            CURLOPT_SSL_VERIFYPEER => false, // XAMPP dev — no verifica cert local
+            CURLOPT_SSL_VERIFYHOST => false,
+        ]);
+
+        $res  = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
+
+        if ($res === false || $err !== '') {
+            return ['ok' => false, 'error' => "cURL: $err"];
+        }
+
+        $json = json_decode($res, true);
+        if (isset($json['sid'])) {
+            return ['ok' => true, 'sid' => $json['sid']];
+        }
+
+        $msg = $json['message'] ?? $json['detail'] ?? $res;
+        return ['ok' => false, 'error' => "Twilio: $msg (HTTP $code)"];
+    }
+
     public function enviarWhatsapp(string $mensaje): bool
     {
         $to = trim($this->cfg->get('alerta_whatsapp'));
         if ($to === '') return false;
-        return $this->twilio($to, $mensaje, true);
+        $r = $this->twilioWA($to, $mensaje);
+        return $r['ok'];
+    }
+
+    public function probarWhatsapp(string $mensaje): array
+    {
+        $to = trim($this->cfg->get('alerta_whatsapp'));
+        if ($to === '') return ['ok' => false, 'error' => 'No hay número de WhatsApp configurado.'];
+        return $this->twilioWA($to, $mensaje);
     }
 
     public function alertar(string $tipo, string $descripcion, float $valor, string $viajeId, array $extra = []): void
@@ -1811,15 +1865,22 @@ try {
     }
 
     if ($method === 'POST' && $uri === '/config/test-sms') {
-        $msg = "FRIOSEGURO - Prueba SMS\nSistema de notificaciones activo.\nFecha: " . date('d/m/Y H:i:s');
+        $msg = "FRIOSEGURO - Prueba SMS\nSistema activo.\nFecha: " . date('d/m/Y H:i:s');
         $ok  = (new Notificador())->enviarSMS($msg);
-        respond(['ok' => $ok, 'mensaje' => $ok ? 'SMS enviado correctamente.' : 'No se pudo enviar. Verifica el numero y las credenciales Twilio.']);
+        respond(['ok' => $ok, 'mensaje' => $ok
+            ? 'SMS enviado. Puede tardar hasta 1 minuto dependiendo de la operadora.'
+            : 'No se pudo enviar el SMS. Verifica que Mercury Mail este activo en XAMPP y que el numero sea correcto.']);
     }
 
     if ($method === 'POST' && $uri === '/config/test-whatsapp') {
-        $msg = "FRIOSEGURO - Prueba WhatsApp\nSistema de notificaciones activo.\nFecha: " . date('d/m/Y H:i:s');
-        $ok  = (new Notificador())->enviarWhatsapp($msg);
-        respond(['ok' => $ok, 'mensaje' => $ok ? 'WhatsApp enviado correctamente.' : 'No se pudo enviar. Verifica el numero y las credenciales Twilio.']);
+        $msg    = "FRIOSEGURO - Prueba WhatsApp\nSistema de notificaciones activo.\nFecha: " . date('d/m/Y H:i:s');
+        $result = (new Notificador())->probarWhatsapp($msg);
+        respond([
+            'ok'     => $result['ok'],
+            'mensaje' => $result['ok']
+                ? 'WhatsApp enviado correctamente. Revisa tu telefono.'
+                : ($result['error'] ?? 'No se pudo enviar.'),
+        ]);
     }
 
     /* =========================
