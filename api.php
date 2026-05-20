@@ -217,7 +217,145 @@ final class Database
                 resuelta    INTEGER NOT NULL DEFAULT 0,
                 timestamp   INTEGER NOT NULL DEFAULT (unixepoch())
             );
+
+            CREATE TABLE IF NOT EXISTS configuracion (
+                clave          TEXT PRIMARY KEY,
+                valor          TEXT,
+                actualizado_en INTEGER DEFAULT (unixepoch())
+            );
         ");
+    }
+}
+
+/* ============================================================================
+ | CONFIG REPO
+ ============================================================================ */
+
+final class ConfigRepo
+{
+    private PDO $db;
+    public function __construct() { $this->db = Database::get(); }
+
+    public function get(string $clave, string $default = ''): string
+    {
+        $s = $this->db->prepare("SELECT valor FROM configuracion WHERE clave = ?");
+        $s->execute([$clave]);
+        $r = $s->fetch();
+        return $r ? (string)$r['valor'] : $default;
+    }
+
+    public function set(string $clave, string $valor): void
+    {
+        $s = $this->db->prepare(
+            "INSERT OR REPLACE INTO configuracion (clave, valor, actualizado_en) VALUES (?, ?, unixepoch())"
+        );
+        $s->execute([$clave, $valor]);
+    }
+
+    public function all(): array
+    {
+        return $this->db->query("SELECT clave, valor FROM configuracion")->fetchAll();
+    }
+
+    public function toMap(): array
+    {
+        $map = [];
+        foreach ($this->all() as $r) $map[$r['clave']] = $r['valor'];
+        return $map;
+    }
+}
+
+/* ============================================================================
+ | NOTIFICADOR  (Email SMTP + WhatsApp CallMeBot)
+ ============================================================================ */
+
+final class Notificador
+{
+    private ConfigRepo $cfg;
+    public function __construct() { $this->cfg = new ConfigRepo(); }
+
+    public function enviarEmail(string $asunto, string $cuerpo): bool
+    {
+        $to   = trim($this->cfg->get('notif_email'));
+        $host = $this->cfg->get('smtp_host', 'smtp.gmail.com');
+        $port = (int)$this->cfg->get('smtp_port', '587');
+        $user = $this->cfg->get('smtp_user');
+        $pass = $this->cfg->get('smtp_pass');
+        $from = $this->cfg->get('smtp_from', $user);
+
+        if ($to === '') return false;
+        if ($user === '' || $pass === '') {
+            return @mail($to, $asunto, $cuerpo, "From: FríoSeguro <noreply@frioseguro.local>\r\nContent-Type: text/plain; charset=UTF-8");
+        }
+        return $this->smtpEnviar($host, $port, $user, $pass, $from, $to, $asunto, $cuerpo);
+    }
+
+    public function enviarWhatsapp(string $mensaje): bool
+    {
+        $phone  = trim($this->cfg->get('notif_whatsapp'));
+        $apikey = trim($this->cfg->get('callmebot_apikey'));
+        if ($phone === '' || $apikey === '') return false;
+
+        $url = 'https://api.callmebot.com/whatsapp.php?' . http_build_query([
+            'phone'  => $phone,
+            'text'   => $mensaje,
+            'apikey' => $apikey,
+        ]);
+        $ctx = stream_context_create(['http' => ['timeout' => 12, 'ignore_errors' => true]]);
+        return @file_get_contents($url, false, $ctx) !== false;
+    }
+
+    public function alertar(string $tipo, string $descripcion, float $valor, string $viajeId): void
+    {
+        if ($this->cfg->get('notif_email_activo', '1') !== '0') {
+            $asunto = "⚠️ FríoSeguro — $tipo";
+            $body   = "$descripcion\nValor: {$valor}\nViaje: $viajeId\nFecha: " . date('Y-m-d H:i:s');
+            $this->enviarEmail($asunto, $body);
+        }
+        if ($this->cfg->get('notif_whatsapp_activo', '1') !== '0') {
+            $msg = "⚠️ *FríoSeguro — $tipo*\n$descripcion\nValor: $valor\nViaje: $viajeId\n" . date('Y-m-d H:i:s');
+            $this->enviarWhatsapp($msg);
+        }
+    }
+
+    private function smtpEnviar(string $host, int $port, string $user, string $pass,
+                                string $from, string $to, string $subject, string $body): bool
+    {
+        $sock = @fsockopen($host, $port, $errno, $errstr, 12);
+        if (!$sock) return false;
+
+        $rd = function() use ($sock): string {
+            $d = '';
+            while (!feof($sock)) {
+                $line = fgets($sock, 512);
+                $d .= $line;
+                if (isset($line[3]) && $line[3] === ' ') break;
+            }
+            return $d;
+        };
+        $wr = fn(string $c) => fwrite($sock, "$c\r\n");
+
+        $rd();
+        $wr("EHLO frioseguro.local"); $ehlo = $rd();
+        if (str_contains($ehlo, 'STARTTLS')) {
+            $wr("STARTTLS"); $rd();
+            stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            $wr("EHLO frioseguro.local"); $rd();
+        }
+        $wr("AUTH LOGIN"); $rd();
+        $wr(base64_encode($user)); $rd();
+        $wr(base64_encode($pass));
+        if (!str_starts_with($rd(), '235')) { fclose($sock); return false; }
+
+        $enc = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+        $wr("MAIL FROM:<$from>"); $rd();
+        $wr("RCPT TO:<$to>"); $rd();
+        $wr("DATA"); $rd();
+        $wr("From: =?UTF-8?B?" . base64_encode('FríoSeguro') . "?= <$from>\r\nTo: $to\r\nSubject: $enc\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n$body");
+        $wr("."); $rd();
+        $wr("QUIT");
+        fclose($sock);
+        return true;
     }
 }
 
@@ -1423,13 +1561,44 @@ try {
             'longitud_actual'
         ]);
 
-        $id = (new TelemetriaRepo())
-            ->insert($data);
+        $id = (new TelemetriaRepo())->insert($data);
 
-        respond([
-            'ok' => true,
-            'id' => $id
-        ]);
+        // Detectar anomalías y notificar
+        $viaje = (new ViajeRepo())->find($data['viaje_id']);
+        if ($viaje) {
+            $tMin  = (float)($viaje['temp_min'] ?? 2.0);
+            $tMax  = (float)($viaje['temp_max'] ?? 8.0);
+            $tAct  = (float)$data['temperatura_actual'];
+            $notif = new Notificador();
+            if ($tAct > $tMax + 1.5) {
+                (new AlertaRepo())->insert([
+                    'viaje_id'    => $data['viaje_id'],
+                    'tipo'        => 'temperatura_critica',
+                    'descripcion' => "Temperatura crítica: {$tAct}°C (máx permitido: {$tMax}°C)",
+                    'latitud'     => $data['latitud_actual'] ?? null,
+                    'longitud'    => $data['longitud_actual'] ?? null,
+                    'valor'       => $tAct,
+                    'timestamp'   => $data['timestamp_lectura_real'] ?? time(),
+                ]);
+                $notif->alertar('Temperatura Crítica', "Temperatura {$tAct}°C supera el máximo de {$tMax}°C", $tAct, $data['viaje_id']);
+            } elseif ($tAct < $tMin - 1.5) {
+                (new AlertaRepo())->insert([
+                    'viaje_id'    => $data['viaje_id'],
+                    'tipo'        => 'temperatura_riesgo',
+                    'descripcion' => "Temperatura baja: {$tAct}°C (mín permitido: {$tMin}°C)",
+                    'latitud'     => $data['latitud_actual'] ?? null,
+                    'longitud'    => $data['longitud_actual'] ?? null,
+                    'valor'       => $tAct,
+                    'timestamp'   => $data['timestamp_lectura_real'] ?? time(),
+                ]);
+                $notif->alertar('Temperatura Baja', "Temperatura {$tAct}°C está bajo el mínimo de {$tMin}°C", $tAct, $data['viaje_id']);
+            }
+            if (!empty($data['puerta_abierta'])) {
+                $notif->alertar('Puerta Abierta', 'La puerta del vehículo refrigerado está abierta', 0, $data['viaje_id']);
+            }
+        }
+
+        respond(['ok' => true, 'id' => $id]);
     }
 
     /* =========================
@@ -1594,6 +1763,45 @@ try {
 
     if ($method === 'GET' && $uri === '/ia/ultimo-analisis') {
         respond(ctrlIaUltimoAnalisis());
+    }
+
+    /* =========================
+       CONFIGURACIÓN
+    ========================= */
+
+    if ($method === 'GET' && $uri === '/config') {
+        $map = (new ConfigRepo())->toMap();
+        unset($map['smtp_pass'], $map['callmebot_apikey']);
+        respond($map);
+    }
+
+    if ($method === 'POST' && $uri === '/config') {
+        $data = jsonBody();
+        $cfg  = new ConfigRepo();
+        $permitidos = [
+            'notif_email','notif_email_activo','notif_whatsapp','notif_whatsapp_activo',
+            'smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from',
+            'callmebot_apikey','idioma','nombre_sistema',
+        ];
+        foreach ($permitidos as $k) {
+            if (array_key_exists($k, $data)) $cfg->set($k, (string)$data[$k]);
+        }
+        respond(['ok' => true]);
+    }
+
+    if ($method === 'POST' && $uri === '/config/test-email') {
+        $ok  = (new Notificador())->enviarEmail(
+            'Prueba FríoSeguro',
+            "Correo de prueba del sistema FríoSeguro.\nFecha: " . date('Y-m-d H:i:s')
+        );
+        respond(['ok' => $ok, 'mensaje' => $ok ? 'Correo enviado correctamente.' : 'No se pudo enviar. Verifica la configuración SMTP.']);
+    }
+
+    if ($method === 'POST' && $uri === '/config/test-whatsapp') {
+        $ok  = (new Notificador())->enviarWhatsapp(
+            "✅ *FríoSeguro — Prueba*\nSistema de notificaciones activo.\n" . date('Y-m-d H:i:s')
+        );
+        respond(['ok' => $ok, 'mensaje' => $ok ? 'WhatsApp enviado correctamente.' : 'No se pudo enviar. Verifica el teléfono y API key de CallMeBot.']);
     }
 
     /* =========================

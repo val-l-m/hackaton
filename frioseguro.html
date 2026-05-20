@@ -17,6 +17,11 @@
   --text:#f1f5f9;--sub:#94a3b8;--muted:#475569;
   --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
 }
+body.light-mode{
+  --bg:#f0f4f8;--sb:#ffffff;--card:#ffffff;--card2:#f8fafc;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --text:#0f172a;--sub:#475569;--muted:#94a3b8;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden;}
 
@@ -532,6 +537,49 @@ footer p{font-size:12px;color:var(--muted);}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* ── MÓDULO CONFIGURACIÓN ────────────────────────────────── */
+#view-config{display:none;flex-direction:column;gap:0;overflow-y:auto;height:100%;}
+#view-config.active{display:flex;}
+.cfg-wrap{max-width:860px;width:100%;margin:0 auto;padding:24px 20px 40px;}
+.cfg-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;}
+.cfg-section-title{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--text);margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.cfg-section-title i{font-size:18px;color:var(--blue);}
+.cfg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.cfg-row.single{grid-template-columns:1fr;}
+.cfg-row.triple{grid-template-columns:1fr 1fr 1fr;}
+.cfg-field label{display:block;font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.cfg-field input,.cfg-field select{width:100%;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px;font-size:13px;font-family:var(--font);transition:border .2s;}
+.cfg-field input:focus,.cfg-field select:focus{outline:none;border-color:var(--blue);}
+.cfg-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.cfg-toggle-row:last-child{border-bottom:none;}
+.cfg-toggle-label{font-size:13px;color:var(--text);font-weight:500;}
+.cfg-toggle-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.cfg-toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+.cfg-toggle input{opacity:0;width:0;height:0;}
+.cfg-toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:24px;cursor:pointer;transition:.3s;}
+.cfg-toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+.cfg-toggle input:checked+.cfg-toggle-slider{background:var(--blue);}
+.cfg-toggle input:checked+.cfg-toggle-slider:before{transform:translateX(20px);}
+.cfg-btn-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;}
+.cfg-btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s;}
+.cfg-btn-primary{background:var(--blue);color:#fff;}
+.cfg-btn-primary:hover{background:var(--blue-d);}
+.cfg-btn-ghost{background:var(--card2);color:var(--text);border:1px solid var(--border);}
+.cfg-btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+.cfg-btn-danger{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+.cfg-btn-danger:hover{background:rgba(239,68,68,.2);}
+.cfg-msg{font-size:12px;padding:8px 12px;border-radius:6px;margin-top:10px;display:none;}
+.cfg-msg.ok{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2);display:block;}
+.cfg-msg.err{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);display:block;}
+.cfg-theme-opt{display:flex;gap:12px;}
+.cfg-theme-card{flex:1;border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;text-align:center;transition:.2s;}
+.cfg-theme-card.selected{border-color:var(--blue);}
+.cfg-theme-card i{font-size:22px;display:block;margin-bottom:6px;}
+.cfg-theme-card span{font-size:12px;font-weight:600;}
+.cfg-profile-box{display:flex;align-items:center;gap:16px;padding:16px;background:var(--card2);border-radius:10px;border:1px solid var(--border);}
+.cfg-avatar{width:52px;height:52px;border-radius:50%;background:var(--blue-grad);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;}
+.cfg-note{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -707,7 +755,7 @@ footer p{font-size:12px;color:var(--muted);}
       <div class="nav-item" id="nav-usuarios" onclick="showDashView('usuarios', this)"><i class="bi bi-people"></i><span>Usuarios</span></div>
       <div class="nav-item" onclick="navPending('Zonas sin Señal')"><i class="bi bi-wifi-off"></i><span>Zonas sin Señal</span></div>
       <div class="nav-item" onclick="navPending('Reglas de Temperatura')"><i class="bi bi-thermometer-half"></i><span>Reglas de Temperatura</span></div>
-      <div class="nav-item" onclick="navPending('Configuración')"><i class="bi bi-gear"></i><span>Configuración</span></div>
+      <div class="nav-item" id="nav-config" onclick="showDashView('config',this)"><i class="bi bi-gear"></i><span>Configuración</span></div>
     </nav>
     <div class="sb-footer">
       <div class="sf-row">
@@ -1120,6 +1168,150 @@ footer p{font-size:12px;color:var(--muted);}
         </div>
       </div>
       </div><!-- /view-ia -->
+
+      <!-- ══ VISTA CONFIGURACIÓN ══ -->
+      <section id="view-config" class="dash-view">
+        <div class="cfg-wrap">
+
+          <!-- Apariencia -->
+          <div class="cfg-section">
+            <div class="cfg-section-title"><i class="bi bi-palette"></i>Apariencia</div>
+            <div class="cfg-row single" style="margin-bottom:0">
+              <div class="cfg-field">
+                <label>Tema</label>
+                <div class="cfg-theme-opt">
+                  <div class="cfg-theme-card" id="theme-dark" onclick="setTheme('dark')">
+                    <i class="bi bi-moon-stars-fill" style="color:var(--indigo)"></i>
+                    <span>Oscuro</span>
+                  </div>
+                  <div class="cfg-theme-card" id="theme-light" onclick="setTheme('light')">
+                    <i class="bi bi-sun-fill" style="color:var(--amber)"></i>
+                    <span>Claro</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Perfil y Sesión -->
+          <div class="cfg-section">
+            <div class="cfg-section-title"><i class="bi bi-person-circle"></i>Perfil y Sesión</div>
+            <div class="cfg-profile-box">
+              <div class="cfg-avatar" id="cfg-avatar-letter">A</div>
+              <div>
+                <div style="font-weight:700;font-size:15px" id="cfg-usuario-nombre">Administrador</div>
+                <div style="font-size:12px;color:var(--sub)" id="cfg-usuario-rol">Rol: admin</div>
+              </div>
+            </div>
+            <div class="cfg-btn-row">
+              <button class="cfg-btn cfg-btn-danger" onclick="cerrarSesion()">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+              </button>
+            </div>
+          </div>
+
+          <!-- Notificaciones -->
+          <div class="cfg-section">
+            <div class="cfg-section-title"><i class="bi bi-bell"></i>Notificaciones de Alerta</div>
+
+            <div class="cfg-toggle-row">
+              <div>
+                <div class="cfg-toggle-label"><i class="bi bi-envelope" style="color:var(--blue);margin-right:6px"></i>Alertas por correo electrónico</div>
+                <div class="cfg-toggle-sub">Se envía un email cuando hay anomalías de temperatura</div>
+              </div>
+              <label class="cfg-toggle">
+                <input type="checkbox" id="cfg-notif-email-activo" onchange="cfgToggle('notif_email_activo',this.checked)">
+                <span class="cfg-toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="cfg-row" style="margin-top:14px">
+              <div class="cfg-field">
+                <label>Correo destino de alertas</label>
+                <input type="email" id="cfg-notif-email" placeholder="responsable@empresa.com">
+              </div>
+            </div>
+
+            <div class="cfg-toggle-row">
+              <div>
+                <div class="cfg-toggle-label"><i class="bi bi-whatsapp" style="color:#25d366;margin-right:6px"></i>Alertas por WhatsApp</div>
+                <div class="cfg-toggle-sub">Requiere registrarse en CallMeBot (gratis)</div>
+              </div>
+              <label class="cfg-toggle">
+                <input type="checkbox" id="cfg-notif-wa-activo" onchange="cfgToggle('notif_whatsapp_activo',this.checked)">
+                <span class="cfg-toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="cfg-row" style="margin-top:14px">
+              <div class="cfg-field">
+                <label>Número WhatsApp (con código de país)</label>
+                <input type="text" id="cfg-notif-wa" placeholder="+525512345678">
+              </div>
+              <div class="cfg-field">
+                <label>API Key de CallMeBot</label>
+                <input type="text" id="cfg-callmebot-key" placeholder="123456">
+              </div>
+            </div>
+            <p class="cfg-note">
+              <i class="bi bi-info-circle"></i>
+              Para activar WhatsApp: guarda el número <strong>+34 644 59 60 79</strong> como "CallMeBot" en tus contactos,
+              envíale el mensaje <strong>"I allow callmebot to send me messages"</strong> y recibirás tu API key en unos segundos.
+            </p>
+
+            <div class="cfg-btn-row">
+              <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestEmail()">
+                <i class="bi bi-envelope-check"></i> Probar correo
+              </button>
+              <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestWA()">
+                <i class="bi bi-whatsapp"></i> Probar WhatsApp
+              </button>
+              <button class="cfg-btn cfg-btn-primary" onclick="cfgGuardarNotif()">
+                <i class="bi bi-floppy"></i> Guardar
+              </button>
+            </div>
+            <div class="cfg-msg" id="cfg-msg-notif"></div>
+          </div>
+
+          <!-- SMTP -->
+          <div class="cfg-section">
+            <div class="cfg-section-title"><i class="bi bi-server"></i>Configuración SMTP (correo)</div>
+            <div class="cfg-row">
+              <div class="cfg-field">
+                <label>Servidor SMTP</label>
+                <input type="text" id="cfg-smtp-host" placeholder="smtp.gmail.com">
+              </div>
+              <div class="cfg-field">
+                <label>Puerto</label>
+                <input type="number" id="cfg-smtp-port" placeholder="587">
+              </div>
+            </div>
+            <div class="cfg-row">
+              <div class="cfg-field">
+                <label>Usuario (correo de envío)</label>
+                <input type="email" id="cfg-smtp-user" placeholder="tuapp@gmail.com">
+              </div>
+              <div class="cfg-field">
+                <label>Contraseña de aplicación</label>
+                <input type="password" id="cfg-smtp-pass" placeholder="••••••••••••">
+              </div>
+            </div>
+            <p class="cfg-note">
+              <i class="bi bi-info-circle"></i>
+              Con Gmail usa una <strong>Contraseña de aplicación</strong> (no tu contraseña normal).
+              Ve a: cuenta Google → Seguridad → Verificación en 2 pasos → Contraseñas de aplicaciones.
+            </p>
+            <div class="cfg-btn-row">
+              <button class="cfg-btn cfg-btn-primary" onclick="cfgGuardarSMTP()">
+                <i class="bi bi-floppy"></i> Guardar SMTP
+              </button>
+            </div>
+            <div class="cfg-msg" id="cfg-msg-smtp"></div>
+          </div>
+
+        </div><!-- /cfg-wrap -->
+      </section><!-- /view-config -->
+
     </div>
   </div>
 </div>
@@ -1591,6 +1783,7 @@ function showDashView(view, el = null) {
   usuarios?.classList.remove('active');
   vehiculos?.classList.remove('active');
   viajesActivos?.classList.remove('active');
+  document.getElementById('view-config')?.classList.remove('active');
 
   if (view === 'usuarios') {
     resumenItems.forEach(x => x.classList.add('hidden-resumen'));
@@ -1613,6 +1806,14 @@ function showDashView(view, el = null) {
     viajesActivos?.classList.add('active');
     setTopbar('Viajes Activos', 'Monitoreo en tiempo real de vehículos en circulación');
     cargarViajesActivos();
+    return;
+  }
+
+  if (view === 'config') {
+    resumenItems.forEach(x => x.classList.add('hidden-resumen'));
+    document.getElementById('view-config')?.classList.add('active');
+    setTopbar('Configuración del Sistema', 'Preferencias, notificaciones y ajustes generales');
+    cargarConfig();
     return;
   }
 
@@ -2163,7 +2364,112 @@ window.addEventListener('load',()=>{
     document.getElementById('l-user').style.borderColor='';
     document.getElementById('l-err').style.display='none';
   });
+
+  // Aplicar tema guardado al cargar
+  applyTheme(localStorage.getItem('frioseguro_theme') || 'dark');
 });
+
+// ── TEMA ─────────────────────────────────────────────────────────────
+function applyTheme(t) {
+  document.body.classList.toggle('light-mode', t === 'light');
+  document.getElementById('theme-dark')?.classList.toggle('selected', t === 'dark');
+  document.getElementById('theme-light')?.classList.toggle('selected', t === 'light');
+}
+function setTheme(t) {
+  localStorage.setItem('frioseguro_theme', t);
+  applyTheme(t);
+  apiRequest('/config', {method:'POST', body: JSON.stringify({})}).catch(()=>{});
+}
+
+// ── CONFIGURACIÓN ────────────────────────────────────────────────────
+async function cargarConfig() {
+  try {
+    const d = await apiRequest('/config');
+    const s = v => document.getElementById(v);
+    if (s('cfg-notif-email'))      s('cfg-notif-email').value          = d.notif_email       || '';
+    if (s('cfg-notif-email-activo')) s('cfg-notif-email-activo').checked = d.notif_email_activo !== '0';
+    if (s('cfg-notif-wa'))         s('cfg-notif-wa').value             = d.notif_whatsapp    || '';
+    if (s('cfg-notif-wa-activo'))  s('cfg-notif-wa-activo').checked    = d.notif_whatsapp_activo !== '0';
+    if (s('cfg-callmebot-key'))    s('cfg-callmebot-key').value        = d.callmebot_apikey  || '';
+    if (s('cfg-smtp-host'))        s('cfg-smtp-host').value            = d.smtp_host         || 'smtp.gmail.com';
+    if (s('cfg-smtp-port'))        s('cfg-smtp-port').value            = d.smtp_port         || '587';
+    if (s('cfg-smtp-user'))        s('cfg-smtp-user').value            = d.smtp_user         || '';
+    // cfg-smtp-pass: no se expone desde la API
+    applyTheme(localStorage.getItem('frioseguro_theme') || 'dark');
+  } catch(e) { console.warn('cargarConfig:', e); }
+}
+
+function cfgToggle(clave, val) {
+  apiRequest('/config', {method:'POST', body: JSON.stringify({[clave]: val ? '1' : '0'})}).catch(()=>{});
+}
+
+async function cfgGuardarNotif() {
+  const s = id => document.getElementById(id)?.value?.trim() || '';
+  const data = {
+    notif_email:             s('cfg-notif-email'),
+    notif_email_activo:      document.getElementById('cfg-notif-email-activo')?.checked ? '1' : '0',
+    notif_whatsapp:          s('cfg-notif-wa'),
+    notif_whatsapp_activo:   document.getElementById('cfg-notif-wa-activo')?.checked ? '1' : '0',
+    callmebot_apikey:        s('cfg-callmebot-key'),
+  };
+  try {
+    await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
+    cfgMsg('cfg-msg-notif', 'Notificaciones guardadas correctamente.', true);
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error al guardar.', false); }
+}
+
+async function cfgGuardarSMTP() {
+  const s = id => document.getElementById(id)?.value?.trim() || '';
+  const data = {
+    smtp_host: s('cfg-smtp-host'),
+    smtp_port: s('cfg-smtp-port'),
+    smtp_user: s('cfg-smtp-user'),
+    smtp_from: s('cfg-smtp-user'),
+    smtp_pass: s('cfg-smtp-pass'),
+  };
+  try {
+    await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
+    cfgMsg('cfg-msg-smtp', 'Configuración SMTP guardada.', true);
+  } catch(e) { cfgMsg('cfg-msg-smtp', 'Error al guardar.', false); }
+}
+
+async function cfgTestEmail() {
+  cfgMsg('cfg-msg-notif', 'Enviando correo de prueba...', true);
+  try {
+    const r = await apiRequest('/config/test-email', {method:'POST', body:'{}'});
+    cfgMsg('cfg-msg-notif', r.mensaje, r.ok);
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexión.', false); }
+}
+
+async function cfgTestWA() {
+  cfgMsg('cfg-msg-notif', 'Enviando WhatsApp de prueba...', true);
+  try {
+    const r = await apiRequest('/config/test-whatsapp', {method:'POST', body:'{}'});
+    cfgMsg('cfg-msg-notif', r.mensaje, r.ok);
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexión.', false); }
+}
+
+function cfgMsg(id, msg, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'cfg-msg ' + (ok ? 'ok' : 'err');
+  setTimeout(() => { el.className = 'cfg-msg'; }, 4000);
+}
+
+// ── CERRAR SESIÓN ────────────────────────────────────────────────────
+function cerrarSesion() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  document.getElementById('page-dash').style.display = 'none';
+  document.getElementById('rfab').style.display      = 'none';
+  document.getElementById('page-login').style.display = 'flex';
+  // Limpiar estado
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-resumen')?.classList.add('active');
+  showDashView('resumen');
+}
 </script>
 </body>
 </html>
