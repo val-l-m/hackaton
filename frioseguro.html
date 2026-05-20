@@ -395,6 +395,40 @@ footer p{font-size:12px;color:var(--muted);}
 .sync-fill{height:100%;background:linear-gradient(90deg,var(--blue-d),var(--blue));width:0;transition:width .06s;}
 .sync-ct{font-family:var(--mono);font-size:10px;color:var(--muted);}
 
+
+
+/* ═══════════ CRUD VIEWS: USUARIOS / VEHÍCULOS ═══════════ */
+.dash-view{display:none;animation:fadeUp .25s ease;}
+.dash-view.active{display:block;}
+.view-resumen{display:grid;}
+.view-resumen.hidden-resumen{display:none !important;}
+.crud-page{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.crud-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;}
+.crud-header h2{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px;}
+.crud-header p{font-size:13px;color:var(--sub);margin:0;}
+.crud-grid{display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start;}
+.crud-form,.crud-table-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.crud-form-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.crud-form .f-group{margin-bottom:11px;}
+.crud-actions{display:flex;gap:8px;margin-top:12px;}
+.btn-danger-soft{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.35);padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;}
+.btn-warning-soft{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.35);padding:7px 10px;border-radius:7px;font-size:12px;font-weight:600;}
+.btn-blue-soft{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.35);padding:7px 10px;border-radius:7px;font-size:12px;font-weight:600;}
+.crud-table-wrap{width:100%;overflow:auto;border-radius:10px;border:1px solid var(--border);}
+.crud-table{width:100%;border-collapse:collapse;background:rgba(10,22,40,.25);min-width:780px;}
+.crud-table th,.crud-table td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;color:var(--text);}
+.crud-table th{background:rgba(10,22,40,.65);color:var(--sub);font-size:10px;text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono);}
+.crud-table tr:hover td{background:rgba(59,130,246,.05);}
+.crud-badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;}
+.crud-badge.activo{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.35);}
+.crud-badge.inactivo{background:rgba(148,163,184,.12);color:var(--sub);border:1px solid rgba(148,163,184,.25);}
+.crud-badge.mantenimiento{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.35);}
+.crud-empty{padding:28px;text-align:center;color:var(--muted);font-size:13px;}
+.crud-alert{display:none;margin-bottom:12px;padding:10px 12px;border-radius:9px;font-size:12px;border:1px solid var(--border);}
+.crud-alert.ok{display:block;background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.25);}
+.crud-alert.err{display:block;background:rgba(239,68,68,.1);color:var(--red);border-color:rgba(239,68,68,.25);}
+@media(max-width:1050px){.crud-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}.mid-grid,.bot-row{grid-template-columns:1fr}}
+
 /* Scrollbar */
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -563,17 +597,17 @@ footer p{font-size:12px;color:var(--muted);}
       </div>
     </div>
     <nav class="sb-nav">
-      <div class="nav-item active"><i class="bi bi-grid-fill"></i><span>Resumen</span></div>
-      <div class="nav-item"><i class="bi bi-truck"></i><span>Viajes Activos</span></div>
-      <div class="nav-item"><i class="bi bi-map"></i><span>Mapa en Vivo</span></div>
-      <div class="nav-item"><i class="bi bi-bell"></i><span>Alertas</span><span class="nav-badge badge" id="nav-alert-badge">0</span></div>
-      <div class="nav-item"><i class="bi bi-clock-history"></i><span>Historial de Viajes</span></div>
-      <div class="nav-item"><i class="bi bi-capsule"></i><span>Lotes y Medicamentos</span></div>
-      <div class="nav-item"><i class="bi bi-truck-front"></i><span>Vehículos</span></div>
-      <div class="nav-item"><i class="bi bi-people"></i><span>Usuarios</span></div>
-      <div class="nav-item"><i class="bi bi-wifi-off"></i><span>Zonas sin Señal</span></div>
-      <div class="nav-item"><i class="bi bi-thermometer-half"></i><span>Reglas de Temperatura</span></div>
-      <div class="nav-item"><i class="bi bi-gear"></i><span>Configuración</span></div>
+      <div class="nav-item active" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-grid-fill"></i><span>Resumen</span></div>
+      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-truck"></i><span>Viajes Activos</span></div>
+      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-map"></i><span>Mapa en Vivo</span></div>
+      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-bell"></i><span>Alertas</span><span class="nav-badge badge" id="nav-alert-badge">0</span></div>
+      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-clock-history"></i><span>Historial de Viajes</span></div>
+      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-capsule"></i><span>Lotes y Medicamentos</span></div>
+      <div class="nav-item" data-view="vehiculos" onclick="showDashView('vehiculos', this)"><i class="bi bi-truck-front"></i><span>Vehículos</span></div>
+      <div class="nav-item" data-view="usuarios" onclick="showDashView('usuarios', this)"><i class="bi bi-people"></i><span>Usuarios</span></div>
+      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-wifi-off"></i><span>Zonas sin Señal</span></div>
+      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-thermometer-half"></i><span>Reglas de Temperatura</span></div>
+      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-gear"></i><span>Configuración</span></div>
     </nav>
     <div class="sb-footer">
       <div class="sf-row">
@@ -614,7 +648,7 @@ footer p{font-size:12px;color:var(--muted);}
 
     <div class="dash-body">
       <!-- STATS — Bootstrap 5.3 row/col grid -->
-      <div class="stats-row">
+      <div class="stats-row view-resumen">
         <div class="sc">
           <div class="sc-ico ic-blue"><i class="bi bi-truck"></i></div>
           <div><div class="sc-lbl">Viajes Activos</div><div class="sc-val" id="sc-viajes">0</div><div class="sc-sub">En curso actualmente</div></div>
@@ -638,7 +672,7 @@ footer p{font-size:12px;color:var(--muted);}
       </div>
 
       <!-- MAP + ALERTS — Bootstrap 5.3 row/col -->
-      <div class="mid-grid">
+      <div class="mid-grid view-resumen">
         <div class="map-card">
           <div class="map-hdr">
             <div class="map-ttl"><div class="map-live-dot"></div>Mapa en Tiempo Real</div>
@@ -666,7 +700,7 @@ footer p{font-size:12px;color:var(--muted);}
       </div>
 
       <!-- BOTTOM ROW — Bootstrap 5.3 row/col -->
-      <div class="bot-row">
+      <div class="bot-row view-resumen">
         <!-- Temp chart -->
         <div class="b-card">
           <div class="b-hdr">
@@ -716,13 +750,172 @@ footer p{font-size:12px;color:var(--muted);}
           <div class="dest-footer">Ver todos los destinos <i class="bi bi-arrow-right"></i></div>
         </div>
       </div>
+
+
+      <!-- CRUD USUARIOS -->
+      <section id="view-usuarios" class="dash-view crud-page">
+        <div class="crud-header">
+          <div>
+            <h2>Usuarios</h2>
+            <p>Alta, consulta, modificación y eliminación de usuarios del sistema.</p>
+          </div>
+          <button class="btn-ghost" onclick="resetUsuarioForm()"><i class="bi bi-plus-circle"></i> Nuevo usuario</button>
+        </div>
+
+        <div id="usuarios-msg" class="crud-alert"></div>
+
+        <div class="crud-grid">
+          <form class="crud-form" id="formUsuario">
+            <div class="crud-form-title"><i class="bi bi-person-gear" style="color:var(--blue)"></i><span id="usuario-form-title">Registrar usuario</span></div>
+            <input type="hidden" id="u_id">
+
+            <div class="f-group">
+              <label class="f-label">Nombre completo</label>
+              <input class="f-input" type="text" id="u_nombre" placeholder="Ej. Carlos Torres" required>
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Correo electrónico</label>
+              <input class="f-input" type="email" id="u_email" placeholder="usuario@correo.com" required>
+            </div>
+
+            <div class="f-group" id="u_password_group">
+              <label class="f-label">Contraseña</label>
+              <input class="f-input" type="password" id="u_password" placeholder="Mínimo 6 caracteres">
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Teléfono</label>
+              <input class="f-input" type="text" id="u_telefono" placeholder="55 0000 0000">
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Rol</label>
+              <select class="f-input" id="u_rol" required>
+                <option value="admin">Admin</option>
+                <option value="operador" selected>Operador</option>
+                <option value="supervisor">Supervisor</option>
+              </select>
+            </div>
+
+            <div class="f-group" id="u_estado_group" style="display:none">
+              <label class="f-label">Estado</label>
+              <select class="f-input" id="u_estado">
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="crud-actions">
+              <button type="submit" class="btn-primary" id="btnUsuarioGuardar">Guardar</button>
+              <button type="button" class="btn-ghost" onclick="resetUsuarioForm()">Cancelar</button>
+            </div>
+          </form>
+
+          <div class="crud-table-card">
+            <div class="crud-form-title"><i class="bi bi-table" style="color:var(--teal)"></i>Usuarios registrados</div>
+            <div class="crud-table-wrap">
+              <table class="crud-table">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Estado</th><th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaUsuarios">
+                  <tr><td colspan="7" class="crud-empty">Cargando usuarios...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CRUD VEHÍCULOS -->
+      <section id="view-vehiculos" class="dash-view crud-page">
+        <div class="crud-header">
+          <div>
+            <h2>Vehículos</h2>
+            <p>Alta, consulta, modificación y eliminación de unidades de transporte.</p>
+          </div>
+          <button class="btn-ghost" onclick="resetVehiculoForm()"><i class="bi bi-plus-circle"></i> Nuevo vehículo</button>
+        </div>
+
+        <div id="vehiculos-msg" class="crud-alert"></div>
+
+        <div class="crud-grid">
+          <form class="crud-form" id="formVehiculo">
+            <div class="crud-form-title"><i class="bi bi-truck-front" style="color:var(--blue)"></i><span id="vehiculo-form-title">Registrar vehículo</span></div>
+            <input type="hidden" id="v_id">
+
+            <div class="f-group">
+              <label class="f-label">Placas</label>
+              <input class="f-input" type="text" id="v_placas" placeholder="ABC-123-D" required>
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Marca</label>
+              <input class="f-input" type="text" id="v_marca" placeholder="Nissan / Ford / Toyota" required>
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Modelo</label>
+              <input class="f-input" type="text" id="v_modelo" placeholder="NP300 Refrigerada" required>
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Año</label>
+              <input class="f-input" type="number" id="v_anio" placeholder="2026">
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Conductor</label>
+              <input class="f-input" type="text" id="v_conductor" placeholder="Nombre del conductor">
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Capacidad</label>
+              <input class="f-input" type="number" step="0.01" id="v_capacidad" placeholder="Kg o litros">
+            </div>
+
+            <div class="f-group" id="v_estado_group" style="display:none">
+              <label class="f-label">Estado</label>
+              <select class="f-input" id="v_estado">
+                <option value="activo">Activo</option>
+                <option value="mantenimiento">Mantenimiento</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="crud-actions">
+              <button type="submit" class="btn-primary" id="btnVehiculoGuardar">Guardar</button>
+              <button type="button" class="btn-ghost" onclick="resetVehiculoForm()">Cancelar</button>
+            </div>
+          </form>
+
+          <div class="crud-table-card">
+            <div class="crud-form-title"><i class="bi bi-table" style="color:var(--teal)"></i>Vehículos registrados</div>
+            <div class="crud-table-wrap">
+              <table class="crud-table">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Placas</th><th>Marca</th><th>Modelo</th><th>Año</th><th>Conductor</th><th>Capacidad</th><th>Estado</th><th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaVehiculos">
+                  <tr><td colspan="9" class="crud-empty">Cargando vehículos...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 // ── STATE ──────────────────────────────────────────────
 let ruralMode=false,queueCount=0,alertCount=0;
@@ -732,6 +925,27 @@ let tempChart,donutChart;
 let curTemp=5.0,curLat=19.2920,curLng=-99.6570;
 let tData=[],tLabels=[];
 let lastTelCount=0;
+
+
+// API compatible con XAMPP: http://localhost/hackaton-main/frioseguro.html
+// Requiere que api.php acepte rutas tipo api.php/dashboard, api.php/usuarios, etc.
+const API_BASE = new URL('api.php', window.location.href).href;
+const apiUrl = (endpoint) => `${API_BASE}${endpoint}`;
+
+async function apiRequest(endpoint, options = {}) {
+  const res = await fetch(apiUrl(endpoint), {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    throw new Error(data.error || `Error HTTP ${res.status}`);
+  }
+  return data;
+}
 
 // Routes
 const V102_on=[[19.292,-99.657],[19.260,-99.645],[19.230,-99.628],[19.200,-99.612],[19.175,-99.600],[19.150,-99.584]];
@@ -909,7 +1123,7 @@ function changeVehicle(v){
 
 // ── API CALLS ─────────────────────────────────────────────
 function fetchDashboard(){
-  fetch('/api/dashboard')
+  fetch(apiUrl('/dashboard'))
     .then(r=>r.json())
     .then(d=>{
       document.getElementById('sc-viajes').textContent = d.viajes_activos ?? 0;
@@ -930,7 +1144,7 @@ function fetchDashboard(){
 }
 
 function fetchAlertas(){
-  fetch('/api/alertas')
+  fetch(apiUrl('/alertas'))
     .then(r=>r.json())
     .then(d=>{
       if(!d.alertas || d.alertas.length===0) return;
@@ -959,7 +1173,7 @@ function fetchAlertas(){
 // ── MAP DATA FROM API ─────────────────────────────────────
 function fetchMapData(){
   if(!dashMap) return;
-  fetch('/api/viaje/VJ-2026-047')
+  fetch(apiUrl('/viaje/VJ-2026-047'))
     .then(r=>r.json())
     .then(d=>{
       if(!d.telemetria||d.telemetria.length===0) return;
@@ -1142,6 +1356,190 @@ function addAlertItem(time,vehicle,cls,type,med,badgeCls,badgeText){
   if(list.children.length>5)list.removeChild(list.lastChild);
 }
 
+
+// ── DASHBOARD VIEWS + CRUD USUARIOS / VEHÍCULOS ───────────
+function setTopbar(title, subtitle) {
+  const h = document.querySelector('.tb-left h1');
+  const p = document.querySelector('.tb-left p');
+  if (h) h.textContent = title;
+  if (p) p.textContent = subtitle;
+}
+
+function showDashView(view, el = null) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  const resumenItems = document.querySelectorAll('.view-resumen');
+  const usuarios = document.getElementById('view-usuarios');
+  const vehiculos = document.getElementById('view-vehiculos');
+
+  usuarios?.classList.remove('active');
+  vehiculos?.classList.remove('active');
+
+  if (view === 'usuarios') {
+    resumenItems.forEach(x => x.classList.add('hidden-resumen'));
+    usuarios?.classList.add('active');
+    setTopbar('Gestión de Usuarios', 'Alta, consulta, modificación y eliminación de usuarios');
+    cargarUsuarios();
+    return;
+  }
+
+  if (view === 'vehiculos') {
+    resumenItems.forEach(x => x.classList.add('hidden-resumen'));
+    vehiculos?.classList.add('active');
+    setTopbar('Gestión de Vehículos', 'Control administrativo de unidades de transporte');
+    cargarVehiculos();
+    return;
+  }
+
+  resumenItems.forEach(x => x.classList.remove('hidden-resumen'));
+  setTopbar('Resumen General', 'Monitoreo en tiempo real de la distribución de insumos médicos');
+  setTimeout(() => dashMap?.invalidateSize(), 100);
+}
+
+function showCrudMsg(id, msg, ok = true) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `crud-alert ${ok ? 'ok' : 'err'}`;
+  el.textContent = msg;
+  setTimeout(() => { el.className = 'crud-alert'; el.textContent = ''; }, 3500);
+}
+
+function esc(v) {
+  return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
+// USUARIOS
+async function cargarUsuarios() {
+  const tbody = document.getElementById('tablaUsuarios');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="crud-empty">Cargando usuarios...</td></tr>';
+  try {
+    const data = await apiRequest('/usuarios');
+    const usuarios = data.usuarios || [];
+    if (!usuarios.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="crud-empty">No hay usuarios registrados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = usuarios.map(u => `
+      <tr>
+        <td>${esc(u.id)}</td>
+        <td>${esc(u.nombre)}</td>
+        <td>${esc(u.email)}</td>
+        <td>${esc(u.telefono || '—')}</td>
+        <td>${esc(u.rol)}</td>
+        <td><span class="crud-badge ${esc(u.estado)}">${esc(u.estado)}</span></td>
+        <td>
+          <button class="btn-blue-soft" onclick='editarUsuario(${JSON.stringify(u)})'><i class="bi bi-pencil"></i></button>
+          <button class="btn-danger-soft" onclick="eliminarUsuario(${u.id})"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" class="crud-empty">${esc(err.message)}</td></tr>`;
+  }
+}
+
+function resetUsuarioForm() {
+  document.getElementById('formUsuario')?.reset();
+  document.getElementById('u_id').value = '';
+  document.getElementById('u_estado_group').style.display = 'none';
+  document.getElementById('u_password_group').style.display = 'block';
+  document.getElementById('usuario-form-title').textContent = 'Registrar usuario';
+  document.getElementById('btnUsuarioGuardar').textContent = 'Guardar';
+  document.getElementById('u_rol').value = 'operador';
+}
+
+function editarUsuario(u) {
+  document.getElementById('u_id').value = u.id;
+  document.getElementById('u_nombre').value = u.nombre || '';
+  document.getElementById('u_email').value = u.email || '';
+  document.getElementById('u_telefono').value = u.telefono || '';
+  document.getElementById('u_rol').value = u.rol || 'operador';
+  document.getElementById('u_estado').value = u.estado || 'activo';
+  document.getElementById('u_estado_group').style.display = 'block';
+  document.getElementById('u_password_group').style.display = 'none';
+  document.getElementById('usuario-form-title').textContent = 'Modificar usuario';
+  document.getElementById('btnUsuarioGuardar').textContent = 'Actualizar';
+}
+
+async function eliminarUsuario(id) {
+  if (!confirm('¿Eliminar este usuario?')) return;
+  try {
+    await apiRequest(`/usuarios/${id}`, { method: 'DELETE' });
+    showCrudMsg('usuarios-msg', 'Usuario eliminado correctamente.');
+    cargarUsuarios();
+  } catch (err) {
+    showCrudMsg('usuarios-msg', err.message, false);
+  }
+}
+
+// VEHÍCULOS
+async function cargarVehiculos() {
+  const tbody = document.getElementById('tablaVehiculos');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="9" class="crud-empty">Cargando vehículos...</td></tr>';
+  try {
+    const data = await apiRequest('/vehiculos');
+    const vehiculos = data.vehiculos || [];
+    if (!vehiculos.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="crud-empty">No hay vehículos registrados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = vehiculos.map(v => `
+      <tr>
+        <td>${esc(v.id)}</td>
+        <td>${esc(v.placas)}</td>
+        <td>${esc(v.marca)}</td>
+        <td>${esc(v.modelo)}</td>
+        <td>${esc(v.anio || '—')}</td>
+        <td>${esc(v.conductor || '—')}</td>
+        <td>${esc(v.capacidad || '—')}</td>
+        <td><span class="crud-badge ${esc(v.estado)}">${esc(v.estado)}</span></td>
+        <td>
+          <button class="btn-blue-soft" onclick='editarVehiculo(${JSON.stringify(v)})'><i class="bi bi-pencil"></i></button>
+          <button class="btn-danger-soft" onclick="eliminarVehiculo('${esc(v.id)}')"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="9" class="crud-empty">${esc(err.message)}</td></tr>`;
+  }
+}
+
+function resetVehiculoForm() {
+  document.getElementById('formVehiculo')?.reset();
+  document.getElementById('v_id').value = '';
+  document.getElementById('v_estado_group').style.display = 'none';
+  document.getElementById('vehiculo-form-title').textContent = 'Registrar vehículo';
+  document.getElementById('btnVehiculoGuardar').textContent = 'Guardar';
+}
+
+function editarVehiculo(v) {
+  document.getElementById('v_id').value = v.id;
+  document.getElementById('v_placas').value = v.placas || '';
+  document.getElementById('v_marca').value = v.marca || '';
+  document.getElementById('v_modelo').value = v.modelo || '';
+  document.getElementById('v_anio').value = v.anio || '';
+  document.getElementById('v_conductor').value = v.conductor || '';
+  document.getElementById('v_capacidad').value = v.capacidad || '';
+  document.getElementById('v_estado').value = v.estado || 'activo';
+  document.getElementById('v_estado_group').style.display = 'block';
+  document.getElementById('vehiculo-form-title').textContent = 'Modificar vehículo';
+  document.getElementById('btnVehiculoGuardar').textContent = 'Actualizar';
+}
+
+async function eliminarVehiculo(id) {
+  if (!confirm('¿Eliminar este vehículo?')) return;
+  try {
+    await apiRequest(`/vehiculos/${id}`, { method: 'DELETE' });
+    showCrudMsg('vehiculos-msg', 'Vehículo eliminado correctamente.');
+    cargarVehiculos();
+  } catch (err) {
+    showCrudMsg('vehiculos-msg', err.message, false);
+  }
+}
+
 // ── STATS COUNTER ─────────────────────────────────────────
 function countUp(id,target){
   const el=document.getElementById(id);let c=0;
@@ -1157,6 +1555,56 @@ window.addEventListener('load',()=>{
     e.forEach(x=>{if(x.isIntersecting){countUp('l1',284);countUp('l2',47);countUp('l3',23);countUp('l4',1840);obs.disconnect();}});
   });
   obs.observe(document.querySelector('.land-stats'));
+
+
+  document.getElementById('formUsuario')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('u_id').value;
+    const payload = {
+      nombre: document.getElementById('u_nombre').value.trim(),
+      email: document.getElementById('u_email').value.trim(),
+      telefono: document.getElementById('u_telefono').value.trim(),
+      rol: document.getElementById('u_rol').value,
+      estado: document.getElementById('u_estado').value
+    };
+    if (!id) payload.password = document.getElementById('u_password').value;
+    try {
+      await apiRequest(id ? `/usuarios/${id}` : '/usuarios', {
+        method: id ? 'PUT' : 'POST',
+        body: JSON.stringify(payload)
+      });
+      showCrudMsg('usuarios-msg', id ? 'Usuario actualizado correctamente.' : 'Usuario registrado correctamente.');
+      resetUsuarioForm();
+      cargarUsuarios();
+    } catch (err) {
+      showCrudMsg('usuarios-msg', err.message, false);
+    }
+  });
+
+  document.getElementById('formVehiculo')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('v_id').value;
+    const payload = {
+      placas: document.getElementById('v_placas').value.trim(),
+      marca: document.getElementById('v_marca').value.trim(),
+      modelo: document.getElementById('v_modelo').value.trim(),
+      anio: Number(document.getElementById('v_anio').value || 0),
+      conductor: document.getElementById('v_conductor').value.trim(),
+      capacidad: Number(document.getElementById('v_capacidad').value || 0),
+      estado: document.getElementById('v_estado').value
+    };
+    try {
+      await apiRequest(id ? `/vehiculos/${id}` : '/vehiculos', {
+        method: id ? 'PUT' : 'POST',
+        body: JSON.stringify(payload)
+      });
+      showCrudMsg('vehiculos-msg', id ? 'Vehículo actualizado correctamente.' : 'Vehículo registrado correctamente.');
+      resetVehiculoForm();
+      cargarVehiculos();
+    } catch (err) {
+      showCrudMsg('vehiculos-msg', err.message, false);
+    }
+  });
 
   document.getElementById('l-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
   document.getElementById('l-user').addEventListener('input',()=>{
