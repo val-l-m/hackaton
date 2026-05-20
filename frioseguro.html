@@ -75,26 +75,6 @@
     </div>
   </section>
 
-  <!-- STATS -->
-  <div class="land-stats">
-    <div class="ls-item">
-      <div class="ls-icon i1"><i class="bi bi-truck"></i></div>
-      <div><div class="num" id="l1">0</div><div class="lbl">Envíos monitoreados</div></div>
-    </div>
-    <div class="ls-item">
-      <div class="ls-icon i2"><i class="bi bi-exclamation-triangle"></i></div>
-      <div><div class="num" id="l2">0</div><div class="lbl">Alertas térmicas detectadas</div></div>
-    </div>
-    <div class="ls-item">
-      <div class="ls-icon i3"><i class="bi bi-capsule-pill"></i></div>
-      <div><div class="num" id="l3">0</div><div class="lbl">Medicamentos protegidos</div></div>
-    </div>
-    <div class="ls-item">
-      <div class="ls-icon i4"><i class="bi bi-wifi-off"></i></div>
-      <div><div class="num" id="l4">0</div><div class="lbl">Horas de operación offline</div></div>
-    </div>
-  </div>
-
   <!-- PROBLEMA -->
   <section class="section s-bg2" id="prob">
     <div class="prob-grid">
@@ -104,25 +84,6 @@
         <p>Durante el transporte de medicamentos pueden ocurrir fallas en la refrigeración o pérdidas de señal que impiden saber qué sucedió realmente en el trayecto.</p>
         <div class="prob-quote">"Sin un registro confiable, los medicamentos pueden echarse a perder, se generan pérdidas económicas y se pone en riesgo la salud de los pacientes sin evidencia para auditorías."</div>
         <p>Esta problemática es especialmente crítica en zonas rurales y rutas de difícil acceso del Estado de México, donde la conectividad es limitada y el transporte es la única vía.</p>
-      </div>
-      <div class="scenario">
-        <div class="sc-label">Escenario real — Toluca → Sultepec</div>
-        <div class="tl">
-          <div class="tl-dot dg"></div>
-          <div class="tl-t"><strong>06:00 — Salida del almacén</strong><span>Online. Insulina a 5.2°C. GPS activo.</span></div>
-        </div>
-        <div class="tl">
-          <div class="tl-dot da"></div>
-          <div class="tl-t"><strong>08:30 — Zona sin cobertura</strong><span>Sin señal. Sistema convencional pierde el rastro.</span></div>
-        </div>
-        <div class="tl">
-          <div class="tl-dot dr"></div>
-          <div class="tl-t"><strong>09:15 — Falla de refrigeración</strong><span>Temperatura sube a 14°C. Nadie lo sabe aún.</span></div>
-        </div>
-        <div class="tl">
-          <div class="tl-dot dg"></div>
-          <div class="tl-t"><strong>11:00 — Señal recuperada</strong><span>MedicMaps Sentinel sincroniza 147 registros. Alerta georreferenciada generada.</span></div>
-        </div>
       </div>
     </div>
   </section>
@@ -442,11 +403,11 @@
     </div>
     <div class="f-group mb-3">
       <label class="f-label form-label">Usuario</label>
-      <input class="f-input form-control" type="text" id="l-user" placeholder="operador@isem.gob.mx" autocomplete="username">
+      <input class="f-input form-control" type="text" id="l-user" autocomplete="username">
     </div>
     <div class="f-group mb-3">
       <label class="f-label form-label">Contraseña</label>
-      <input class="f-input form-control" type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+      <input class="f-input form-control" type="password" id="l-pass" autocomplete="current-password">
     </div>
     <div class="f-hint">Demo — usuario: <b>admin</b> &nbsp;|&nbsp; contraseña: <b>admin123</b></div>
     <div class="login-err" id="l-err">⚠ Credenciales incorrectas</div>
@@ -564,7 +525,6 @@
           <div class="map-hdr">
             <div class="map-ttl"><div class="map-live-dot"></div>Mapa en Tiempo Real</div>
             <div class="map-acts">
-              <div class="map-btn"><i class="bi bi-crosshair"></i></div>
               <div class="map-btn"><i class="bi bi-arrows-fullscreen"></i></div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 // ── STATE ──────────────────────────────────────────────
 let ruralMode=false,queueCount=0,alertCount=0;
+const _osrmCache={};
 
 // ── IDs de alertas ya notificadas por correo (evita duplicados en el cliente) ──
 const _alertasNotificadas = new Set();
@@ -30,6 +31,22 @@ async function apiRequest(endpoint, options = {}) {
     throw new Error(data.error || `Error HTTP ${res.status}`);
   }
   return data;
+}
+
+// ── OSRM ROUTING ──────────────────────────────────────────
+async function fetchOSRMRoute(from,to){
+  const key=`${from[0].toFixed(4)},${from[1].toFixed(4)};${to[0].toFixed(4)},${to[1].toFixed(4)}`;
+  if(_osrmCache[key]) return _osrmCache[key];
+  try{
+    const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?geometries=geojson&overview=full`);
+    const d=await r.json();
+    if(d.routes?.[0]){
+      const pts=d.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+      _osrmCache[key]=pts;
+      return pts;
+    }
+  }catch(e){}
+  return [from,to];
 }
 
 // Routes
@@ -88,24 +105,37 @@ function doLogin(){
 
 // ── HERO MAP ─────────────────────────────────────────────
 function initHeroMap(){
-  heroMap=L.map('hero-map',{zoomControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false}).setView([19.15,-99.57],9);
+  heroMap=L.map('hero-map',{zoomControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false}).setView([19.09,-99.79],9);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©CartoDB'}).addTo(heroMap);
-  L.polyline([...V102_on,...V101_route],{color:'#22c55e',weight:3.5,opacity:.9}).addTo(heroMap);
-  L.polyline(V102_risk,{color:'#f59e0b',weight:3.5,opacity:.85}).addTo(heroMap);
-  L.polyline(V102_crit,{color:'#ef4444',weight:3.5,opacity:.9}).addTo(heroMap);
-  L.polyline([...V102_off,...V103_off],{color:'#f97316',weight:3,dashArray:'7 5',opacity:.8}).addTo(heroMap);
-  addVeh(heroMap,[19.265,-99.665],'V-101','#22c55e');
-  addVeh(heroMap,[19.050,-99.520],'V-102','#ef4444',true);
-  addVeh(heroMap,[19.020,-99.440],'V-103','#3b82f6');
-  addVeh(heroMap,[19.125,-99.460],'V-105','#f59e0b');
   addCtrl(heroMap,ctrlSanMiguel,'San Miguel');
   addCtrl(heroMap,ctrlLaEsperanza,'La Esperanza');
+  // Ruta Toluca → Sultepec via OSRM (sigue caminos reales)
+  fetchOSRMRoute([19.292,-99.657],[18.876,-99.928]).then(pts=>{
+    const n=pts.length;
+    const s1=Math.floor(n*.50),s2=Math.floor(n*.65),s3=Math.floor(n*.72);
+    L.polyline(pts.slice(0,s1+1),{color:'#22c55e',weight:3.5,opacity:.9}).addTo(heroMap);
+    L.polyline(pts.slice(s1,s2+1),{color:'#f59e0b',weight:3.5,opacity:.85}).addTo(heroMap);
+    L.polyline(pts.slice(s2,s3+1),{color:'#ef4444',weight:3.5,opacity:.9}).addTo(heroMap);
+    L.polyline(pts.slice(s3),{color:'#ef4444',weight:3,dashArray:'7 5',opacity:.8}).addTo(heroMap);
+    addVeh(heroMap,pts[Math.floor(n*.22)],'V-101','#22c55e');
+    addVeh(heroMap,pts[Math.floor(n*.68)],'V-102','#ef4444',true);
+    addVeh(heroMap,pts[Math.floor(n*.83)],'V-103','#ef4444');
+  }).catch(()=>{
+    L.polyline([...V102_on,...V101_route],{color:'#22c55e',weight:3.5,opacity:.9}).addTo(heroMap);
+    L.polyline(V102_risk,{color:'#f59e0b',weight:3.5,opacity:.85}).addTo(heroMap);
+    L.polyline(V102_crit,{color:'#ef4444',weight:3.5,opacity:.9}).addTo(heroMap);
+    L.polyline([...V102_off,...V103_off],{color:'#ef4444',weight:3,dashArray:'7 5',opacity:.8}).addTo(heroMap);
+    addVeh(heroMap,[19.265,-99.665],'V-101','#22c55e');
+    addVeh(heroMap,[19.050,-99.520],'V-102','#ef4444',true);
+    addVeh(heroMap,[19.020,-99.440],'V-103','#ef4444');
+  });
+  addVeh(heroMap,[19.125,-99.460],'V-105','#f59e0b');
 }
 
 // ── DASH MAP ─────────────────────────────────────────────
 function initDashMap(){
   if(dashMap)return;
-  dashMap=L.map('dash-map',{zoomControl:true}).setView([19.15,-99.58],11);
+  dashMap=L.map('dash-map',{zoomControl:true}).setView([19.09,-99.79],10);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©CartoDB'}).addTo(dashMap);
 
   // Legend
@@ -116,9 +146,8 @@ function initDashMap(){
       <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#22c55e;display:inline-block;border-radius:2px"></span>Conexión Activa</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#f59e0b;display:inline-block;border-radius:2px"></span>En Riesgo</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#ef4444;display:inline-block;border-radius:2px"></span>Temperatura Crítica</div>
-      <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#f97316;border-top:2px dashed #f97316;display:inline-block"></span>Offline / Sin Señal</div>
+      <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#ef4444;border-top:2px dashed #ef4444;display:inline-block"></span>Offline / Sin Señal</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">🚛</span>Vehículo</div>
-      <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">⚠️</span>Alerta Crítica</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">📍</span>Punto de Control</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">🏁</span>Destino</div>
     </div>`;
@@ -156,6 +185,18 @@ function initDashMap(){
     return d;
   };
   simCtrl.addTo(dashMap);
+
+  // Ruta demo Toluca → Sultepec via OSRM (se reemplaza cuando llegan datos reales)
+  fetchOSRMRoute([19.292,-99.657],[18.876,-99.928]).then(pts=>{
+    if(!pts||pts.length<2) return;
+    const splitAt=Math.floor(pts.length*.6);
+    if(!v102Line)
+      v102Line=L.polyline(pts.slice(0,splitAt+1),{color:'#22c55e',weight:4,opacity:.9}).addTo(dashMap);
+    if(!v102OffLine)
+      v102OffLine=L.polyline(pts.slice(splitAt),{color:'#ef4444',weight:4,dashArray:'8 5',opacity:.85}).addTo(dashMap);
+    if(!vMarker)
+      vMarker=L.marker(pts[splitAt],{icon:vIcon('V-102','#22c55e',false)}).bindPopup('<b>V-102</b>').addTo(dashMap);
+  }).catch(()=>{});
 }
 
 function vIcon(label,color,alert=false){
@@ -328,46 +369,49 @@ function notificarAlertaCorreo(alerta) {
 }
 
 // ── MAP DATA FROM API ─────────────────────────────────────
-function fetchMapData(){
+async function fetchMapData(){
   if(!dashMap) return;
   if(SIM.active) return; // la simulación controla el mapa directamente
-  fetch(apiUrl('/viaje/'+(SIM.tripId||'VJ-2026-047')))
-    .then(r=>r.json())
-    .then(d=>{
-      if(!d.telemetria||d.telemetria.length===0) return;
-      if(d.telemetria.length===lastTelCount) return; // sin cambios
-      lastTelCount=d.telemetria.length;
+  try{
+    const r=await fetch(apiUrl('/viaje/'+(SIM.tripId||'VJ-2026-047')));
+    const d=await r.json();
+    if(!d.telemetria||d.telemetria.length===0) return;
+    if(d.telemetria.length===lastTelCount) return;
+    lastTelCount=d.telemetria.length;
 
-      // Ocultar mensaje de espera
-      const wm=document.getElementById('map-wait-msg');
-      if(wm) wm.style.display='none';
+    const wm=document.getElementById('map-wait-msg');
+    if(wm) wm.style.display='none';
 
-      // Separar segmentos: online vs offline (sincronizado_nube=1)
-      const onPts=[],offPts=[];
-      d.telemetria.forEach(t=>{
-        const pt=[t.latitud_actual,t.longitud_actual];
-        if(t.sincronizado_nube) offPts.push(pt);
-        else onPts.push(pt);
-      });
+    const onPts=[],offPts=[];
+    d.telemetria.forEach(t=>{
+      const pt=[t.latitud_actual,t.longitud_actual];
+      if(t.sincronizado_nube) offPts.push(pt);
+      else onPts.push(pt);
+    });
 
-      // Redibujar líneas
-      if(v102Line){dashMap.removeLayer(v102Line);}
-      if(v102OffLine){dashMap.removeLayer(v102OffLine);}
+    if(v102Line){dashMap.removeLayer(v102Line);v102Line=null;}
+    if(v102OffLine){dashMap.removeLayer(v102OffLine);v102OffLine=null;}
 
-      const estado=d.viaje?d.viaje.estado:'activo';
-      const onColor=estado==='alerta'?'#ef4444':estado==='sin_senal'?'#f59e0b':'#22c55e';
+    const estado=d.viaje?d.viaje.estado:'activo';
+    const onColor=estado==='alerta'?'#ef4444':estado==='sin_senal'?'#f59e0b':'#22c55e';
 
-      if(onPts.length>1)
-        v102Line=L.polyline(onPts,{color:onColor,weight:4,opacity:.95}).addTo(dashMap);
-      if(offPts.length>1)
-        v102OffLine=L.polyline(offPts,{color:'#f97316',weight:4,dashArray:'8 5',opacity:.9}).addTo(dashMap);
+    // Línea online siguiendo caminos reales (OSRM)
+    if(onPts.length>1){
+      const routed=await fetchOSRMRoute(onPts[0],onPts[onPts.length-1]);
+      v102Line=L.polyline(routed,{color:onColor,weight:4,opacity:.95}).addTo(dashMap);
+    }
+    // Línea offline: roja punteada siguiendo caminos reales
+    if(offPts.length>1){
+      const routed=await fetchOSRMRoute(offPts[0],offPts[offPts.length-1]);
+      v102OffLine=L.polyline(routed,{color:'#ef4444',weight:4,dashArray:'8 5',opacity:.9}).addTo(dashMap);
+    }
 
       // Mover/crear marcador del vehículo en última posición
       const all=d.telemetria;
       const last=all[all.length-1];
       const lastPos=[last.latitud_actual,last.longitud_actual];
       const isAlert=estado==='alerta'||last.lote_comprometido;
-      const markerColor=isAlert?'#ef4444':ruralMode?'#3b82f6':'#22c55e';
+      const markerColor=isAlert?'#ef4444':'#22c55e';
 
       if(vMarker){
         vMarker.setLatLng(lastPos);
@@ -379,7 +423,6 @@ function fetchMapData(){
         dashMap.setView(lastPos,13);
       }
 
-      // Marcadores ⚠ en coordenadas con temperatura crítica
       v102AlertMarkers.forEach(m=>dashMap.removeLayer(m));
       v102AlertMarkers=[];
       all.filter(t=>t.lote_comprometido).forEach(t=>{
@@ -388,11 +431,9 @@ function fetchMapData(){
         v102AlertMarkers.push(m);
       });
 
-      // Actualizar temperatura actual
       curTemp=last.temperatura_actual;
       curLat=last.latitud_actual; curLng=last.longitud_actual;
-    })
-    .catch(()=>{});
+  }catch(e){}
 }
 
 // ── TELEMETRY LOOP ────────────────────────────────────────
@@ -431,11 +472,11 @@ function startLoop(){
       if(dashMap&&offlineLog.length>1){
         if(offlinePolyGrowing)dashMap.removeLayer(offlinePolyGrowing);
         offlinePolyGrowing=L.polyline(offlineLog.map(p=>[p.lat,p.lng]),
-          {color:'#f97316',weight:4,dashArray:'8 5',opacity:.85}).addTo(dashMap);
+          {color:'#ef4444',weight:4,dashArray:'8 5',opacity:.85}).addTo(dashMap);
       }
       if(dashMap&&vMarker){
         vMarker.setLatLng([curLat,curLng]);
-        vMarker.setIcon(vIcon('V-102','#3b82f6',false));
+        vMarker.setIcon(vIcon('V-102','#ef4444',false));
       }
     } else {
       curTemp+=(Math.random()*.4-.2); curTemp=Math.max(3.5,Math.min(curTemp,7.5));
@@ -517,7 +558,7 @@ function finishSync(){
     if(offlinePolyGrowing){dashMap.removeLayer(offlinePolyGrowing);offlinePolyGrowing=null;}
     // "Momento drama": dibujar de golpe la ruta completa recorrida sin señal
     const offPts=offlineLog.length>1?offlineLog.map(p=>[p.lat,p.lng]):V102_off;
-    offlineFinalPoly=L.polyline(offPts,{color:'#f97316',weight:4,dashArray:'8 5',opacity:.9}).addTo(dashMap);
+    offlineFinalPoly=L.polyline(offPts,{color:'#ef4444',weight:4,dashArray:'8 5',opacity:.9}).addTo(dashMap);
     // Colocar marcadores ⚠ en coordenadas EXACTAS donde la temp superó el límite
     const TEMP_LIMITE=8;
     let alertasColocadas=0;
@@ -1320,12 +1361,6 @@ const _origFinishSync = typeof finishSync === 'function' ? finishSync : null;
 window.addEventListener('load',()=>{
   initHeroMap();
   setInterval(()=>{const t=(4.2+Math.random()*2.5).toFixed(1);document.getElementById('h-temp').textContent=t+'°C';},3000);
-
-  const obs=new IntersectionObserver(e=>{
-    e.forEach(x=>{if(x.isIntersecting){countUp('l1',284);countUp('l2',47);countUp('l3',23);countUp('l4',1840);obs.disconnect();}});
-  });
-  obs.observe(document.querySelector('.land-stats'));
-
 
   document.getElementById('formUsuario')?.addEventListener('submit', async e => {
     e.preventDefault();
