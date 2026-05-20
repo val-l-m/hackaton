@@ -1356,110 +1356,61 @@ footer p{font-size:12px;color:var(--muted);}
 
           <!-- Notificaciones: SMS -->
           <div class="cfg-section">
-            <div class="cfg-section-title"><i class="bi bi-bell-fill"></i>Alertas SMS y WhatsApp</div>
+            <div class="cfg-section-title"><i class="bi bi-chat-text-fill"></i>Alertas por SMS</div>
             <p style="font-size:12px;color:var(--sub);margin-bottom:16px">
-              Ingresa el número de teléfono que recibirá las alertas. El sistema enviará automáticamente un mensaje al detectar anomalías de temperatura, puerta abierta u otras alertas críticas.
+              El sistema envía un SMS automáticamente al detectar anomalías de temperatura, puerta abierta u otras alertas críticas.
             </p>
 
-            <!-- SMS via email-to-SMS gateway (gratis, automático) -->
             <div class="cfg-toggle-row">
               <div>
-                <div class="cfg-toggle-label">
-                  <i class="bi bi-chat-text-fill" style="color:var(--blue);margin-right:6px"></i>
-                  Alertas por SMS
-                  <span style="background:var(--green);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;margin-left:6px;font-weight:700">GRATIS</span>
-                </div>
-                <div class="cfg-toggle-sub">El sistema detecta la operadora y envía el SMS automáticamente</div>
+                <div class="cfg-toggle-label"><i class="bi bi-chat-text-fill" style="color:var(--blue);margin-right:6px"></i>Activar alertas por SMS</div>
+                <div class="cfg-toggle-sub">Se enviará un mensaje de texto cuando se detecte una alerta</div>
               </div>
               <label class="cfg-toggle">
                 <input type="checkbox" id="cfg-sms-activo" onchange="cfgToggle('sms_activo',this.checked)">
                 <span class="cfg-toggle-slider"></span>
               </label>
             </div>
-            <div class="cfg-row single" style="margin-top:10px">
+
+            <div class="cfg-row single" style="margin-top:14px">
               <div class="cfg-field">
-                <label>Número de celular</label>
-                <input type="tel" id="cfg-sms-num" placeholder="+525512345678"
-                  oninput="cfgDetectarOp(this.value)">
-                <div id="cfg-op-detected" style="font-size:11px;color:var(--green);margin-top:5px;min-height:16px"></div>
+                <label>Número de celular que recibirá los SMS</label>
+                <input type="tel" id="cfg-sms-num" placeholder="+525512345678">
               </div>
             </div>
 
-            <!-- WhatsApp -->
-            <div class="cfg-toggle-row" style="margin-top:6px">
-              <div>
-                <div class="cfg-toggle-label"><i class="bi bi-whatsapp" style="color:#25d366;margin-right:6px"></i>Alertas por WhatsApp</div>
-                <div class="cfg-toggle-sub">Mensaje de WhatsApp al número configurado</div>
-              </div>
-              <label class="cfg-toggle">
-                <input type="checkbox" id="cfg-wa-activo" onchange="cfgToggle('wa_activo',this.checked)">
-                <span class="cfg-toggle-slider"></span>
-              </label>
-            </div>
-            <div class="cfg-row single" style="margin-top:10px">
+            <div class="cfg-row" style="margin-top:4px">
               <div class="cfg-field">
-                <label>Número de WhatsApp (con código de país)</label>
-                <input type="tel" id="cfg-wa-num" placeholder="+525512345678">
+                <label>Account SID de Twilio</label>
+                <input type="text" id="cfg-twilio-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+              </div>
+              <div class="cfg-field">
+                <label>Auth Token de Twilio</label>
+                <input type="password" id="cfg-twilio-token" placeholder="••••••••••••••••••••••••••••••••">
               </div>
             </div>
+
+            <div class="cfg-row single">
+              <div class="cfg-field">
+                <label>Número Twilio de envío (el que te asignaron al registrarte)</label>
+                <input type="text" id="cfg-twilio-sms-from" placeholder="+15005550006">
+              </div>
+            </div>
+
+            <p class="cfg-note">
+              <i class="bi bi-info-circle"></i>
+              Crea una cuenta gratis en <strong>twilio.com</strong> — obtienes ~$15 USD de crédito de prueba sin tarjeta de crédito. Tu Account SID, Auth Token y número de envío están en el Dashboard al entrar.
+            </p>
 
             <div class="cfg-btn-row">
               <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestSMS()">
-                <i class="bi bi-chat-text"></i> Probar SMS
-              </button>
-              <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestWA()">
-                <i class="bi bi-whatsapp"></i> Probar WhatsApp
+                <i class="bi bi-send"></i> Enviar SMS de prueba
               </button>
               <button class="cfg-btn cfg-btn-primary" onclick="cfgGuardarNotif()">
                 <i class="bi bi-floppy"></i> Guardar
               </button>
             </div>
             <div class="cfg-msg" id="cfg-msg-notif"></div>
-          </div>
-
-          <!-- Credenciales Twilio (sistema) -->
-          <div class="cfg-section">
-            <div class="cfg-section-title" style="cursor:pointer" onclick="toggleTwilio()">
-              <i class="bi bi-gear-wide-connected"></i>Configuración del Proveedor (Twilio)
-              <i class="bi bi-chevron-down" id="twilio-chevron" style="margin-left:auto;font-size:12px"></i>
-            </div>
-            <div id="twilio-panel" style="display:none">
-              <p class="cfg-note" style="margin-bottom:14px">
-                <i class="bi bi-info-circle"></i>
-                Crea una cuenta gratuita en <strong>twilio.com</strong>. Con el trial gratuito obtienes crédito suficiente para demos.
-                Necesitas: Account SID, Auth Token y un número Twilio (se asigna gratis al registrarte).
-              </p>
-              <div class="cfg-row">
-                <div class="cfg-field">
-                  <label>Account SID</label>
-                  <input type="text" id="cfg-twilio-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-                </div>
-                <div class="cfg-field">
-                  <label>Auth Token</label>
-                  <input type="password" id="cfg-twilio-token" placeholder="••••••••••••••••••••••••••••••••">
-                </div>
-              </div>
-              <div class="cfg-row">
-                <div class="cfg-field">
-                  <label>Número Twilio para SMS</label>
-                  <input type="text" id="cfg-twilio-sms-from" placeholder="+15005550006">
-                </div>
-                <div class="cfg-field">
-                  <label>Número Twilio para WhatsApp</label>
-                  <input type="text" id="cfg-twilio-wa-from" placeholder="+14155238886">
-                </div>
-              </div>
-              <p class="cfg-note">
-                <i class="bi bi-whatsapp" style="color:#25d366"></i>
-                Para WhatsApp: activa el <strong>Sandbox de WhatsApp</strong> en Twilio Console → Messaging → Try it out → Send a WhatsApp message. El número sandbox es <strong>+1 415 523 8886</strong>.
-              </p>
-              <div class="cfg-btn-row">
-                <button class="cfg-btn cfg-btn-primary" onclick="cfgGuardarTwilio()">
-                  <i class="bi bi-floppy"></i> Guardar credenciales
-                </button>
-              </div>
-              <div class="cfg-msg" id="cfg-msg-twilio"></div>
-            </div>
           </div>
 
         </div><!-- /cfg-wrap -->
@@ -2768,15 +2719,11 @@ async function cargarConfig() {
     const d = await apiRequest('/config');
     const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     const c = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val !== '0'; };
-    v('cfg-sms-num',       d.alerta_sms     || '');
-    if (d.alerta_sms) cfgDetectarOp(d.alerta_sms);
-    v('cfg-wa-num',        d.alerta_whatsapp|| '');
-    v('cfg-twilio-sid',    d.twilio_sid     || '');
+    v('cfg-sms-num',         d.alerta_sms      || '');
+    v('cfg-twilio-sid',      d.twilio_sid      || '');
     v('cfg-twilio-sms-from', d.twilio_sms_from || '');
-    v('cfg-twilio-wa-from',  d.twilio_wa_from  || '');
-    // twilio_token no se expone
+    // twilio_token no se expone por seguridad
     c('cfg-sms-activo', d.sms_activo ?? '1');
-    c('cfg-wa-activo',  d.wa_activo  ?? '1');
     applyTheme(localStorage.getItem('frioseguro_theme') || 'dark');
   } catch(e) { console.warn('cargarConfig:', e); }
 }
@@ -2785,51 +2732,19 @@ function cfgToggle(clave, val) {
   apiRequest('/config', {method:'POST', body: JSON.stringify({[clave]: val ? '1' : '0'})}).catch(()=>{});
 }
 
-// Detecta operadora en tiempo real para mostrar feedback al usuario
-const OP_PREFIJOS = {
-  att:      ['331','332','333','334','335','336','337','338','339',
-             '811','818','819','821','822','823','824','825','826','827','828','829'],
-  movistar: ['961','962','963','964','965','966','967','968','969',
-             '221','222','223','224','225','226','227','228','229'],
-};
-function cfgDetectarOp(val) {
-  const el = document.getElementById('cfg-op-detected');
-  if (!el) return;
-  const num = val.replace(/\D/g,'').replace(/^521?/, '').slice(-10);
-  if (num.length < 6) { el.textContent = ''; return; }
-  const p3 = num.slice(0,3);
-  let op = 'Telcel';
-  if (OP_PREFIJOS.att.includes(p3))      op = 'AT&T México';
-  if (OP_PREFIJOS.movistar.includes(p3)) op = 'Movistar';
-  el.innerHTML = `<i class="bi bi-check-circle-fill"></i> Operadora detectada: <strong>${op}</strong>`;
-}
-
 async function cfgGuardarNotif() {
   const s = id => document.getElementById(id)?.value?.trim() || '';
   const data = {
-    alerta_sms:       s('cfg-sms-num'),
-    sms_activo:       document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
-    alerta_whatsapp:  s('cfg-wa-num'),
-    wa_activo:        document.getElementById('cfg-wa-activo')?.checked ? '1' : '0',
-  };
-  try {
-    await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
-    cfgMsg('cfg-msg-notif', 'Numeros guardados correctamente.', true);
-  } catch(e) { cfgMsg('cfg-msg-notif', 'Error al guardar.', false); }
-}
-
-async function cfgGuardarTwilio() {
-  const s = id => document.getElementById(id)?.value?.trim() || '';
-  const data = {
+    alerta_sms:      s('cfg-sms-num'),
+    sms_activo:      document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
     twilio_sid:      s('cfg-twilio-sid'),
     twilio_token:    s('cfg-twilio-token'),
     twilio_sms_from: s('cfg-twilio-sms-from'),
-    twilio_wa_from:  s('cfg-twilio-wa-from'),
   };
   try {
     await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
-    cfgMsg('cfg-msg-twilio', 'Credenciales Twilio guardadas.', true);
-  } catch(e) { cfgMsg('cfg-msg-twilio', 'Error al guardar.', false); }
+    cfgMsg('cfg-msg-notif', 'Configuracion guardada correctamente.', true);
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error al guardar.', false); }
 }
 
 async function cfgTestSMS() {
@@ -2837,15 +2752,7 @@ async function cfgTestSMS() {
   try {
     const r = await apiRequest('/config/test-sms', {method:'POST', body:'{}'});
     cfgMsg('cfg-msg-notif', r.mensaje, r.ok);
-  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexion.', false); }
-}
-
-async function cfgTestWA() {
-  cfgMsg('cfg-msg-notif', 'Enviando WhatsApp de prueba...', true);
-  try {
-    const r = await apiRequest('/config/test-whatsapp', {method:'POST', body:'{}'});
-    cfgMsg('cfg-msg-notif', r.mensaje, r.ok);
-  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexion.', false); }
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexion con el servidor.', false); }
 }
 
 function cfgMsg(id, msg, ok) {

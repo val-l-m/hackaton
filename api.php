@@ -312,77 +312,16 @@ final class Notificador
     private ConfigRepo $cfg;
     public function __construct() { $this->cfg = new ConfigRepo(); }
 
-    // ── Email-to-SMS via gateways de operadoras mexicanas ────────────
-    // Las operadoras convierten emails a SMS automáticamente (gratis).
-    // Requiere que XAMPP tenga Mercury Mail activo (incluido en XAMPP).
-    private static array $GATEWAYS = [
-        'telcel'   => '@itelcel.com',
-        'att'      => '@mms.att.net',
-        'movistar' => '@mensajes.movistar.com.mx',
-        'unefon'   => '@unefon.com.mx',
-        'virgin'   => '@virginmobile.mx',
-        'bait'     => '@itelcel.com',  // BAIT usa red Telcel
-    ];
-
-    // Detecta operadora por prefijo del número mexicano (10 dígitos)
-    private function detectarOperadora(string $num): string
-    {
-        $num = preg_replace('/\D/', '', $num);
-        // Quitar +52 o 52 al inicio si lo tiene
-        if (str_starts_with($num, '521')) $num = substr($num, 2);
-        elseif (str_starts_with($num, '52')) $num = substr($num, 2);
-
-        $prefijo3 = substr($num, 0, 3);
-        $prefijo4 = substr($num, 0, 4);
-
-        // Prefijos AT&T México conocidos
-        $att = ['331','332','333','334','335','336','337','338','339',
-                '811','818','819','821','822','823','824','825','826','827','828','829'];
-        if (in_array($prefijo3, $att)) return 'att';
-
-        // Prefijos Movistar conocidos
-        $movistar = ['961','962','963','964','965','966','967','968','969',
-                     '221','222','223','224','225','226','227','228','229'];
-        if (in_array($prefijo3, $movistar)) return 'movistar';
-
-        return 'telcel'; // Telcel tiene ~70% del mercado — default seguro
-    }
-
-    public function enviarSMS(string $mensaje): bool
-    {
-        $num = preg_replace('/\D/', '', trim($this->cfg->get('alerta_sms')));
-        if (strlen($num) < 10) return false;
-
-        // Extraer 10 dígitos locales
-        if (str_starts_with($num, '521')) $num = substr($num, 2);
-        elseif (str_starts_with($num, '52')) $num = substr($num, 2);
-        $num10 = substr($num, -10);
-
-        $operadora = $this->detectarOperadora($num10);
-        $gateway   = self::$GATEWAYS[$operadora];
-        $destino   = $num10 . $gateway;
-
-        // Asunto corto (algunos gateways lo incluyen en el SMS)
-        $asunto  = 'FrioSeguro Alerta';
-        $headers = "From: frioseguro@localhost\r\nContent-Type: text/plain; charset=UTF-8";
-
-        return @mail($destino, $asunto, $mensaje, $headers);
-    }
-
-    // ── WhatsApp via Twilio (cURL — funciona en XAMPP) ───────────────
-    private function twilioWA(string $to, string $body): array
+    // ── SMS via Twilio (cURL — funciona en XAMPP) ────────────────────
+    private function twilioSMS(string $to, string $body): array
     {
         $sid   = trim($this->cfg->get('twilio_sid'));
         $token = trim($this->cfg->get('twilio_token'));
-        $from  = trim($this->cfg->get('twilio_wa_from'));
+        $from  = trim($this->cfg->get('twilio_sms_from'));
 
         if ($sid === '' || $token === '' || $from === '') {
-            return ['ok' => false, 'error' => 'Faltan credenciales Twilio (SID, Token o número WhatsApp).'];
+            return ['ok' => false, 'error' => 'Faltan credenciales Twilio (SID, Token o numero de envio).'];
         }
-
-        // Normalizar números: agregar prefijo whatsapp:
-        $toAddr   = 'whatsapp:' . (str_starts_with($to,   'whatsapp:') ? substr($to,   10) : $to);
-        $fromAddr = 'whatsapp:' . (str_starts_with($from, 'whatsapp:') ? substr($from, 10) : $from);
 
         $url = "https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json";
 
@@ -390,10 +329,10 @@ final class Notificador
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
             CURLOPT_USERPWD        => "$sid:$token",
-            CURLOPT_POSTFIELDS     => http_build_query(['To' => $toAddr, 'From' => $fromAddr, 'Body' => $body]),
+            CURLOPT_POSTFIELDS     => http_build_query(['To' => $to, 'From' => $from, 'Body' => $body]),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 20,
-            CURLOPT_SSL_VERIFYPEER => false, // XAMPP dev — no verifica cert local
+            CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
         ]);
 
@@ -403,42 +342,36 @@ final class Notificador
         curl_close($ch);
 
         if ($res === false || $err !== '') {
-            return ['ok' => false, 'error' => "cURL: $err"];
+            return ['ok' => false, 'error' => "Error de red: $err"];
         }
 
         $json = json_decode($res, true);
         if (isset($json['sid'])) {
-            return ['ok' => true, 'sid' => $json['sid']];
+            return ['ok' => true];
         }
 
-        $msg = $json['message'] ?? $json['detail'] ?? $res;
+        $msg = $json['message'] ?? $json['detail'] ?? substr($res, 0, 200);
         return ['ok' => false, 'error' => "Twilio: $msg (HTTP $code)"];
     }
 
-    public function enviarWhatsapp(string $mensaje): bool
+    public function enviarSMS(string $mensaje): bool
     {
-        $to = trim($this->cfg->get('alerta_whatsapp'));
+        $to = trim($this->cfg->get('alerta_sms'));
         if ($to === '') return false;
-        $r = $this->twilioWA($to, $mensaje);
-        return $r['ok'];
+        return $this->twilioSMS($to, $mensaje)['ok'];
     }
 
-    public function probarWhatsapp(string $mensaje): array
+    public function probarSMS(string $mensaje): array
     {
-        $to = trim($this->cfg->get('alerta_whatsapp'));
-        if ($to === '') return ['ok' => false, 'error' => 'No hay número de WhatsApp configurado.'];
-        return $this->twilioWA($to, $mensaje);
+        $to = trim($this->cfg->get('alerta_sms'));
+        if ($to === '') return ['ok' => false, 'error' => 'No hay numero destino configurado.'];
+        return $this->twilioSMS($to, $mensaje);
     }
 
     public function alertar(string $tipo, string $descripcion, float $valor, string $viajeId, array $extra = []): void
     {
-        $msg = $this->formatoAlerta($tipo, $descripcion, $valor, $viajeId, $extra);
-
         if ($this->cfg->get('sms_activo', '1') !== '0') {
-            $this->enviarSMS($msg);
-        }
-        if ($this->cfg->get('wa_activo', '1') !== '0') {
-            $this->enviarWhatsapp($msg);
+            $this->enviarSMS($this->formatoAlerta($tipo, $descripcion, $valor, $viajeId, $extra));
         }
     }
 
@@ -2046,8 +1979,7 @@ try {
         $cfg  = new ConfigRepo();
         $permitidos = [
             'alerta_sms','sms_activo',
-            'alerta_whatsapp','wa_activo',
-            'twilio_sid','twilio_token','twilio_wa_from',
+            'twilio_sid','twilio_token','twilio_sms_from',
             'idioma','nombre_sistema',
         ];
         foreach ($permitidos as $k) {
@@ -2057,20 +1989,12 @@ try {
     }
 
     if ($method === 'POST' && $uri === '/config/test-sms') {
-        $msg = "FRIOSEGURO - Prueba SMS\nSistema activo.\nFecha: " . date('d/m/Y H:i:s');
-        $ok  = (new Notificador())->enviarSMS($msg);
-        respond(['ok' => $ok, 'mensaje' => $ok
-            ? 'SMS enviado. Puede tardar hasta 1 minuto dependiendo de la operadora.'
-            : 'No se pudo enviar el SMS. Verifica que Mercury Mail este activo en XAMPP y que el numero sea correcto.']);
-    }
-
-    if ($method === 'POST' && $uri === '/config/test-whatsapp') {
-        $msg    = "FRIOSEGURO - Prueba WhatsApp\nSistema de notificaciones activo.\nFecha: " . date('d/m/Y H:i:s');
-        $result = (new Notificador())->probarWhatsapp($msg);
+        $msg    = "FRIOSEGURO - Prueba SMS\nSistema activo.\nFecha: " . date('d/m/Y H:i:s');
+        $result = (new Notificador())->probarSMS($msg);
         respond([
             'ok'     => $result['ok'],
             'mensaje' => $result['ok']
-                ? 'WhatsApp enviado correctamente. Revisa tu telefono.'
+                ? 'SMS enviado correctamente. Revisa tu telefono.'
                 : ($result['error'] ?? 'No se pudo enviar.'),
         ]);
     }
