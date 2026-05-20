@@ -543,7 +543,7 @@ final class TelemetriaRepo
                 timestamp_lectura_real,
                 sincronizado_nube
 
-            ) VALUES (?, ?, ?, ?, ?, ?, 1)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
 
         ");
 
@@ -559,7 +559,9 @@ final class TelemetriaRepo
 
             $d['longitud_actual'],
 
-            $d['timestamp_lectura_real'] ?? time()
+            $d['timestamp_lectura_real'] ?? time(),
+
+            $d['sincronizado_nube'] ?? 0
         ]);
 
         return (int)$this->db->lastInsertId();
@@ -1672,6 +1674,22 @@ try {
             'ok' => true,
             'id' => $id
         ]);
+    }
+
+    if (
+        $method === 'PUT' &&
+        str_starts_with($uri, '/viaje/')
+    ) {
+        $id   = basename($uri);
+        $data = jsonBody();
+        $repo = new ViajeRepo();
+        if (!$repo->find($id)) {
+            respond(['error' => 'Viaje no encontrado'], 404);
+        }
+        if (!empty($data['estado'])) {
+            $repo->updateEstado($id, $data['estado']);
+        }
+        respond(['ok' => true]);
     }
 
     if (

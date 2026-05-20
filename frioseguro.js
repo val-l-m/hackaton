@@ -5,6 +5,9 @@ let ruralMode=false,queueCount=0,alertCount=0;
 const _alertasNotificadas = new Set();
 let heroMap,dashMap,vMarker,offPoly,waitMsg;
 let v102Line=null,v102OffLine=null,v102AlertMarkers=[];
+let offlineLog=[],offlinePolyGrowing=null,offlineWaypointIdx=0,offlineFinalPoly=null;
+const SIM={active:false,tripId:null,intervalId:null,stepIdx:0,offline:false,
+  onlinePolylines:[],currentSegPts:[],currentSegColor:null,currentSegLine:null};
 let tempChart,donutChart;
 let curTemp=5.0,curLat=19.2920,curLng=-99.6570;
 let tData=[],tLabels=[];
@@ -38,6 +41,19 @@ const V102_off=[[19.050,-99.520],[19.020,-99.505],[18.990,-99.490],[18.960,-99.4
 const V101_route=[[19.310,-99.700],[19.290,-99.682],[19.265,-99.665]];
 const V103_off=[[19.100,-99.480],[19.070,-99.462],[19.040,-99.445],[19.010,-99.428]];
 const V105_route=[[19.200,-99.520],[19.170,-99.498],[19.140,-99.476],[19.110,-99.454]];
+
+// Ruta completa de simulación con perfil térmico (verde → ámbar → rojo → offline)
+const SIM_ROUTE=[
+  {lat:19.292,lng:-99.657,temp:4.2},{lat:19.272,lng:-99.650,temp:4.5},
+  {lat:19.256,lng:-99.643,temp:4.8},{lat:19.240,lng:-99.635,temp:5.1},
+  {lat:19.225,lng:-99.626,temp:5.4},{lat:19.210,lng:-99.618,temp:5.7},
+  {lat:19.195,lng:-99.610,temp:6.1},{lat:19.180,lng:-99.603,temp:6.4},
+  {lat:19.165,lng:-99.595,temp:6.9},{lat:19.155,lng:-99.590,temp:7.3},
+  {lat:19.145,lng:-99.585,temp:7.7},{lat:19.133,lng:-99.576,temp:7.9},
+  {lat:19.120,lng:-99.562,temp:9.4},{lat:19.107,lng:-99.552,temp:11.2},
+  {lat:19.090,lng:-99.540,temp:12.8},{lat:19.070,lng:-99.530,temp:12.1},
+  {lat:19.050,lng:-99.520,temp:11.5}
+];
 
 const alertPt=[19.060,-99.518];
 const ctrlSanMiguel=[19.305,-99.616];
@@ -77,7 +93,7 @@ function initHeroMap(){
   L.polyline([...V102_on,...V101_route],{color:'#22c55e',weight:3.5,opacity:.9}).addTo(heroMap);
   L.polyline(V102_risk,{color:'#f59e0b',weight:3.5,opacity:.85}).addTo(heroMap);
   L.polyline(V102_crit,{color:'#ef4444',weight:3.5,opacity:.9}).addTo(heroMap);
-  L.polyline([...V102_off,...V103_off],{color:'#3b82f6',weight:3,dashArray:'7 5',opacity:.8}).addTo(heroMap);
+  L.polyline([...V102_off,...V103_off],{color:'#f97316',weight:3,dashArray:'7 5',opacity:.8}).addTo(heroMap);
   addVeh(heroMap,[19.265,-99.665],'V-101','#22c55e');
   addVeh(heroMap,[19.050,-99.520],'V-102','#ef4444',true);
   addVeh(heroMap,[19.020,-99.440],'V-103','#3b82f6');
@@ -100,7 +116,7 @@ function initDashMap(){
       <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#22c55e;display:inline-block;border-radius:2px"></span>Conexión Activa</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#f59e0b;display:inline-block;border-radius:2px"></span>En Riesgo</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#ef4444;display:inline-block;border-radius:2px"></span>Temperatura Crítica</div>
-      <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#3b82f6;border-top:2px dashed #3b82f6;display:inline-block"></span>Sin Señal</div>
+      <div style="display:flex;align-items:center;gap:7px"><span style="width:24px;height:3px;background:#f97316;border-top:2px dashed #f97316;display:inline-block"></span>Offline / Sin Señal</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">🚛</span>Vehículo</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">⚠️</span>Alerta Crítica</div>
       <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">📍</span>Punto de Control</div>
@@ -123,6 +139,23 @@ function initDashMap(){
     return d;
   };
   waitMsg.addTo(dashMap);
+
+  // Botón de simulación de viaje completo
+  const simCtrl=L.control({position:'bottomright'});
+  simCtrl.onAdd=()=>{
+    const d=L.DomUtil.create('div');
+    d.style.cssText='margin-bottom:8px';
+    d.innerHTML=`
+      <button id="btn-sim-start" onclick="startTripSim()" style="display:block;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px;box-shadow:0 2px 12px rgba(34,197,94,.45);letter-spacing:.3px;width:100%">
+        ▶ Simular Viaje Completo
+      </button>
+      <button id="btn-sim-stop" onclick="stopTripSim()" style="display:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px;box-shadow:0 2px 12px rgba(239,68,68,.45);letter-spacing:.3px;width:100%;margin-top:4px">
+        ⏹ Finalizar Viaje
+      </button>`;
+    L.DomEvent.disableClickPropagation(d);
+    return d;
+  };
+  simCtrl.addTo(dashMap);
 }
 
 function vIcon(label,color,alert=false){
@@ -297,7 +330,8 @@ function notificarAlertaCorreo(alerta) {
 // ── MAP DATA FROM API ─────────────────────────────────────
 function fetchMapData(){
   if(!dashMap) return;
-  fetch(apiUrl('/viaje/VJ-2026-047'))
+  if(SIM.active) return; // la simulación controla el mapa directamente
+  fetch(apiUrl('/viaje/'+(SIM.tripId||'VJ-2026-047')))
     .then(r=>r.json())
     .then(d=>{
       if(!d.telemetria||d.telemetria.length===0) return;
@@ -326,7 +360,7 @@ function fetchMapData(){
       if(onPts.length>1)
         v102Line=L.polyline(onPts,{color:onColor,weight:4,opacity:.95}).addTo(dashMap);
       if(offPts.length>1)
-        v102OffLine=L.polyline(offPts,{color:'#3b82f6',weight:4,dashArray:'8 5',opacity:.9}).addTo(dashMap);
+        v102OffLine=L.polyline(offPts,{color:'#f97316',weight:4,dashArray:'8 5',opacity:.9}).addTo(dashMap);
 
       // Mover/crear marcador del vehículo en última posición
       const all=d.telemetria;
@@ -374,8 +408,38 @@ function startLoop(){
 
   // Simulación local de temperatura para la gráfica
   setInterval(()=>{
-    if(ruralMode){curTemp+=Math.random()*.3+.02; queueCount++;}
-    else{curTemp+=(Math.random()*.4-.2); curTemp=Math.max(3.5,Math.min(curTemp,7.5));}
+    if(ruralMode){
+      curTemp+=Math.random()*.28+.05;
+      queueCount++;
+      // GPS offline: si la sim está activa, continúa por SIM_ROUTE; si no, usa V102_off
+      if(SIM.active&&SIM.offline){
+        if(SIM.stepIdx<SIM_ROUTE.length){
+          curLat=SIM_ROUTE[SIM.stepIdx].lat;
+          curLng=SIM_ROUTE[SIM.stepIdx].lng;
+          SIM.stepIdx++;
+        }
+      } else {
+        offlineWaypointIdx=Math.min(offlineWaypointIdx+0.18,V102_off.length-1);
+        const i=Math.floor(offlineWaypointIdx);
+        const ni=Math.min(i+1,V102_off.length-1);
+        const f=offlineWaypointIdx-i;
+        curLat=V102_off[i][0]+(V102_off[ni][0]-V102_off[i][0])*f;
+        curLng=V102_off[i][1]+(V102_off[ni][1]-V102_off[i][1])*f;
+      }
+      offlineLog.push({lat:curLat,lng:curLng,temp:curTemp});
+      // Dibujar línea naranja creciente
+      if(dashMap&&offlineLog.length>1){
+        if(offlinePolyGrowing)dashMap.removeLayer(offlinePolyGrowing);
+        offlinePolyGrowing=L.polyline(offlineLog.map(p=>[p.lat,p.lng]),
+          {color:'#f97316',weight:4,dashArray:'8 5',opacity:.85}).addTo(dashMap);
+      }
+      if(dashMap&&vMarker){
+        vMarker.setLatLng([curLat,curLng]);
+        vMarker.setIcon(vIcon('V-102','#3b82f6',false));
+      }
+    } else {
+      curTemp+=(Math.random()*.4-.2); curTemp=Math.max(3.5,Math.min(curTemp,7.5));
+    }
     curTemp=Math.max(0,Math.min(curTemp,19));
     document.getElementById('rfab-q').textContent=queueCount;
   },2000);
@@ -402,9 +466,12 @@ function toggleRural(){
     sfSys.textContent='Sin señal';
     sfSys.style.color='var(--red)';
 
-    if(dashMap){
-      offPoly=L.polyline([[19.140,-99.580],[19.100,-99.558]],{color:'#3b82f6',weight:3.5,dashArray:'8 5',opacity:.85}).addTo(dashMap);
-    }
+    offlineLog=[];
+    offlineWaypointIdx=0;
+    curTemp=Math.max(curTemp,5.8);
+    offlineLog.push({lat:curLat,lng:curLng,temp:curTemp});
+    if(SIM.active){SIM.offline=true;clearInterval(SIM.intervalId);}
+    if(offlineFinalPoly&&dashMap){dashMap.removeLayer(offlineFinalPoly);offlineFinalPoly=null;}
 
     addAlertItem('Hoy, '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),'Vehículo V-102 entró a zona sin señal','offs','Pérdida de señal','Zona rural','ab-blue','Activo');
   } else {
@@ -446,9 +513,46 @@ function finishSync(){
   document.getElementById('tb-sync').textContent='Hace un momento';
 
   if(dashMap){
-    if(offPoly)dashMap.removeLayer(offPoly);
-    L.polyline([[19.140,-99.580],[19.100,-99.558],[19.050,-99.518]],{color:'#3b82f6',weight:3.5,dashArray:'8 5',opacity:.85}).addTo(dashMap);
-    addAlert(dashMap,[19.050,-99.518]);
+    if(offPoly){dashMap.removeLayer(offPoly);offPoly=null;}
+    if(offlinePolyGrowing){dashMap.removeLayer(offlinePolyGrowing);offlinePolyGrowing=null;}
+    // "Momento drama": dibujar de golpe la ruta completa recorrida sin señal
+    const offPts=offlineLog.length>1?offlineLog.map(p=>[p.lat,p.lng]):V102_off;
+    offlineFinalPoly=L.polyline(offPts,{color:'#f97316',weight:4,dashArray:'8 5',opacity:.9}).addTo(dashMap);
+    // Colocar marcadores ⚠ en coordenadas EXACTAS donde la temp superó el límite
+    const TEMP_LIMITE=8;
+    let alertasColocadas=0;
+    offlineLog.forEach(p=>{
+      if(p.temp>TEMP_LIMITE){
+        addAlert(dashMap,[p.lat,p.lng],`${p.temp.toFixed(1)}°C — detectado retroactivamente`);
+        alertasColocadas++;
+      }
+    });
+    if(alertasColocadas===0){
+      const mid=offPts[Math.floor(offPts.length/2)]||[19.050,-99.518];
+      addAlert(dashMap,mid,`${curTemp.toFixed(1)}°C — Anomalía detectada en zona offline`);
+    }
+    if(vMarker&&offPts.length>0){
+      const last=offPts[offPts.length-1];
+      vMarker.setLatLng(last);
+      vMarker.setIcon(vIcon('V-102','#22c55e',false));
+    }
+  }
+  // Enviar batch offline a la API y cerrar viaje
+  if(SIM.tripId&&offlineLog.length>0){
+    const baseTs=Math.floor(Date.now()/1000)-offlineLog.length*3;
+    offlineLog.forEach((p,i)=>{
+      fetch('/api/telemetria',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({viaje_id:SIM.tripId,temperatura_actual:p.temp,latitud_actual:p.lat,
+          longitud_actual:p.lng,timestamp_lectura_real:baseTs+i*3,sincronizado_nube:1,sensor_puerta:0})
+      }).catch(()=>{});
+    });
+    setTimeout(()=>{
+      fetch('/api/viaje/'+SIM.tripId,{method:'PUT',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({estado:'completado'})}).catch(()=>{});
+      SIM.active=false; SIM.offline=false;
+      const bs=document.getElementById('btn-sim-start'); if(bs)bs.style.display='';
+      const be=document.getElementById('btn-sim-stop');  if(be)be.style.display='none';
+    },2500);
   }
 
   const synced=queueCount;
@@ -1058,7 +1162,7 @@ function iaAnalizar(){
   fetch('/api/ia/analizar-riesgo', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({id_viaje: IA_VIAJE_ID})
+    body: JSON.stringify({id_viaje: SIM.tripId||IA_VIAJE_ID})
   })
   .then(r => r.json())
   .then(d => {
@@ -1077,7 +1181,7 @@ function iaAnalizar(){
 }
 
 function iaCargarUltimo(){
-  fetch('/api/ia/ultimo-analisis?id_viaje=' + IA_VIAJE_ID)
+  fetch('/api/ia/ultimo-analisis?id_viaje=' + (SIM.tripId||IA_VIAJE_ID))
     .then(r => r.json())
     .then(d => {
       if (d.ok && d.analisis) iaRenderResult({
@@ -1376,6 +1480,160 @@ function cfgMsg(id, msg, ok) {
   el.textContent = msg;
   el.className = 'cfg-msg ' + (ok ? 'ok' : 'err');
   setTimeout(() => { el.className = 'cfg-msg'; }, 4000);
+}
+
+// ── SIMULACIÓN DE VIAJE COMPLETO ─────────────────────────────────────────────
+function simTempColor(temp){
+  if(temp>8.0)return '#ef4444';
+  if(temp>6.5)return '#f59e0b';
+  return '#22c55e';
+}
+
+function simAddMapPoint(lat,lng,temp){
+  if(!dashMap)return;
+  const color=simTempColor(temp);
+  const pt=[lat,lng];
+  if(SIM.currentSegColor===null){
+    SIM.currentSegColor=color; SIM.currentSegPts=[pt];
+  } else if(color!==SIM.currentSegColor){
+    const last=SIM.currentSegPts[SIM.currentSegPts.length-1];
+    SIM.currentSegColor=color; SIM.currentSegPts=[last,pt];
+    const l=L.polyline([...SIM.currentSegPts],{color,weight:4.5,opacity:.97,lineCap:'round',lineJoin:'round'}).addTo(dashMap);
+    SIM.onlinePolylines.push(l); SIM.currentSegLine=l;
+  } else {
+    SIM.currentSegPts.push(pt);
+    if(!SIM.currentSegLine&&SIM.currentSegPts.length>=2){
+      const l=L.polyline([...SIM.currentSegPts],{color,weight:4.5,opacity:.97,lineCap:'round',lineJoin:'round'}).addTo(dashMap);
+      SIM.onlinePolylines.push(l); SIM.currentSegLine=l;
+    } else if(SIM.currentSegLine){
+      SIM.currentSegLine.setLatLngs([...SIM.currentSegPts]);
+    }
+  }
+}
+
+function simTick(){
+  if(!SIM.active||SIM.offline)return;
+  if(SIM.stepIdx>=SIM_ROUTE.length){stopTripSim();return;}
+  const wp=SIM_ROUTE[SIM.stepIdx];
+  const noise=(Math.random()-.5)*.3;
+  const temp=parseFloat((wp.temp+noise).toFixed(1));
+  curLat=wp.lat; curLng=wp.lng; curTemp=temp;
+
+  simAddMapPoint(wp.lat,wp.lng,temp);
+
+  const color=simTempColor(temp);
+  const isAlert=temp>8;
+  if(vMarker){
+    vMarker.setLatLng([wp.lat,wp.lng]);
+    vMarker.setIcon(vIcon('V-102',color,isAlert));
+    vMarker.getPopup()&&vMarker.setPopupContent(`<b>V-102</b><br>Vacunas BCG<br>${temp.toFixed(1)}°C<br>${wp.lat.toFixed(4)}, ${wp.lng.toFixed(4)}`);
+  } else {
+    vMarker=L.marker([wp.lat,wp.lng],{icon:vIcon('V-102',color,isAlert)})
+      .bindPopup(`<b>V-102</b><br>Vacunas BCG<br>${temp.toFixed(1)}°C`)
+      .addTo(dashMap);
+  }
+
+  // Gráfica de temperatura en tiempo real
+  if(tempChart){
+    const lbl=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    if(tempChart.data.labels.length>20){tempChart.data.labels.shift();tempChart.data.datasets[0].data.shift();}
+    tempChart.data.labels.push(lbl);
+    tempChart.data.datasets[0].data.push(temp);
+    tempChart.update('none');
+  }
+
+  // Contadores del dashboard
+  document.getElementById('sc-viajes').textContent='1';
+  document.getElementById('sc-lotes').textContent='1';
+  const tmax=document.getElementById('sc-tmax');
+  if(tmax){tmax.textContent=temp.toFixed(1)+'°C';tmax.style.color=isAlert?'var(--red)':'var(--green)';}
+
+  // Enviar telemetría a la API
+  if(SIM.tripId){
+    fetch('/api/telemetria',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({viaje_id:SIM.tripId,temperatura_actual:temp,latitud_actual:wp.lat,
+        longitud_actual:wp.lng,timestamp_lectura_real:Math.floor(Date.now()/1000),
+        sincronizado_nube:0,sensor_puerta:0})
+    }).catch(()=>{});
+  }
+
+  // Alerta al cruzar 8°C (solo la primera vez)
+  if(isAlert&&SIM.stepIdx>0&&SIM_ROUTE[SIM.stepIdx-1].temp<=8){
+    addAlertItem('Hoy, '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+      'Vehículo V-102','crit','Temperatura crítica','Vacunas BCG','ab-red',temp.toFixed(1)+'°C');
+    alertCount++;
+    document.getElementById('sc-alerts').textContent=alertCount;
+    document.getElementById('nav-alert-badge').textContent=alertCount;
+    document.getElementById('tb-nb').textContent=alertCount;
+  }
+
+  SIM.stepIdx++;
+  if(SIM.stepIdx%4===0)dashMap.panTo([wp.lat,wp.lng]);
+}
+
+async function startTripSim(){
+  if(SIM.active)return;
+
+  // Crear vehículo V-102 si no existe (puede fallar si ya existe, se ignora)
+  fetch('/api/vehiculos',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({id:'V-102',placas:'EMX-102-FRG',marca:'Mercedes-Benz',
+      modelo:'Sprinter',anio:2023,conductor:'Carlos Méndez',capacidad:500})
+  }).catch(()=>{});
+
+  // Crear viaje en la BD
+  const tripId='VJ-SIM-'+Date.now();
+  try{
+    await fetch('/api/viaje',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:tripId,vehiculo_id:'V-102',medicamento:'Vacunas BCG',
+        origen:'Toluca, Estado de México',destino:'Sultepec, Estado de México',
+        temp_min:2.0,temp_max:8.0})
+    });
+  }catch(e){}
+  SIM.tripId=tripId;
+
+  // Resetear estado
+  SIM.active=true; SIM.offline=false; SIM.stepIdx=0;
+  SIM.onlinePolylines=[]; SIM.currentSegPts=[]; SIM.currentSegColor=null; SIM.currentSegLine=null;
+
+  // Limpiar mapa de datos anteriores
+  if(v102Line){dashMap.removeLayer(v102Line);v102Line=null;}
+  if(v102OffLine){dashMap.removeLayer(v102OffLine);v102OffLine=null;}
+  v102AlertMarkers.forEach(m=>dashMap.removeLayer(m)); v102AlertMarkers=[];
+  if(offlineFinalPoly){dashMap.removeLayer(offlineFinalPoly);offlineFinalPoly=null;}
+  if(vMarker){dashMap.removeLayer(vMarker);vMarker=null;}
+  offlineLog=[]; offlineWaypointIdx=0; queueCount=0;
+  document.getElementById('rfab-q').textContent=0;
+
+  // Limpiar gráfica
+  if(tempChart){tempChart.data.labels=[];tempChart.data.datasets[0].data=[];tempChart.update('none');}
+
+  const wm=document.getElementById('map-wait-msg'); if(wm)wm.style.display='none';
+
+  // Centrar mapa en el punto de inicio
+  dashMap.flyTo([SIM_ROUTE[0].lat,SIM_ROUTE[0].lng],12,{animate:true,duration:1.5});
+
+  // UI: cambiar botones
+  const bs=document.getElementById('btn-sim-start'); if(bs)bs.style.display='none';
+  const be=document.getElementById('btn-sim-stop');  if(be)be.style.display='block';
+
+  addAlertItem('Hoy, '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+    'V-102 — '+tripId,'offs','Viaje iniciado','Toluca → Sultepec','ab-blue','En Ruta');
+
+  simTick();
+  SIM.intervalId=setInterval(simTick,3000);
+}
+
+function stopTripSim(){
+  clearInterval(SIM.intervalId);
+  if(SIM.tripId){
+    fetch('/api/viaje/'+SIM.tripId,{method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({estado:'completado'})}).catch(()=>{});
+  }
+  SIM.active=false; SIM.offline=false;
+  const bs=document.getElementById('btn-sim-start'); if(bs)bs.style.display='block';
+  const be=document.getElementById('btn-sim-stop');  if(be)be.style.display='none';
+  addAlertItem('Hoy, '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
+    'V-102','offs','Viaje finalizado','Completado y guardado en historial','ab-blue','OK');
 }
 
 // ── CERRAR SESIÓN ────────────────────────────────────────────────────
