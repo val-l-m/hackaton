@@ -1215,38 +1215,27 @@ footer p{font-size:12px;color:var(--muted);}
               Ingresa el número de teléfono que recibirá las alertas. El sistema enviará automáticamente un mensaje al detectar anomalías de temperatura, puerta abierta u otras alertas críticas.
             </p>
 
-            <!-- ntfy.sh — push gratuito -->
+            <!-- SMS via email-to-SMS gateway (gratis, automático) -->
             <div class="cfg-toggle-row">
               <div>
                 <div class="cfg-toggle-label">
-                  <i class="bi bi-phone-vibrate-fill" style="color:var(--blue);margin-right:6px"></i>
-                  Alertas push al celular <span style="background:var(--green);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;margin-left:6px;font-weight:700">GRATIS</span>
+                  <i class="bi bi-chat-text-fill" style="color:var(--blue);margin-right:6px"></i>
+                  Alertas por SMS
+                  <span style="background:var(--green);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;margin-left:6px;font-weight:700">GRATIS</span>
                 </div>
-                <div class="cfg-toggle-sub">Notificación instantánea en el celular via ntfy.sh — sin costo, sin límites</div>
+                <div class="cfg-toggle-sub">El sistema detecta la operadora y envía el SMS automáticamente</div>
               </div>
               <label class="cfg-toggle">
                 <input type="checkbox" id="cfg-sms-activo" onchange="cfgToggle('sms_activo',this.checked)">
                 <span class="cfg-toggle-slider"></span>
               </label>
             </div>
-
-            <div class="cfg-row single" style="margin-top:12px">
+            <div class="cfg-row single" style="margin-top:10px">
               <div class="cfg-field">
-                <label>Canal de notificación (puedes escribir cualquier nombre único)</label>
-                <div style="display:flex;gap:8px;align-items:center">
-                  <input type="text" id="cfg-ntfy-topic" placeholder="frioseguro-alertas-2026" style="flex:1">
-                  <button class="cfg-btn cfg-btn-ghost" style="white-space:nowrap;padding:9px 14px" onclick="cfgGenerarTopic()">
-                    <i class="bi bi-shuffle"></i> Generar
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:4px">
-              <div style="font-size:12px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Cómo activarlo en tu celular (1 minuto)</div>
-              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text)">
-                <div><span style="background:var(--blue);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">1</span>Descarga la app <strong>ntfy</strong> en Play Store o App Store (gratis)</div>
-                <div><span style="background:var(--blue);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">2</span>Abre la app → botón <strong>+</strong> → escribe el nombre del canal de arriba</div>
-                <div><span style="background:var(--blue);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">3</span>Guarda y presiona <strong>Probar push</strong> — deberías recibir la notificación al instante</div>
+                <label>Número de celular</label>
+                <input type="tel" id="cfg-sms-num" placeholder="+525512345678"
+                  oninput="cfgDetectarOp(this.value)">
+                <div id="cfg-op-detected" style="font-size:11px;color:var(--green);margin-top:5px;min-height:16px"></div>
               </div>
             </div>
 
@@ -1270,7 +1259,7 @@ footer p{font-size:12px;color:var(--muted);}
 
             <div class="cfg-btn-row">
               <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestSMS()">
-                <i class="bi bi-phone-vibrate"></i> Probar push
+                <i class="bi bi-chat-text"></i> Probar SMS
               </button>
               <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestWA()">
                 <i class="bi bi-whatsapp"></i> Probar WhatsApp
@@ -2414,7 +2403,8 @@ async function cargarConfig() {
     const d = await apiRequest('/config');
     const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     const c = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val !== '0'; };
-    v('cfg-ntfy-topic',    d.ntfy_topic     || '');
+    v('cfg-sms-num',       d.alerta_sms     || '');
+    if (d.alerta_sms) cfgDetectarOp(d.alerta_sms);
     v('cfg-wa-num',        d.alerta_whatsapp|| '');
     v('cfg-twilio-sid',    d.twilio_sid     || '');
     v('cfg-twilio-sms-from', d.twilio_sms_from || '');
@@ -2430,16 +2420,29 @@ function cfgToggle(clave, val) {
   apiRequest('/config', {method:'POST', body: JSON.stringify({[clave]: val ? '1' : '0'})}).catch(()=>{});
 }
 
-function cfgGenerarTopic() {
-  const rand = Math.random().toString(36).slice(2, 10);
-  const el = document.getElementById('cfg-ntfy-topic');
-  if (el) el.value = `frioseguro-${rand}`;
+// Detecta operadora en tiempo real para mostrar feedback al usuario
+const OP_PREFIJOS = {
+  att:      ['331','332','333','334','335','336','337','338','339',
+             '811','818','819','821','822','823','824','825','826','827','828','829'],
+  movistar: ['961','962','963','964','965','966','967','968','969',
+             '221','222','223','224','225','226','227','228','229'],
+};
+function cfgDetectarOp(val) {
+  const el = document.getElementById('cfg-op-detected');
+  if (!el) return;
+  const num = val.replace(/\D/g,'').replace(/^521?/, '').slice(-10);
+  if (num.length < 6) { el.textContent = ''; return; }
+  const p3 = num.slice(0,3);
+  let op = 'Telcel';
+  if (OP_PREFIJOS.att.includes(p3))      op = 'AT&T México';
+  if (OP_PREFIJOS.movistar.includes(p3)) op = 'Movistar';
+  el.innerHTML = `<i class="bi bi-check-circle-fill"></i> Operadora detectada: <strong>${op}</strong>`;
 }
 
 async function cfgGuardarNotif() {
   const s = id => document.getElementById(id)?.value?.trim() || '';
   const data = {
-    ntfy_topic:       s('cfg-ntfy-topic'),
+    alerta_sms:       s('cfg-sms-num'),
     sms_activo:       document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
     alerta_whatsapp:  s('cfg-wa-num'),
     wa_activo:        document.getElementById('cfg-wa-activo')?.checked ? '1' : '0',
@@ -2465,7 +2468,7 @@ async function cfgGuardarTwilio() {
 }
 
 async function cfgTestSMS() {
-  cfgMsg('cfg-msg-notif', 'Enviando notificacion push de prueba...', true);
+  cfgMsg('cfg-msg-notif', 'Enviando SMS de prueba...', true);
   try {
     const r = await apiRequest('/config/test-sms', {method:'POST', body:'{}'});
     cfgMsg('cfg-msg-notif', r.mensaje, r.ok);

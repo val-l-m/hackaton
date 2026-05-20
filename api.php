@@ -274,51 +274,61 @@ final class Notificador
     private ConfigRepo $cfg;
     public function __construct() { $this->cfg = new ConfigRepo(); }
 
-    // ── Twilio helper ─────────────────────────────────────────────────
-    private function twilio(string $to, string $body, bool $whatsapp = false): bool
+    // ── Email-to-SMS via gateways de operadoras mexicanas ────────────
+    // Las operadoras convierten emails a SMS automáticamente (gratis).
+    // Requiere que XAMPP tenga Mercury Mail activo (incluido en XAMPP).
+    private static array $GATEWAYS = [
+        'telcel'   => '@itelcel.com',
+        'att'      => '@mms.att.net',
+        'movistar' => '@mensajes.movistar.com.mx',
+        'unefon'   => '@unefon.com.mx',
+        'virgin'   => '@virginmobile.mx',
+        'bait'     => '@itelcel.com',  // BAIT usa red Telcel
+    ];
+
+    // Detecta operadora por prefijo del número mexicano (10 dígitos)
+    private function detectarOperadora(string $num): string
     {
-        $sid   = trim($this->cfg->get('twilio_sid'));
-        $token = trim($this->cfg->get('twilio_token'));
-        $from  = trim($this->cfg->get($whatsapp ? 'twilio_wa_from' : 'twilio_sms_from'));
+        $num = preg_replace('/\D/', '', $num);
+        // Quitar +52 o 52 al inicio si lo tiene
+        if (str_starts_with($num, '521')) $num = substr($num, 2);
+        elseif (str_starts_with($num, '52')) $num = substr($num, 2);
 
-        if ($sid === '' || $token === '' || $from === '') return false;
+        $prefijo3 = substr($num, 0, 3);
+        $prefijo4 = substr($num, 0, 4);
 
-        $toAddr   = $whatsapp ? "whatsapp:$to"   : $to;
-        $fromAddr = $whatsapp ? "whatsapp:$from" : $from;
+        // Prefijos AT&T México conocidos
+        $att = ['331','332','333','334','335','336','337','338','339',
+                '811','818','819','821','822','823','824','825','826','827','828','829'];
+        if (in_array($prefijo3, $att)) return 'att';
 
-        $url  = "https://api.twilio.com/2010-04-01/Accounts/$sid/Messages.json";
-        $ctx  = stream_context_create(['http' => [
-            'method'  => 'POST',
-            'header'  => "Authorization: Basic " . base64_encode("$sid:$token") . "\r\n"
-                       . "Content-Type: application/x-www-form-urlencoded\r\n",
-            'content' => http_build_query(['To' => $toAddr, 'From' => $fromAddr, 'Body' => $body]),
-            'timeout' => 15,
-            'ignore_errors' => true,
-        ]]);
-        $res = @file_get_contents($url, false, $ctx);
-        if ($res === false) return false;
-        $json = json_decode($res, true);
-        return isset($json['sid']);
+        // Prefijos Movistar conocidos
+        $movistar = ['961','962','963','964','965','966','967','968','969',
+                     '221','222','223','224','225','226','227','228','229'];
+        if (in_array($prefijo3, $movistar)) return 'movistar';
+
+        return 'telcel'; // Telcel tiene ~70% del mercado — default seguro
     }
 
-    // ── ntfy.sh — push gratuito (sin cuenta, sin límites) ────────────
     public function enviarSMS(string $mensaje): bool
     {
-        $topic = trim($this->cfg->get('ntfy_topic'));
-        if ($topic === '') return false;
+        $num = preg_replace('/\D/', '', trim($this->cfg->get('alerta_sms')));
+        if (strlen($num) < 10) return false;
 
-        $ctx = stream_context_create(['http' => [
-            'method'  => 'POST',
-            'header'  => "Content-Type: text/plain; charset=utf-8\r\n"
-                       . "Title: FrioSeguro - Alerta\r\n"
-                       . "Priority: urgent\r\n"
-                       . "Tags: warning,thermometer\r\n",
-            'content' => $mensaje,
-            'timeout' => 10,
-            'ignore_errors' => true,
-        ]]);
-        $res = @file_get_contents("https://ntfy.sh/$topic", false, $ctx);
-        return $res !== false;
+        // Extraer 10 dígitos locales
+        if (str_starts_with($num, '521')) $num = substr($num, 2);
+        elseif (str_starts_with($num, '52')) $num = substr($num, 2);
+        $num10 = substr($num, -10);
+
+        $operadora = $this->detectarOperadora($num10);
+        $gateway   = self::$GATEWAYS[$operadora];
+        $destino   = $num10 . $gateway;
+
+        // Asunto corto (algunos gateways lo incluyen en el SMS)
+        $asunto  = 'FrioSeguro Alerta';
+        $headers = "From: frioseguro@localhost\r\nContent-Type: text/plain; charset=UTF-8";
+
+        return @mail($destino, $asunto, $mensaje, $headers);
     }
 
     public function enviarWhatsapp(string $mensaje): bool
@@ -1789,9 +1799,9 @@ try {
         $data = jsonBody();
         $cfg  = new ConfigRepo();
         $permitidos = [
-            'ntfy_topic','sms_activo',
+            'alerta_sms','sms_activo',
             'alerta_whatsapp','wa_activo',
-            'twilio_sid','twilio_token','twilio_sms_from','twilio_wa_from',
+            'twilio_sid','twilio_token','twilio_wa_from',
             'idioma','nombre_sistema',
         ];
         foreach ($permitidos as $k) {
