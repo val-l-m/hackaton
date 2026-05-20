@@ -1351,17 +1351,17 @@ footer p{font-size:12px;color:var(--muted);}
             </div>
           </div>
 
-          <!-- Notificaciones: SMS -->
+          <!-- Notificaciones: Telegram -->
           <div class="cfg-section">
-            <div class="cfg-section-title"><i class="bi bi-chat-text-fill"></i>Alertas por SMS</div>
-            <p style="font-size:12px;color:var(--sub);margin-bottom:16px">
-              El sistema envía un SMS automáticamente al detectar anomalías. Solo ingresa el número que recibirá las alertas.
+            <div class="cfg-section-title"><i class="bi bi-telegram"></i>Alertas por Telegram <span style="background:var(--green);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px;font-weight:700">GRATIS</span></div>
+            <p style="font-size:12px;color:var(--sub);margin-bottom:18px">
+              Recibirás un mensaje en Telegram cuando haya una alerta. Es gratis, instantáneo y no requiere configuraciones externas.
             </p>
 
             <div class="cfg-toggle-row">
               <div>
-                <div class="cfg-toggle-label"><i class="bi bi-chat-text-fill" style="color:var(--blue);margin-right:6px"></i>Activar alertas por SMS</div>
-                <div class="cfg-toggle-sub">Se enviará un SMS cuando se detecte una alerta crítica</div>
+                <div class="cfg-toggle-label"><i class="bi bi-bell-fill" style="color:var(--blue);margin-right:6px"></i>Activar alertas por Telegram</div>
+                <div class="cfg-toggle-sub">Mensaje instantáneo al celular cuando se detecte una anomalía</div>
               </div>
               <label class="cfg-toggle">
                 <input type="checkbox" id="cfg-sms-activo" onchange="cfgToggle('sms_activo',this.checked)">
@@ -1369,24 +1369,37 @@ footer p{font-size:12px;color:var(--muted);}
               </label>
             </div>
 
-            <div class="cfg-row single" style="margin-top:14px">
-              <div class="cfg-field">
-                <label>Número de celular que recibirá los SMS</label>
-                <input type="tel" id="cfg-sms-num" placeholder="+525512345678">
+            <!-- Pasos para conectar -->
+            <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:16px">
+              <div style="font-size:12px;font-weight:700;color:var(--sub);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Conectar en 2 pasos</div>
+              <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span>
+                  <span>Abre Telegram y busca el bot <strong id="cfg-bot-nombre">@FrioSeguroBot</strong> — o presiona el botón:</span>
+                </div>
+                <div style="padding-left:36px">
+                  <a id="cfg-bot-link" href="https://t.me/FrioSeguroBot" target="_blank" class="cfg-btn cfg-btn-ghost" style="display:inline-flex;text-decoration:none">
+                    <i class="bi bi-telegram"></i> Abrir bot en Telegram
+                  </a>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span>
+                  <span>Envía cualquier mensaje al bot (escribe <strong>/start</strong>) y presiona:</span>
+                </div>
+                <div style="padding-left:36px">
+                  <button class="cfg-btn cfg-btn-ghost" onclick="cfgConectarTelegram()" id="btn-conectar-tg">
+                    <i class="bi bi-lightning-charge-fill"></i> Conectar automáticamente
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Auth Token — único campo técnico necesario -->
-            <div class="cfg-row single" style="margin-top:4px">
-              <div class="cfg-field">
-                <label>Auth Token <span style="font-size:10px;color:var(--muted)">(solo se ingresa una vez — encuéntralo en console.twilio.com)</span></label>
-                <input type="password" id="cfg-twilio-token" placeholder="••••••••••••••••••••••••••••••••">
-              </div>
-            </div>
+            <!-- Estado de conexión -->
+            <div id="cfg-tg-status" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;display:flex;align-items:center;gap:8px"></div>
 
-            <div class="cfg-btn-row">
-              <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestSMS()">
-                <i class="bi bi-send"></i> Enviar SMS de prueba
+            <div class="cfg-btn-row" style="margin-top:14px">
+              <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestSMS()" id="btn-test-tg" style="display:none">
+                <i class="bi bi-send"></i> Enviar mensaje de prueba
               </button>
               <button class="cfg-btn cfg-btn-primary" onclick="cfgGuardarNotif()">
                 <i class="bi bi-floppy"></i> Guardar
@@ -2701,9 +2714,14 @@ async function cargarConfig() {
     const d = await apiRequest('/config');
     const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     const c = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val !== '0'; };
-    v('cfg-sms-num', d.alerta_sms || '');
-    // twilio_token no se expone por seguridad
     c('cfg-sms-activo', d.sms_activo ?? '1');
+    if (d.tg_chat_id) cfgMostrarTgConectado(d.tg_nombre || 'Usuario conectado');
+    // Actualizar nombre del bot si viene del servidor
+    if (d.tg_bot_username) {
+      const n = '@' + d.tg_bot_username;
+      const el = document.getElementById('cfg-bot-nombre'); if (el) el.textContent = n;
+      const a  = document.getElementById('cfg-bot-link');   if (a)  a.href = 'https://t.me/' + d.tg_bot_username;
+    }
     applyTheme(localStorage.getItem('frioseguro_theme') || 'dark');
   } catch(e) { console.warn('cargarConfig:', e); }
 }
@@ -2712,26 +2730,48 @@ function cfgToggle(clave, val) {
   apiRequest('/config', {method:'POST', body: JSON.stringify({[clave]: val ? '1' : '0'})}).catch(()=>{});
 }
 
+function cfgMostrarTgConectado(nombre) {
+  const st = document.getElementById('cfg-tg-status');
+  const bt = document.getElementById('btn-test-tg');
+  if (st) {
+    st.style.display = 'flex';
+    st.style.background = 'rgba(34,197,94,.1)';
+    st.style.border = '1px solid rgba(34,197,94,.2)';
+    st.style.color = 'var(--green)';
+    st.innerHTML = `<i class="bi bi-check-circle-fill"></i> Conectado como <strong style="margin-left:4px">${nombre}</strong>`;
+  }
+  if (bt) bt.style.display = 'inline-flex';
+}
+
+async function cfgConectarTelegram() {
+  const btn = document.getElementById('btn-conectar-tg');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Buscando...'; }
+  try {
+    const r = await apiRequest('/config/telegram-buscar');
+    if (r.ok) {
+      cfgMostrarTgConectado(r.nombre || 'Usuario');
+      cfgMsg('cfg-msg-notif', `Telegram conectado. Ahora puedes enviar una prueba.`, true);
+    } else {
+      cfgMsg('cfg-msg-notif', r.error || 'No se encontró. Abre el bot y envía /start primero.', false);
+    }
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexión con el servidor.', false); }
+  finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> Conectar automáticamente'; } }
+}
+
 async function cfgGuardarNotif() {
-  const s   = id => document.getElementById(id)?.value?.trim() || '';
-  const tok = s('cfg-twilio-token');
-  const data = {
-    alerta_sms:   s('cfg-sms-num'),
-    sms_activo:   document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
-  };
-  if (tok) data.twilio_token = tok; // solo guardar si se ingresó algo
+  const data = { sms_activo: document.getElementById('cfg-sms-activo')?.checked ? '1' : '0' };
   try {
     await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
-    cfgMsg('cfg-msg-notif', 'Guardado. Usa "Enviar SMS de prueba" para verificar.', true);
+    cfgMsg('cfg-msg-notif', 'Guardado correctamente.', true);
   } catch(e) { cfgMsg('cfg-msg-notif', 'Error al guardar.', false); }
 }
 
 async function cfgTestSMS() {
-  cfgMsg('cfg-msg-notif', 'Enviando SMS de prueba...', true);
+  cfgMsg('cfg-msg-notif', 'Enviando mensaje de prueba a Telegram...', true);
   try {
     const r = await apiRequest('/config/test-sms', {method:'POST', body:'{}'});
     cfgMsg('cfg-msg-notif', r.mensaje, r.ok);
-  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexion con el servidor.', false); }
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexión con el servidor.', false); }
 }
 
 function cfgMsg(id, msg, ok) {

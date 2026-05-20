@@ -317,7 +317,7 @@ final class ConfigRepo
 }
 
 /* ============================================================================
- | NOTIFICADOR  (Email SMTP + WhatsApp CallMeBot)
+ | NOTIFICADOR  (Telegram Bot — gratis, sin cuentas de pago)
  ============================================================================ */
 
 final class Notificador
@@ -325,83 +325,62 @@ final class Notificador
     private ConfigRepo $cfg;
     public function __construct() { $this->cfg = new ConfigRepo(); }
 
-    // Normaliza cualquier número mexicano a formato E.164 (+521XXXXXXXXXX)
-    private function normalizarNumero(string $num): string
+    // ── Telegram Bot API ──────────────────────────────────────────────
+    private function tgPost(string $method, array $params): array
     {
-        $n = preg_replace('/\D/', '', $num);
-        // Quitar doble código: 5252... → 52...
-        if (str_starts_with($n, '5252')) $n = substr($n, 2);
-        // Agregar +52 si solo son 10 dígitos
-        if (strlen($n) === 10) $n = '52' . $n;
-        // Algunos números mexicanos móviles necesitan 521 (no solo 52)
-        if (strlen($n) === 12 && str_starts_with($n, '52') && !str_starts_with($n, '521')) {
-            $n = '521' . substr($n, 2);
-        }
-        return '+' . $n;
-    }
+        $token = trim($this->cfg->get('tg_token'));
+        if ($token === '') return ['ok' => false, 'error' => 'Bot no configurado.'];
 
-    // ── SMS via Twilio (cURL — funciona en XAMPP) ────────────────────
-    private function twilioSMS(string $to, string $body): array
-    {
-        $sid   = trim($this->cfg->get('twilio_sid'));
-        $token = trim($this->cfg->get('twilio_token'));
-        $from  = trim($this->cfg->get('twilio_sms_from'));
-
-        if ($sid === '' || $token === '' || $from === '') {
-            return ['ok' => false, 'error' => 'Configura el Account SID, Auth Token y numero Twilio primero.'];
-        }
-
-        $toNorm = $this->normalizarNumero($to);
-
-        $url = "https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json";
-
-        $ch = curl_init($url);
+        $ch = curl_init("https://api.telegram.org/bot{$token}/{$method}");
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
-            CURLOPT_USERPWD        => "$sid:$token",
-            CURLOPT_POSTFIELDS     => http_build_query([
-                'To'   => $toNorm,
-                'From' => $from,
-                'Body' => $body,
-            ]),
+            CURLOPT_POSTFIELDS     => json_encode($params),
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 20,
+            CURLOPT_TIMEOUT        => 15,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
         ]);
-
-        $res  = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err  = curl_error($ch);
+        $res = curl_exec($ch);
+        $err = curl_error($ch);
         curl_close($ch);
 
-        if ($res === false || $err !== '') {
-            return ['ok' => false, 'error' => "Error de conexion: $err"];
-        }
-
+        if ($res === false) return ['ok' => false, 'error' => $err];
         $json = json_decode($res, true);
-        if (isset($json['sid'])) {
-            return ['ok' => true, 'to' => $toNorm];
-        }
+        return $json ?? ['ok' => false, 'error' => 'Respuesta invalida'];
+    }
 
-        $msg = $json['message'] ?? $json['detail'] ?? substr($res, 0, 300);
-        return ['ok' => false, 'error' => "Twilio ($code): $msg"];
+    // Obtiene los últimos mensajes al bot para buscar el chat_id del usuario
+    public function buscarChatId(): array
+    {
+        $r = $this->tgPost('getUpdates', ['limit' => 20, 'offset' => -20]);
+        if (!($r['ok'] ?? false)) return $r;
+
+        $updates = array_reverse($r['result'] ?? []);
+        foreach ($updates as $u) {
+            $chat = $u['message']['chat'] ?? $u['callback_query']['message']['chat'] ?? null;
+            if ($chat) {
+                $nombre = trim(($chat['first_name'] ?? '') . ' ' . ($chat['last_name'] ?? ''));
+                return ['ok' => true, 'chat_id' => (string)$chat['id'], 'nombre' => $nombre];
+            }
+        }
+        return ['ok' => false, 'error' => 'No se encontro ningún mensaje. Abre el bot y envía /start primero.'];
     }
 
     public function enviarSMS(string $mensaje): bool
     {
-        $to = trim($this->cfg->get('alerta_sms'));
-        if ($to === '') return false;
-        return $this->twilioSMS($to, $mensaje)['ok'];
+        $chatId = trim($this->cfg->get('tg_chat_id'));
+        if ($chatId === '') return false;
+        $r = $this->tgPost('sendMessage', ['chat_id' => $chatId, 'text' => $mensaje]);
+        return $r['ok'] ?? false;
     }
 
     public function probarSMS(string $mensaje): array
     {
-        $to = trim($this->cfg->get('alerta_sms'));
-        if ($to === '') return ['ok' => false, 'error' => 'Ingresa un numero de celular en la configuracion.'];
-        $r = $this->twilioSMS($to, $mensaje);
-        if ($r['ok']) $r['mensaje'] = 'SMS enviado a ' . $r['to'] . '. Revisa tu telefono.';
-        return $r;
+        $chatId = trim($this->cfg->get('tg_chat_id'));
+        if ($chatId === '') return ['ok' => false, 'error' => 'Primero conecta tu Telegram con el botón de abajo.'];
+        $r = $this->tgPost('sendMessage', ['chat_id' => $chatId, 'text' => $mensaje]);
+        if ($r['ok'] ?? false) return ['ok' => true, 'mensaje' => 'Mensaje enviado a Telegram. Revisa tu celular.'];
+        return ['ok' => false, 'error' => $r['description'] ?? 'Error desconocido'];
     }
 
     public function alertar(string $tipo, string $descripcion, float $valor, string $viajeId, array $extra = []): void
@@ -2006,7 +1985,16 @@ try {
 
     if ($method === 'GET' && $uri === '/config') {
         $map = (new ConfigRepo())->toMap();
-        unset($map['smtp_pass'], $map['callmebot_apikey']);
+        unset($map['tg_token']); // no exponer el token del bot
+        // Agregar nombre del bot si está configurado
+        $token = trim((new ConfigRepo())->get('tg_token'));
+        if ($token !== '') {
+            $ch = curl_init("https://api.telegram.org/bot{$token}/getMe");
+            curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER=>true, CURLOPT_TIMEOUT=>5, CURLOPT_SSL_VERIFYPEER=>false]);
+            $r = json_decode(curl_exec($ch) ?: '{}', true);
+            curl_close($ch);
+            if ($r['ok'] ?? false) $map['tg_bot_username'] = $r['result']['username'] ?? '';
+        }
         respond($map);
     }
 
@@ -2014,8 +2002,7 @@ try {
         $data = jsonBody();
         $cfg  = new ConfigRepo();
         $permitidos = [
-            'alerta_sms','sms_activo',
-            'twilio_sid','twilio_token','twilio_sms_from',
+            'tg_chat_id','sms_activo','tg_token',
             'idioma','nombre_sistema',
         ];
         foreach ($permitidos as $k) {
@@ -2025,12 +2012,17 @@ try {
     }
 
     if ($method === 'POST' && $uri === '/config/test-sms') {
-        $msg    = "FRIOSEGURO - Prueba\nSistema de alertas activo.\n" . date('d/m/Y H:i:s');
+        $msg    = "✅ FrioSeguro — Prueba\nSistema de alertas activo.\n" . date('d/m/Y H:i:s');
         $result = (new Notificador())->probarSMS($msg);
-        respond([
-            'ok'     => $result['ok'],
-            'mensaje' => $result['mensaje'] ?? $result['error'] ?? 'Error desconocido.',
-        ]);
+        respond(['ok' => $result['ok'], 'mensaje' => $result['mensaje'] ?? $result['error'] ?? 'Error.']);
+    }
+
+    if ($method === 'GET' && $uri === '/config/telegram-buscar') {
+        $result = (new Notificador())->buscarChatId();
+        if ($result['ok'] ?? false) {
+            (new ConfigRepo())->set('tg_chat_id', $result['chat_id']);
+        }
+        respond($result);
     }
 
     /* =========================
