@@ -271,6 +271,18 @@ final class Database
 
 final class ConfigRepo
 {
+    // Valores por defecto — cargados desde config.local.php si existe
+    private static function defaults(): array
+    {
+        static $d = null;
+        if ($d === null) {
+            $d = ['sms_activo' => '1'];
+            $f = __DIR__ . '/config.local.php';
+            if (file_exists($f)) $d = array_merge($d, (array)(require $f));
+        }
+        return $d;
+    }
+
     private PDO $db;
     public function __construct() { $this->db = Database::get(); }
 
@@ -279,7 +291,8 @@ final class ConfigRepo
         $s = $this->db->prepare("SELECT valor FROM configuracion WHERE clave = ?");
         $s->execute([$clave]);
         $r = $s->fetch();
-        return $r ? (string)$r['valor'] : $default;
+        if ($r) return (string)$r['valor'];
+        return self::defaults()[$clave] ?? $default;
     }
 
     public function set(string $clave, string $valor): void

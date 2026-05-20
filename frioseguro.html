@@ -1355,13 +1355,13 @@ footer p{font-size:12px;color:var(--muted);}
           <div class="cfg-section">
             <div class="cfg-section-title"><i class="bi bi-chat-text-fill"></i>Alertas por SMS</div>
             <p style="font-size:12px;color:var(--sub);margin-bottom:16px">
-              El sistema envía un SMS automáticamente al detectar anomalías de temperatura, puerta abierta u otras alertas críticas.
+              El sistema envía un SMS automáticamente al detectar anomalías. Solo ingresa el número que recibirá las alertas.
             </p>
 
             <div class="cfg-toggle-row">
               <div>
                 <div class="cfg-toggle-label"><i class="bi bi-chat-text-fill" style="color:var(--blue);margin-right:6px"></i>Activar alertas por SMS</div>
-                <div class="cfg-toggle-sub">Se enviará un mensaje de texto cuando se detecte una alerta</div>
+                <div class="cfg-toggle-sub">Se enviará un SMS cuando se detecte una alerta crítica</div>
               </div>
               <label class="cfg-toggle">
                 <input type="checkbox" id="cfg-sms-activo" onchange="cfgToggle('sms_activo',this.checked)">
@@ -1376,28 +1376,13 @@ footer p{font-size:12px;color:var(--muted);}
               </div>
             </div>
 
-            <div class="cfg-row" style="margin-top:4px">
+            <!-- Auth Token — único campo técnico necesario -->
+            <div class="cfg-row single" style="margin-top:4px">
               <div class="cfg-field">
-                <label>Account SID de Twilio</label>
-                <input type="text" id="cfg-twilio-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-              </div>
-              <div class="cfg-field">
-                <label>Auth Token de Twilio</label>
+                <label>Auth Token <span style="font-size:10px;color:var(--muted)">(solo se ingresa una vez — encuéntralo en console.twilio.com)</span></label>
                 <input type="password" id="cfg-twilio-token" placeholder="••••••••••••••••••••••••••••••••">
               </div>
             </div>
-
-            <div class="cfg-row single">
-              <div class="cfg-field">
-                <label>Número Twilio de envío (el que te asignaron al registrarte)</label>
-                <input type="text" id="cfg-twilio-sms-from" placeholder="+15005550006">
-              </div>
-            </div>
-
-            <p class="cfg-note">
-              <i class="bi bi-info-circle"></i>
-              Crea una cuenta gratis en <strong>twilio.com</strong> — obtienes ~$15 USD de crédito de prueba sin tarjeta de crédito. Tu Account SID, Auth Token y número de envío están en el Dashboard al entrar.
-            </p>
 
             <div class="cfg-btn-row">
               <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestSMS()">
@@ -2716,9 +2701,7 @@ async function cargarConfig() {
     const d = await apiRequest('/config');
     const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     const c = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val !== '0'; };
-    v('cfg-sms-num',         d.alerta_sms      || '');
-    v('cfg-twilio-sid',      d.twilio_sid      || '');
-    v('cfg-twilio-sms-from', d.twilio_sms_from || '');
+    v('cfg-sms-num', d.alerta_sms || '');
     // twilio_token no se expone por seguridad
     c('cfg-sms-activo', d.sms_activo ?? '1');
     applyTheme(localStorage.getItem('frioseguro_theme') || 'dark');
@@ -2730,17 +2713,16 @@ function cfgToggle(clave, val) {
 }
 
 async function cfgGuardarNotif() {
-  const s = id => document.getElementById(id)?.value?.trim() || '';
+  const s   = id => document.getElementById(id)?.value?.trim() || '';
+  const tok = s('cfg-twilio-token');
   const data = {
-    alerta_sms:      s('cfg-sms-num'),
-    sms_activo:      document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
-    twilio_sid:      s('cfg-twilio-sid'),
-    twilio_token:    s('cfg-twilio-token'),
-    twilio_sms_from: s('cfg-twilio-sms-from'),
+    alerta_sms:   s('cfg-sms-num'),
+    sms_activo:   document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
   };
+  if (tok) data.twilio_token = tok; // solo guardar si se ingresó algo
   try {
     await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
-    cfgMsg('cfg-msg-notif', 'Configuracion guardada correctamente.', true);
+    cfgMsg('cfg-msg-notif', 'Guardado. Usa "Enviar SMS de prueba" para verificar.', true);
   } catch(e) { cfgMsg('cfg-msg-notif', 'Error al guardar.', false); }
 }
 
