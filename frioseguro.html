@@ -443,6 +443,59 @@ footer p{font-size:12px;color:var(--muted);}
 
 
 
+/* ═══════════ VIAJES ACTIVOS ═══════════ */
+.va-page{display:flex;flex-direction:column;gap:14px;padding:20px;overflow-y:auto;height:100%;}
+.va-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.va-title{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.va-subtitle{font-size:12px;color:var(--sub);margin-top:3px;}
+.va-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.va-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.va-stat-icon{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;font-size:16px;flex-shrink:0;}
+.va-stat-icon.blue{background:rgba(59,130,246,.15);color:var(--blue);}
+.va-stat-icon.green{background:rgba(34,197,94,.15);color:var(--green);}
+.va-stat-icon.amber{background:rgba(245,158,11,.15);color:var(--amber);}
+.va-stat-icon.red{background:rgba(239,68,68,.15);color:var(--red);}
+.va-stat-val{font-size:22px;font-weight:700;font-family:var(--mono);line-height:1.1;}
+.va-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;}
+.va-table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;flex:1;}
+.va-table-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+.va-table-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.va-refresh{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;}
+.va-refresh:hover{background:rgba(59,130,246,.2);}
+.va-table-wrap{overflow-x:auto;}
+.va-table{width:100%;border-collapse:collapse;font-size:12px;min-width:860px;}
+.va-table thead th{padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);white-space:nowrap;font-family:var(--mono);}
+.va-table tbody tr{border-bottom:1px solid rgba(26,58,92,.5);cursor:pointer;transition:background .15s;}
+.va-table tbody tr:hover{background:rgba(59,130,246,.06);}
+.va-table tbody tr:last-child{border-bottom:none;}
+.va-table tbody td{padding:11px 14px;vertical-align:middle;}
+.va-veh-cell{display:flex;align-items:center;gap:8px;}
+.va-veh-badge{background:var(--blue-grad);color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;flex-shrink:0;letter-spacing:.3px;}
+.va-veh-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.va-temp{font-family:var(--mono);font-size:13px;font-weight:700;}
+.va-temp.ok{color:var(--green);}
+.va-temp.warn{color:var(--amber);}
+.va-temp.crit{color:var(--red);}
+.va-temp.na{color:var(--muted);}
+.va-estado{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.va-estado.en-ruta{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);}
+.va-estado.detenido{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25);}
+.va-estado.sin-senal{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.va-estado.sin-datos{background:rgba(71,85,105,.12);color:var(--muted);border:1px solid rgba(71,85,105,.25);}
+.va-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.va-estado.en-ruta .va-dot{background:var(--green);animation:pulse-glow 2s infinite;}
+.va-estado.detenido .va-dot{background:var(--amber);}
+.va-estado.sin-senal .va-dot{background:var(--red);}
+.va-estado.sin-datos .va-dot{background:var(--muted);}
+.va-btn-map{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;transition:all .15s;}
+.va-btn-map:hover{background:var(--blue);color:#fff;}
+.va-ruta{display:flex;align-items:center;gap:5px;font-size:11px;}
+.va-ruta .va-r-loc{color:var(--text);font-weight:500;}
+.va-ruta .va-r-arr{color:var(--muted);font-size:9px;}
+.va-last-conn{font-size:11px;color:var(--sub);}
+.va-last-conn.fresh{color:var(--green);}
+.va-empty-row td{padding:40px;text-align:center;color:var(--muted);font-size:13px;}
+
 /* ═══════════ CRUD VIEWS: USUARIOS / VEHÍCULOS ═══════════ */
 .dash-view{display:none;animation:fadeUp .25s ease;}
 .dash-view.active{display:block;}
@@ -644,7 +697,7 @@ footer p{font-size:12px;color:var(--muted);}
     </div>
     <nav class="sb-nav">
       <div class="nav-item active" id="nav-resumen" onclick="navPage('resumen')"><i class="bi bi-grid-fill"></i><span>Resumen</span></div>
-      <div class="nav-item" onclick="navPending('Viajes Activos')"><i class="bi bi-truck"></i><span>Viajes Activos</span></div>
+      <div class="nav-item" id="nav-viajes-activos" onclick="showDashView('viajes-activos', this)"><i class="bi bi-truck"></i><span>Viajes Activos</span></div>
       <div class="nav-item" onclick="navPending('Mapa en Vivo')"><i class="bi bi-map"></i><span>Mapa en Vivo</span></div>
       <div class="nav-item" id="nav-ia" onclick="navPage('ia')" style="background:rgba(129,140,248,.08);border-left:3px solid var(--indigo);margin-bottom:4px"><i class="bi bi-cpu" style="color:var(--indigo)"></i><span style="color:var(--indigo);font-weight:600">IA Predictiva</span><span class="nav-badge badge" style="background:var(--indigo)">NEW</span></div>
       <div class="nav-item" onclick="navPending('Alertas')"><i class="bi bi-bell"></i><span>Alertas</span><span class="nav-badge badge" id="nav-alert-badge">0</span></div>
@@ -958,6 +1011,77 @@ footer p{font-size:12px;color:var(--muted);}
           </div>
         </div>
       </section>
+
+      <!-- VIAJES ACTIVOS -->
+      <section id="view-viajes-activos" class="dash-view">
+        <div class="va-page">
+
+          <div class="va-header">
+            <div>
+              <div class="va-title"><i class="bi bi-truck" style="color:var(--blue)"></i>Viajes Activos</div>
+              <div class="va-subtitle">Monitoreo en tiempo real de todas las unidades en circulación — haz clic en una fila para verla en el mapa</div>
+            </div>
+            <button class="va-refresh" onclick="cargarViajesActivos()">
+              <i class="bi bi-arrow-clockwise" id="va-refresh-icon"></i> Actualizar
+            </button>
+          </div>
+
+          <div class="va-stats">
+            <div class="va-stat">
+              <div class="va-stat-icon blue"><i class="bi bi-truck"></i></div>
+              <div><div class="va-stat-val" id="va-total">—</div><div class="va-stat-lbl">Total activos</div></div>
+            </div>
+            <div class="va-stat">
+              <div class="va-stat-icon green"><i class="bi bi-reception-4"></i></div>
+              <div><div class="va-stat-val" id="va-en-ruta">—</div><div class="va-stat-lbl">En Ruta</div></div>
+            </div>
+            <div class="va-stat">
+              <div class="va-stat-icon amber"><i class="bi bi-pause-circle"></i></div>
+              <div><div class="va-stat-val" id="va-detenido">—</div><div class="va-stat-lbl">Detenidos</div></div>
+            </div>
+            <div class="va-stat">
+              <div class="va-stat-icon red"><i class="bi bi-wifi-off"></i></div>
+              <div><div class="va-stat-val" id="va-sin-senal">—</div><div class="va-stat-lbl">Sin Señal</div></div>
+            </div>
+          </div>
+
+          <div class="va-table-card">
+            <div class="va-table-hdr">
+              <div class="va-table-title">
+                <i class="bi bi-table" style="color:var(--teal)"></i>
+                Unidades en Circulación
+              </div>
+              <span style="font-size:11px;color:var(--muted)" id="va-last-update"></span>
+            </div>
+            <div class="va-table-wrap">
+              <table class="va-table">
+                <thead>
+                  <tr>
+                    <th>Vehículo</th>
+                    <th>Viaje / Medicamento</th>
+                    <th>Ruta</th>
+                    <th>Temperatura</th>
+                    <th>Estado</th>
+                    <th>Última Conexión</th>
+                    <th>Conductor</th>
+                    <th>Mapa</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaViajesActivos">
+                  <tr class="va-empty-row">
+                    <td colspan="8">
+                      <i class="bi bi-hourglass-split" style="font-size:22px;display:block;margin-bottom:8px"></i>
+                      Cargando viajes...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       </div><!-- /view-resumen -->
 
       <!-- ══ VISTA IA PREDICTIVA ══ -->
@@ -1459,12 +1583,14 @@ function showDashView(view, el = null) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
 
-  const resumenItems = document.querySelectorAll('.view-resumen');
-  const usuarios = document.getElementById('view-usuarios');
-  const vehiculos = document.getElementById('view-vehiculos');
+  const resumenItems  = document.querySelectorAll('.view-resumen');
+  const usuarios      = document.getElementById('view-usuarios');
+  const vehiculos     = document.getElementById('view-vehiculos');
+  const viajesActivos = document.getElementById('view-viajes-activos');
 
   usuarios?.classList.remove('active');
   vehiculos?.classList.remove('active');
+  viajesActivos?.classList.remove('active');
 
   if (view === 'usuarios') {
     resumenItems.forEach(x => x.classList.add('hidden-resumen'));
@@ -1479,6 +1605,14 @@ function showDashView(view, el = null) {
     vehiculos?.classList.add('active');
     setTopbar('Gestión de Vehículos', 'Control administrativo de unidades de transporte');
     cargarVehiculos();
+    return;
+  }
+
+  if (view === 'viajes-activos') {
+    resumenItems.forEach(x => x.classList.add('hidden-resumen'));
+    viajesActivos?.classList.add('active');
+    setTopbar('Viajes Activos', 'Monitoreo en tiempo real de vehículos en circulación');
+    cargarViajesActivos();
     return;
   }
 
@@ -1630,6 +1764,130 @@ async function eliminarVehiculo(id) {
   }
 }
 
+// ── VIAJES ACTIVOS ─────────────────────────────────────────
+async function cargarViajesActivos() {
+  const tbody = document.getElementById('tablaViajesActivos');
+  if (!tbody) return;
+
+  const icon = document.getElementById('va-refresh-icon');
+  if (icon) icon.style.animation = 'spin 1s linear infinite';
+
+  try {
+    const data  = await apiRequest('/viajes-activos');
+    const viajes = data.viajes || [];
+
+    const total    = viajes.length;
+    const enRuta   = viajes.filter(v => v.estado_conexion === 'en_ruta').length;
+    const detenido = viajes.filter(v => v.estado_conexion === 'detenido').length;
+    const sinSenal = viajes.filter(v => ['sin_senal','sin_datos'].includes(v.estado_conexion)).length;
+
+    document.getElementById('va-total').textContent    = total;
+    document.getElementById('va-en-ruta').textContent  = enRuta;
+    document.getElementById('va-detenido').textContent = detenido;
+    document.getElementById('va-sin-senal').textContent= sinSenal;
+    document.getElementById('va-last-update').textContent =
+      'Actualizado: ' + new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+    if (!viajes.length) {
+      tbody.innerHTML = `<tr class="va-empty-row"><td colspan="8">
+        <i class="bi bi-truck" style="font-size:24px;display:block;margin-bottom:8px;color:var(--muted)"></i>
+        No hay viajes activos en este momento.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = viajes.map(v => {
+      const temp      = v.temperatura_actual != null ? parseFloat(v.temperatura_actual) : null;
+      const tempClass = temp == null   ? 'na'
+                      : temp > v.temp_max ? 'crit'
+                      : temp < v.temp_min ? 'warn' : 'ok';
+      const tempStr   = temp != null ? temp.toFixed(1) + '°C' : '—';
+
+      const estadoClass = v.estado_conexion === 'en_ruta'   ? 'en-ruta'
+                        : v.estado_conexion === 'detenido'  ? 'detenido'
+                        : v.estado_conexion === 'sin_senal' ? 'sin-senal' : 'sin-datos';
+      const estadoIcon  = v.estado_conexion === 'en_ruta'   ? 'bi-truck'
+                        : v.estado_conexion === 'detenido'  ? 'bi-pause-circle'
+                        : v.estado_conexion === 'sin_senal' ? 'bi-wifi-off' : 'bi-question-circle';
+
+      let connStr = '—', connClass = '';
+      if (v.ultima_lectura) {
+        const secAgo = Math.round(Date.now() / 1000 - parseInt(v.ultima_lectura));
+        const minAgo = Math.floor(secAgo / 60);
+        if (secAgo < 60)       { connStr = 'Hace ' + secAgo + ' seg'; connClass = 'fresh'; }
+        else if (minAgo < 60)  connStr = 'Hace ' + minAgo + ' min';
+        else                   connStr = 'Hace ' + Math.floor(minAgo/60) + 'h ' + (minAgo%60) + 'm';
+      }
+
+      const hasGps = v.latitud_actual != null && v.longitud_actual != null;
+      const lat    = hasGps ? parseFloat(v.latitud_actual)  : 0;
+      const lng    = hasGps ? parseFloat(v.longitud_actual) : 0;
+      const mapBtn = hasGps
+        ? `<button class="va-btn-map" onclick="event.stopPropagation();irAVehiculo(${lat},${lng},'${esc(v.vehiculo_id)}')"><i class="bi bi-geo-alt"></i>Ver mapa</button>`
+        : `<span style="color:var(--muted);font-size:11px">Sin GPS</span>`;
+
+      const rowClick = hasGps
+        ? `onclick="irAVehiculo(${lat},${lng},'${esc(v.vehiculo_id)}')" title="Ver en mapa"`
+        : '';
+
+      return `<tr ${rowClick}>
+        <td>
+          <div class="va-veh-cell">
+            <span class="va-veh-badge">${esc(v.vehiculo_id)}</span>
+            <div>
+              <div style="font-size:12px;font-weight:600">${esc(v.placas || '—')}</div>
+              <div class="va-veh-sub">${esc((v.marca||'') + ' ' + (v.modelo||'')).trim() || '—'}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div style="font-size:12px;font-weight:500;color:var(--text)">${esc(v.viaje_id)}</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px"><i class="bi bi-capsule" style="font-size:10px"></i> ${esc(v.medicamento)}</div>
+        </td>
+        <td>
+          <div class="va-ruta">
+            <span class="va-r-loc">${esc(v.origen)}</span>
+            <i class="bi bi-arrow-right va-r-arr"></i>
+            <span class="va-r-loc">${esc(v.destino)}</span>
+          </div>
+        </td>
+        <td>
+          <div class="va-temp ${tempClass}">${tempStr}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">Rango: ${v.temp_min}–${v.temp_max} °C</div>
+        </td>
+        <td>
+          <span class="va-estado ${estadoClass}">
+            <span class="va-dot"></span>
+            <i class="bi ${estadoIcon}"></i>
+            ${esc(v.estado_label)}
+          </span>
+        </td>
+        <td><div class="va-last-conn ${connClass}">${connStr}</div></td>
+        <td style="font-size:12px">${esc(v.conductor || '—')}</td>
+        <td>${mapBtn}</td>
+      </tr>`;
+    }).join('');
+
+  } catch (err) {
+    tbody.innerHTML = `<tr class="va-empty-row"><td colspan="8">
+      <i class="bi bi-exclamation-triangle" style="font-size:22px;display:block;margin-bottom:8px;color:var(--red)"></i>
+      ${esc(err.message)}</td></tr>`;
+  } finally {
+    if (icon) icon.style.animation = '';
+  }
+}
+
+function irAVehiculo(lat, lng, vehiculoId) {
+  if (!lat || !lng) return;
+  showDashView('resumen');
+  document.getElementById('nav-resumen')?.classList.add('active');
+  setTimeout(() => {
+    if (dashMap) {
+      dashMap.invalidateSize();
+      dashMap.flyTo([lat, lng], 15, { animate: true, duration: 1.2 });
+    }
+  }, 250);
+}
+
 // ── STATS COUNTER ─────────────────────────────────────────
 function countUp(id,target){
   const el=document.getElementById(id);let c=0;
@@ -1661,6 +1919,12 @@ function navPage(page){
   document.querySelector('.topbar p').textContent  = page==='ia'
     ? 'Análisis de riesgo térmico con Ollama — gemma3:4b'
     : 'Monitoreo en tiempo real de la distribución de insumos médicos';
+  if (page === 'resumen') {
+    // reset cualquier crud/subvista activa
+    document.querySelectorAll('.dash-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.view-resumen').forEach(v => v.classList.remove('hidden-resumen'));
+    setTimeout(() => dashMap?.invalidateSize(), 100);
+  }
   if(page==='ia') iaCargarUltimo();
 }
 

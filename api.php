@@ -737,6 +737,87 @@ function ctrlDashboard(): array
     ];
 }
 
+/** GET /api/viajes-activos */
+function ctrlViajesActivos(): array
+{
+    $db  = Database::get();
+    $now = time();
+
+    $stmt = $db->prepare("
+        SELECT
+            v.id            AS viaje_id,
+            v.vehiculo_id,
+            v.medicamento,
+            v.origen,
+            v.destino,
+            v.temp_min,
+            v.temp_max,
+            v.estado        AS viaje_estado,
+            v.created_at    AS viaje_created,
+            vh.placas,
+            vh.marca,
+            vh.modelo,
+            vh.conductor,
+            vh.estado       AS vehiculo_estado,
+            t.temperatura_actual,
+            t.latitud_actual,
+            t.longitud_actual,
+            t.sensor_puerta,
+            t.timestamp_lectura_real AS ultima_lectura,
+            t.sincronizado_nube,
+            t.lote_comprometido
+        FROM viajes v
+        LEFT JOIN vehiculos vh ON vh.id = v.vehiculo_id
+        LEFT JOIN telemetria_serial t
+            ON  t.viaje_id = v.id
+            AND t.id = (
+                SELECT MAX(t2.id)
+                FROM telemetria_serial t2
+                WHERE t2.viaje_id = v.id
+            )
+        WHERE v.estado = 'activo'
+        ORDER BY COALESCE(t.timestamp_lectura_real, 0) DESC
+    ");
+    $stmt->execute();
+    $viajes = $stmt->fetchAll();
+
+    foreach ($viajes as &$row) {
+        $ultima  = (int)($row['ultima_lectura'] ?? 0);
+        $difSeg  = $ultima > 0 ? ($now - $ultima) : PHP_INT_MAX;
+        $difMin  = $difSeg / 60;
+
+        if ($ultima === 0) {
+            $row['estado_conexion'] = 'sin_datos';
+            $row['estado_label']    = 'Sin datos';
+        } elseif ($difMin < 2) {
+            $row['estado_conexion'] = 'en_ruta';
+            $row['estado_label']    = 'En Ruta';
+        } elseif ($difMin < 10) {
+            $row['estado_conexion'] = 'detenido';
+            $row['estado_label']    = 'Detenido';
+        } else {
+            $row['estado_conexion'] = 'sin_senal';
+            $row['estado_label']    = 'Sin Señal';
+        }
+
+        $row['minutos_sin_conexion'] = $ultima > 0 ? (int)round($difMin) : null;
+        // cast numerics for clean JSON
+        foreach (['temperatura_actual','latitud_actual','longitud_actual','temp_min','temp_max'] as $k) {
+            if (isset($row[$k])) $row[$k] = (float)$row[$k];
+        }
+        $row['sensor_puerta']     = (int)($row['sensor_puerta'] ?? 0);
+        $row['sincronizado_nube'] = (int)($row['sincronizado_nube'] ?? 0);
+        $row['lote_comprometido'] = (int)($row['lote_comprometido'] ?? 0);
+    }
+    unset($row);
+
+    return [
+        'viajes'    => $viajes,
+        'total'     => count($viajes),
+        'timestamp' => $now,
+    ];
+}
+
 /* ============================================================================
  | ROUTER
  ============================================================================ */
@@ -1270,6 +1351,14 @@ try {
     ) {
 
         respond(ctrlDashboard());
+    }
+
+    /* =========================
+       VIAJES ACTIVOS
+    ========================= */
+
+    if ($method === 'GET' && $uri === '/viajes-activos') {
+        respond(ctrlViajesActivos());
     }
 
     /* =========================
