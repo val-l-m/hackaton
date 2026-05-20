@@ -172,6 +172,51 @@ final class Database
             created_at INTEGER DEFAULT (unixepoch())
         );
 
+            CREATE TABLE IF NOT EXISTS analisis_ia_riesgo (
+                id                          INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_viaje                    TEXT,
+                vehiculo                    TEXT,
+                medicamento                 TEXT,
+                modelo_ollama               TEXT,
+                origen                      TEXT    NOT NULL DEFAULT 'ollama',
+                nivel_riesgo                TEXT,
+                titulo_alerta               TEXT,
+                mensaje_dashboard           TEXT,
+                resumen_operador            TEXT,
+                explicacion_tecnica         TEXT,
+                prediccion_estado           TEXT,
+                prediccion_tiempo           TEXT,
+                prediccion_motivo           TEXT,
+                posibles_causas             TEXT,
+                acciones_recomendadas       TEXT,
+                resumen_auditoria           TEXT,
+                confianza                   TEXT,
+                requiere_revision           INTEGER NOT NULL DEFAULT 1,
+                indice_danio_termico        REAL    NOT NULL DEFAULT 0,
+                temperatura_actual          REAL    NOT NULL DEFAULT 0,
+                temperatura_maxima          REAL    NOT NULL DEFAULT 0,
+                tiempo_fuera_de_rango_minutos INTEGER NOT NULL DEFAULT 0,
+                datos_entrada               TEXT,
+                respuesta_completa          TEXT,
+                creado_en                   INTEGER NOT NULL DEFAULT (unixepoch())
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_ia_viaje
+                ON analisis_ia_riesgo(id_viaje, creado_en);
+
+            CREATE TABLE IF NOT EXISTS alertas (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                viaje_id    TEXT    NOT NULL REFERENCES viajes(id),
+                tipo        TEXT    NOT NULL
+                              CHECK(tipo IN ('temperatura_critica','temperatura_riesgo',
+                                             'puerta_abierta','perdida_senal','sync_completado')),
+                descripcion TEXT    NOT NULL,
+                latitud     REAL,
+                longitud    REAL,
+                valor       REAL,
+                resuelta    INTEGER NOT NULL DEFAULT 0,
+                timestamp   INTEGER NOT NULL DEFAULT (unixepoch())
+            );
         ");
     }
 }
@@ -696,6 +741,526 @@ function ctrlDashboard(): array
  | ROUTER
  ============================================================================ */
 
+function required(array $data, array $fields): void
+{
+    foreach ($fields as $f) {
+        if (!isset($data[$f])) {
+            http_response_code(422);
+            echo json_encode(['error' => "Campo requerido: {$f}"]);
+            exit;
+        }
+    }
+}
+
+function respond(array $data, int $code = 200): never
+{
+    http_response_code($code);
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    exit;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  CONFIGURACIÓN IA
+// ══════════════════════════════════════════════════════════════════════════════
+const OLLAMA_URL     = 'http://localhost:11434/api/generate';
+const OLLAMA_MODEL   = 'gemma3:4b';  // modelo instalado localmente
+const OLLAMA_TIMEOUT = 35;           // segundos máximo de espera
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  MOTOR MATEMÁTICO DE MÉTRICAS TÉRMICAS
+// ══════════════════════════════════════════════════════════════════════════════
+final class ThermalMetrics
+{
+    private const SEG_POR_LECTURA = 5;
+
+    public static function calculate(array $tel, array $viaje): array
+    {
+        if (empty($tel)) return self::empty();
+
+        $tempMin = (float)($viaje['temp_min'] ?? 2.0);
+        $tempMax = (float)($viaje['temp_max'] ?? 8.0);
+        $temps   = array_column($tel, 'temperatura_actual');
+
+        $tempActual  = (float)end($temps);
+        $tempMaxima  = (float)max($temps);
+        $tempMinima  = (float)min($temps);
+        $tempPromedio = round(array_sum($temps) / count($temps), 2);
+
+        $lecturasFuera    = 0;
+        $eventosPuerta    = 0;
+        $lectsSync        = 0;
+        $coordCritico     = null;
+        $cantCriticos     = 0;
+
+        foreach ($tel as $t) {
+            $temp = (float)$t['temperatura_actual'];
+            if ($temp > $tempMax || $temp < $tempMin) {
+                $lecturasFuera++;
+                $cantCriticos++;
+                if ($coordCritico === null) {
+                    $coordCritico = [
+                        'latitud'     => $t['latitud_actual'],
+                        'longitud'    => $t['longitud_actual'],
+                        'descripcion' => 'Primera lectura fuera de rango',
+                    ];
+                }
+            }
+            if ((int)$t['sensor_puerta'])   $eventosPuerta++;
+            if ((int)$t['sincronizado_nube']) $lectsSync++;
+        }
+
+        $tiempoFuera = (int)round($lecturasFuera * self::SEG_POR_LECTURA / 60);
+        $tiempoSync  = (int)round($lectsSync     * self::SEG_POR_LECTURA / 60);
+
+        $tendenciaData  = self::calcTendencia($tel);
+        $tiempoEstimado = self::calcTiempoEstimado($tempActual, $tempMax, $tendenciaData['valor']);
+        $indiceDanio    = self::calcIndiceDanio($tel, $tempMin, $tempMax);
+        $estadoCalc     = self::clasificar($indiceDanio, $tempActual, $tempMax, $tiempoFuera, $eventosPuerta > 0);
+
+        return [
+            'temperatura_actual'                => round($tempActual, 2),
+            'temperatura_maxima'                => round($tempMaxima, 2),
+            'temperatura_minima'                => round($tempMinima, 2),
+            'temperatura_promedio'              => $tempPromedio,
+            'tiempo_fuera_de_rango_minutos'     => $tiempoFuera,
+            'tendencia_temperatura'             => $tendenciaData['texto'],
+            'tiempo_estimado_para_superar_limite' => $tiempoEstimado,
+            'indice_danio_termico'              => round($indiceDanio, 2),
+            'estado_calculado_por_sistema'      => $estadoCalc,
+            'coordenada_evento_critico'         => $coordCritico,
+            'cantidad_eventos_criticos'         => $cantCriticos,
+            'tiempo_sin_senal_minutos'          => $tiempoSync,
+            'eventos_puerta'                    => $eventosPuerta,
+            'estado_conexion'                   => $lectsSync > 0 ? 'intermitente' : 'estable',
+            'datos_sincronizados'               => $lectsSync > 0,
+        ];
+    }
+
+    private static function calcTendencia(array $tel): array
+    {
+        $n = count($tel);
+        if ($n < 2) return ['valor' => 0.0, 'texto' => '0.00 °C/min'];
+
+        $ventana  = array_slice($tel, -min(12, $n));
+        $primero  = (float)$ventana[0]['temperatura_actual'];
+        $ultimo   = (float)end($ventana)['temperatura_actual'];
+        $minutos  = (count($ventana) - 1) * self::SEG_POR_LECTURA / 60;
+
+        if ($minutos < 0.001) return ['valor' => 0.0, 'texto' => '0.00 °C/min'];
+
+        $t = ($ultimo - $primero) / $minutos;
+        return ['valor' => $t, 'texto' => ($t >= 0 ? '+' : '') . number_format($t, 2) . ' °C/min'];
+    }
+
+    private static function calcTiempoEstimado(float $actual, float $max, float $tendencia): string
+    {
+        if ($actual > $max)    return 'ya superado';
+        if ($tendencia <= 0)   return 'sin riesgo inmediato por tendencia actual';
+        if (($max - $actual) < 0.01) return 'menos de 1 minuto';
+
+        $min = ($max - $actual) / $tendencia;
+        return $min < 1 ? 'menos de 1 minuto' : round($min) . ' minutos';
+    }
+
+    private static function calcIndiceDanio(array $tel, float $min, float $max, float $sens = 2.0): float
+    {
+        $minPorLect = self::SEG_POR_LECTURA / 60;
+        $total = 0.0;
+        foreach ($tel as $t) {
+            $temp = (float)$t['temperatura_actual'];
+            if ($temp > $max)      $total += ($temp - $max)  * $minPorLect * $sens;
+            elseif ($temp < $min)  $total += ($min  - $temp) * $minPorLect * $sens;
+        }
+        return $total;
+    }
+
+    private static function clasificar(float $danio, float $actual, float $max, int $tFuera, bool $puerta): string
+    {
+        $nivel = match(true) {
+            $danio <= 0  => 0,
+            $danio <= 30 => 1,
+            $danio <= 60 => 3,
+            $danio <= 90 => 4,
+            default      => 5,
+        };
+        if ($actual > $max)                        $nivel = max($nivel, 3);
+        if ($actual > $max && $tFuera > 10)        $nivel = max($nivel, 4);
+        if ($actual > $max && $tFuera > 20)        $nivel = max($nivel, 5);
+        if ($puerta  && $actual > $max)            $nivel = min($nivel + 1, 5);
+
+        return ['seguro','vigilancia','preventivo','alto','critico','comprometido'][$nivel];
+    }
+
+    private static function empty(): array
+    {
+        return [
+            'temperatura_actual' => 0, 'temperatura_maxima' => 0, 'temperatura_minima' => 0,
+            'temperatura_promedio' => 0, 'tiempo_fuera_de_rango_minutos' => 0,
+            'tendencia_temperatura' => '0.00 °C/min',
+            'tiempo_estimado_para_superar_limite' => 'datos insuficientes',
+            'indice_danio_termico' => 0, 'estado_calculado_por_sistema' => 'seguro',
+            'coordenada_evento_critico' => null, 'cantidad_eventos_criticos' => 0,
+            'tiempo_sin_senal_minutos' => 0, 'eventos_puerta' => 0,
+            'estado_conexion' => 'estable', 'datos_sincronizados' => false,
+        ];
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  CLIENTE OLLAMA
+// ══════════════════════════════════════════════════════════════════════════════
+final class OllamaClient
+{
+    private const NIVELES_VALIDOS = ['seguro','vigilancia','preventivo','alto','critico','comprometido'];
+    private const CAMPOS_REQUERIDOS = [
+        'nivel_riesgo','titulo_alerta','mensaje_dashboard','resumen_operador',
+        'explicacion_tecnica','prediccion','posibles_causas','acciones_recomendadas',
+        'resumen_auditoria','confianza','requiere_revision',
+    ];
+
+    public static function analyze(array $datosJson, string $model = OLLAMA_MODEL): array
+    {
+        $json    = json_encode($datosJson, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $prompt  = self::buildPrompt($json);
+        $payload = json_encode([
+            'model'   => $model,
+            'prompt'  => $prompt,
+            'stream'  => false,
+            'format'  => 'json',
+            'options' => ['temperature' => 0.2],
+        ]);
+
+        $ctx = stream_context_create([
+            'http' => [
+                'method'        => 'POST',
+                'header'        => "Content-Type: application/json\r\n",
+                'content'       => $payload,
+                'timeout'       => OLLAMA_TIMEOUT,
+                'ignore_errors' => true,
+            ],
+        ]);
+
+        $raw = @file_get_contents(OLLAMA_URL, false, $ctx);
+
+        if ($raw === false) {
+            return ['ok' => false, 'error' => 'Ollama no disponible (conexión rechazada)'];
+        }
+
+        $resp = json_decode($raw, true);
+        if (!isset($resp['response'])) {
+            return ['ok' => false, 'error' => 'Respuesta inesperada de Ollama'];
+        }
+
+        $analisis = json_decode($resp['response'], true);
+        if (!is_array($analisis)) {
+            // Intentar extraer JSON si hay texto extra
+            preg_match('/\{.*\}/s', $resp['response'], $m);
+            $analisis = $m ? json_decode($m[0], true) : null;
+        }
+
+        if (!is_array($analisis)) {
+            return ['ok' => false, 'error' => 'JSON inválido en respuesta de Ollama'];
+        }
+
+        return ['ok' => true, 'analisis' => self::validate($analisis), 'modelo' => $model];
+    }
+
+    private static function validate(array $a): array
+    {
+        // Completar campos faltantes con valores seguros
+        foreach (self::CAMPOS_REQUERIDOS as $campo) {
+            if (!array_key_exists($campo, $a)) {
+                $a[$campo] = match($campo) {
+                    'posibles_causas', 'acciones_recomendadas' => [],
+                    'prediccion'       => ['estado' => '', 'tiempo_estimado' => '', 'motivo' => ''],
+                    'requiere_revision' => true,
+                    default             => '',
+                };
+            }
+        }
+
+        // Validar nivel_riesgo
+        if (!in_array($a['nivel_riesgo'], self::NIVELES_VALIDOS, true)) {
+            $a['nivel_riesgo'] = 'vigilancia';
+        }
+
+        // Asegurar que prediccion tenga sus subclaves
+        if (!is_array($a['prediccion'])) $a['prediccion'] = [];
+        $a['prediccion'] += ['estado' => '', 'tiempo_estimado' => '', 'motivo' => ''];
+
+        // Asegurar arrays
+        if (!is_array($a['posibles_causas']))       $a['posibles_causas'] = [];
+        if (!is_array($a['acciones_recomendadas'])) $a['acciones_recomendadas'] = [];
+
+        return $a;
+    }
+
+    private static function buildPrompt(string $datosJson): string
+    {
+        return <<<PROMPT
+Eres un asistente experto en monitoreo logístico de cadena de frío para insumos médicos.
+Analiza los datos de telemetría de un lote médico transportado en una ruta con posible pérdida de señal.
+
+Reglas obligatorias:
+- No inventes datos.
+- Usa únicamente la información proporcionada.
+- No tomes decisiones médicas definitivas.
+- No digas que el medicamento puede aplicarse a pacientes.
+- No sustituyes a una autoridad sanitaria.
+- Tu análisis es logístico, preventivo y de auditoría.
+- Si el lote supera el rango permitido, recomienda revisión o validación antes de entrega.
+- Si faltan datos, indícalo claramente.
+- Devuelve únicamente JSON válido.
+- No agregues texto antes ni después del JSON.
+- No uses Markdown. No uses explicaciones fuera del JSON.
+
+Clasifica el riesgo usando únicamente uno de estos valores:
+seguro, vigilancia, preventivo, alto, critico, comprometido
+
+Datos del lote:
+{$datosJson}
+
+Devuelve exactamente esta estructura JSON:
+{
+  "nivel_riesgo": "",
+  "titulo_alerta": "",
+  "mensaje_dashboard": "",
+  "resumen_operador": "",
+  "explicacion_tecnica": "",
+  "prediccion": { "estado": "", "tiempo_estimado": "", "motivo": "" },
+  "posibles_causas": [],
+  "acciones_recomendadas": [],
+  "resumen_auditoria": "",
+  "confianza": "",
+  "requiere_revision": true
+}
+PROMPT;
+    }
+
+    public static function fallback(string $estadoCalc, string $motivo = ''): array
+    {
+        return [
+            'nivel_riesgo'         => $estadoCalc,
+            'titulo_alerta'        => 'IA local no disponible',
+            'mensaje_dashboard'    => 'Se usó la predicción matemática base porque Ollama no respondió correctamente.',
+            'resumen_operador'     => 'El sistema calculó el riesgo con métricas internas, pero no fue posible generar análisis IA.',
+            'explicacion_tecnica'  => 'La conexión con Ollama falló o devolvió una respuesta inválida. ' . $motivo,
+            'prediccion'           => ['estado' => $estadoCalc, 'tiempo_estimado' => 'según métricas', 'motivo' => 'fallback matemático'],
+            'posibles_causas'      => [],
+            'acciones_recomendadas' => ['Verificar que Ollama esté encendido', 'Revisar el modelo configurado', 'Intentar nuevamente el análisis'],
+            'resumen_auditoria'    => 'No se pudo generar análisis IA. Se conservó el cálculo matemático base.',
+            'confianza'            => 'media',
+            'requiere_revision'    => true,
+        ];
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  REPOSITORIO ANÁLISIS IA
+// ══════════════════════════════════════════════════════════════════════════════
+final class IaAnalisisRepo
+{
+    private PDO $db;
+
+    public function __construct() { $this->db = Database::get(); }
+
+    public function save(string $viajeId, string $vehiculo, string $medicamento,
+                         ?string $modelo, string $origen, array $analisis, array $metricas,
+                         array $datosEntrada): int
+    {
+        $pred = $analisis['prediccion'] ?? [];
+        $stmt = $this->db->prepare("
+            INSERT INTO analisis_ia_riesgo
+              (id_viaje, vehiculo, medicamento, modelo_ollama, origen,
+               nivel_riesgo, titulo_alerta, mensaje_dashboard, resumen_operador,
+               explicacion_tecnica, prediccion_estado, prediccion_tiempo, prediccion_motivo,
+               posibles_causas, acciones_recomendadas, resumen_auditoria, confianza,
+               requiere_revision, indice_danio_termico, temperatura_actual, temperatura_maxima,
+               tiempo_fuera_de_rango_minutos, datos_entrada, respuesta_completa)
+            VALUES
+              (:id_viaje, :vehiculo, :medicamento, :modelo, :origen,
+               :nivel_riesgo, :titulo_alerta, :mensaje_dashboard, :resumen_operador,
+               :explicacion_tecnica, :pred_estado, :pred_tiempo, :pred_motivo,
+               :causas, :acciones, :auditoria, :confianza,
+               :revision, :danio, :temp_actual, :temp_max,
+               :t_fuera, :datos_entrada, :respuesta_completa)
+        ");
+        $stmt->execute([
+            ':id_viaje'          => $viajeId,
+            ':vehiculo'          => $vehiculo,
+            ':medicamento'       => $medicamento,
+            ':modelo'            => $modelo,
+            ':origen'            => $origen,
+            ':nivel_riesgo'      => $analisis['nivel_riesgo'] ?? 'vigilancia',
+            ':titulo_alerta'     => $analisis['titulo_alerta'] ?? '',
+            ':mensaje_dashboard' => $analisis['mensaje_dashboard'] ?? '',
+            ':resumen_operador'  => $analisis['resumen_operador'] ?? '',
+            ':explicacion_tecnica' => $analisis['explicacion_tecnica'] ?? '',
+            ':pred_estado'       => $pred['estado'] ?? '',
+            ':pred_tiempo'       => $pred['tiempo_estimado'] ?? '',
+            ':pred_motivo'       => $pred['motivo'] ?? '',
+            ':causas'            => json_encode($analisis['posibles_causas'] ?? []),
+            ':acciones'          => json_encode($analisis['acciones_recomendadas'] ?? []),
+            ':auditoria'         => $analisis['resumen_auditoria'] ?? '',
+            ':confianza'         => $analisis['confianza'] ?? 'media',
+            ':revision'          => (int)($analisis['requiere_revision'] ?? 1),
+            ':danio'             => $metricas['indice_danio_termico'] ?? 0,
+            ':temp_actual'       => $metricas['temperatura_actual'] ?? 0,
+            ':temp_max'          => $metricas['temperatura_maxima'] ?? 0,
+            ':t_fuera'           => $metricas['tiempo_fuera_de_rango_minutos'] ?? 0,
+            ':datos_entrada'     => json_encode($datosEntrada),
+            ':respuesta_completa' => json_encode($analisis),
+        ]);
+        return (int)$this->db->lastInsertId();
+    }
+
+    public function getLatest(string $viajeId): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT * FROM analisis_ia_riesgo WHERE id_viaje = ? ORDER BY creado_en DESC LIMIT 1'
+        );
+        $stmt->execute([$viajeId]);
+        $row = $stmt->fetch();
+        if (!$row) return null;
+
+        $row['posibles_causas']       = json_decode($row['posibles_causas']       ?? '[]', true) ?: [];
+        $row['acciones_recomendadas'] = json_decode($row['acciones_recomendadas'] ?? '[]', true) ?: [];
+        $row['datos_entrada']         = json_decode($row['datos_entrada']         ?? '{}', true) ?: [];
+        $row['creado_en_fmt']         = date('Y-m-d H:i:s', (int)$row['creado_en']);
+        return $row;
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  CONTROLADORES IA
+// ══════════════════════════════════════════════════════════════════════════════
+
+/** POST /api/ia/analizar-riesgo */
+function ctrlIaAnalizarRiesgo(): array
+{
+    $body    = jsonBody();
+    $viajeId = trim((string)($body['id_viaje'] ?? $body['id_lote'] ?? $body['vehiculo'] ?? ''));
+
+    if ($viajeId === '') {
+        http_response_code(400);
+        return ['error' => 'Se requiere id_viaje, id_lote o vehiculo'];
+    }
+
+    // Obtener viaje y telemetría
+    $viajeRepo = new ViajeRepo();
+    $viaje     = $viajeRepo->find($viajeId);
+
+    if ($viaje === null) {
+        // Buscar por vehiculo_id si no se encontró como id de viaje
+        $db   = Database::get();
+        $stmt = $db->prepare("SELECT * FROM viajes WHERE vehiculo_id = ? ORDER BY created_at DESC LIMIT 1");
+        $stmt->execute([$viajeId]);
+        $viaje = $stmt->fetch() ?: null;
+    }
+
+    if ($viaje === null) {
+        http_response_code(404);
+        return ['error' => 'Viaje/lote no encontrado', 'buscado' => $viajeId];
+    }
+
+    $telemetria = (new TelemetriaRepo())->getByViaje($viaje['id']);
+
+    if (count($telemetria) < 2) {
+        http_response_code(422);
+        return ['error' => 'Datos insuficientes para análisis (mínimo 2 lecturas)', 'lecturas' => count($telemetria)];
+    }
+
+    // 1. Calcular métricas matemáticas base
+    $metricas = ThermalMetrics::calculate($telemetria, $viaje);
+
+    // 2. Construir JSON de entrada para Ollama
+    $datosEntrada = [
+        'id_viaje'                    => $viaje['id'],
+        'vehiculo'                    => $viaje['vehiculo_id'],
+        'medicamento'                 => $viaje['medicamento'],
+        'origen'                      => $viaje['origen'],
+        'destino'                     => $viaje['destino'],
+        'rango_temperatura_permitido' => ['min' => $viaje['temp_min'], 'max' => $viaje['temp_max']],
+        'sensibilidad'                => 'alta',
+        'total_lecturas'              => count($telemetria),
+        'ultimas_lecturas'            => array_slice(
+            array_map(fn($t) => [
+                'temp'     => $t['temperatura_actual'],
+                'puerta'   => $t['sensor_puerta'],
+                'lat'      => $t['latitud_actual'],
+                'lng'      => $t['longitud_actual'],
+                'offline'  => $t['sincronizado_nube'],
+                'ts'       => $t['timestamp_lectura_real'],
+            ], $telemetria),
+            -10
+        ),
+    ] + $metricas;
+
+    if ($metricas['datos_sincronizados']) {
+        $datosEntrada['observaciones'][] = 'El evento ocurrió durante una zona sin señal.';
+        $datosEntrada['observaciones'][] = 'Los datos fueron reconstruidos después de recuperar conexión.';
+    }
+    if ($metricas['tiempo_fuera_de_rango_minutos'] > 0) {
+        $datosEntrada['observaciones'][] = 'El lote estuvo fuera del rango térmico permitido.';
+    }
+
+    // 3. Llamar a Ollama
+    $modelo  = $body['modelo'] ?? OLLAMA_MODEL;
+    $ollamaR = OllamaClient::analyze($datosEntrada, $modelo);
+
+    $origen  = 'ollama';
+    $warning = null;
+
+    if (!$ollamaR['ok']) {
+        $analisis = OllamaClient::fallback($metricas['estado_calculado_por_sistema'], $ollamaR['error']);
+        $origen   = 'fallback_matematico';
+        $modelo   = null;
+        $warning  = $ollamaR['error'];
+    } else {
+        $analisis = $ollamaR['analisis'];
+        $modelo   = $ollamaR['modelo'];
+    }
+
+    // 4. Guardar en BD
+    (new IaAnalisisRepo())->save(
+        $viaje['id'], $viaje['vehiculo_id'], $viaje['medicamento'],
+        $modelo, $origen, $analisis, $metricas, $datosEntrada
+    );
+
+    $result = [
+        'ok'           => true,
+        'origen'       => $origen,
+        'modelo'       => $modelo,
+        'datos_entrada' => $datosEntrada,
+        'analisis'     => $analisis,
+        'creado_en'    => date('Y-m-d H:i:s'),
+    ];
+
+    if ($warning !== null) $result['warning'] = $warning;
+
+    return $result;
+}
+
+/** GET /api/ia/ultimo-analisis?id_viaje=... */
+function ctrlIaUltimoAnalisis(): array
+{
+    $viajeId = trim((string)($_GET['id_viaje'] ?? $_GET['vehiculo'] ?? ''));
+    if ($viajeId === '') {
+        http_response_code(400);
+        return ['error' => 'Parámetro id_viaje requerido'];
+    }
+
+    $row = (new IaAnalisisRepo())->getLatest($viajeId);
+    if ($row === null) {
+        return ['ok' => false, 'mensaje' => 'No hay análisis IA disponible para este viaje.'];
+    }
+
+    return ['ok' => true, 'analisis' => $row];
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+//  ROUTER
+// ══════════════════════════════════════════════════════════════════════════════
 $method = $_SERVER['REQUEST_METHOD'];
 
 $uri = parse_url(
@@ -712,6 +1277,20 @@ if ($uri === '') {
 }
 
 try {
+    $result = match(true) {
+        $method === 'POST' && $uri === '/telemetria'             => ctrlTelemetriaStore(),
+        $method === 'POST' && $uri === '/telemetria/batch'       => ctrlTelemetriaBatch(),
+        $method === 'GET'  && $uri === '/dashboard'              => ctrlDashboard(),
+        $method === 'GET'  && $uri === '/alertas'                => ctrlAlertas(),
+        $method === 'POST' && $uri === '/viaje'                  => ctrlViajeCreate(),
+        $method === 'GET'  && str_starts_with($uri, '/viaje/')   => ctrlViajeGet(basename($uri)),
+        $method === 'POST' && $uri === '/ia/analizar-riesgo'     => ctrlIaAnalizarRiesgo(),
+        $method === 'GET'  && $uri === '/ia/ultimo-analisis'     => ctrlIaUltimoAnalisis(),
+        default => (function() {
+            http_response_code(404);
+            return ['error' => 'Endpoint no encontrado', 'uri' => $_SERVER['REQUEST_URI']];
+        })()
+    };
 
     /* =========================
        DASHBOARD

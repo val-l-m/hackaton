@@ -31,6 +31,52 @@ a{text-decoration:none;color:inherit;cursor:pointer;}
 button{cursor:pointer;font-family:var(--font);}
 input{font-family:var(--font);}
 
+/* ── NAVEGACIÓN DE VISTAS ────────────────────────────────────────── */
+#view-resumen,#view-ia{display:flex;flex-direction:column;gap:16px;}
+#view-ia .ia-card{margin-top:0;flex:1;}
+#view-ia .ia-card-body{grid-template-columns:1fr 1fr 1fr;min-height:300px;}
+
+/* ── IA PREDICTIVA LOCAL ─────────────────────────────────────────── */
+.ia-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-top:16px;}
+.ia-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.ia-hdr-left{display:flex;align-items:center;gap:10px;}
+.ia-hdr-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:16px;background:rgba(129,140,248,.15);color:var(--indigo);}
+.ia-hdr-title{font-size:14px;font-weight:700;}
+.ia-hdr-sub{font-size:11px;color:var(--muted);}
+.ia-status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);}
+.ia-status-dot.online{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.5);}
+.ia-status-dot.offline{background:var(--red);}
+.ia-status-dot.analyzing{background:var(--amber);animation:blink 1s infinite;}
+.ia-card-body{padding:18px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.ia-risk-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.ia-risk-seguro     {background:rgba(34,197,94,.15); color:#22c55e; border:1px solid rgba(34,197,94,.3);}
+.ia-risk-vigilancia {background:rgba(59,130,246,.15);color:#3b82f6; border:1px solid rgba(59,130,246,.3);}
+.ia-risk-preventivo {background:rgba(245,158,11,.15);color:#f59e0b; border:1px solid rgba(245,158,11,.3);}
+.ia-risk-alto       {background:rgba(249,115,22,.15);color:#f97316; border:1px solid rgba(249,115,22,.3);}
+.ia-risk-critico    {background:rgba(239,68,68,.15); color:#ef4444; border:1px solid rgba(239,68,68,.3);}
+.ia-risk-comprometido{background:rgba(168,85,247,.2);color:#a855f7;border:1px solid rgba(168,85,247,.4);}
+.ia-metric-block{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.ia-metric-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.ia-metric-val{font-size:13px;font-weight:600;color:var(--text);line-height:1.5;}
+.ia-recom-list{list-style:none;padding:0;}
+.ia-recom-list li{font-size:12px;color:var(--sub);padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;}
+.ia-recom-list li:last-child{border-bottom:none;}
+.ia-recom-list li::before{content:"→";color:var(--indigo);flex-shrink:0;}
+.ia-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;gap:10px;color:var(--sub);font-size:13px;}
+.ia-loader-spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--indigo);border-radius:50%;animation:spin 1s linear infinite;}
+.ia-empty{padding:28px;text-align:center;color:var(--muted);font-size:13px;}
+.ia-btn{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;padding:9px 18px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
+.ia-btn:hover{opacity:.9;transform:translateY(-1px);}
+.ia-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.ia-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);}
+/* borde coloreado según riesgo */
+.ia-card[data-riesgo="seguro"]      {border-left:3px solid #22c55e;}
+.ia-card[data-riesgo="vigilancia"]  {border-left:3px solid #3b82f6;}
+.ia-card[data-riesgo="preventivo"]  {border-left:3px solid #f59e0b;}
+.ia-card[data-riesgo="alto"]        {border-left:3px solid #f97316;}
+.ia-card[data-riesgo="critico"]     {border-left:3px solid #ef4444;}
+.ia-card[data-riesgo="comprometido"]{border-left:3px solid #a855f7;}
+
 /* SHARED */
 .btn-primary{background:var(--blue-grad);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-weight:600;font-size:14px;transition:all .2s;}
 .btn-primary:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 8px 20px rgba(37,99,235,.35);}
@@ -233,7 +279,7 @@ footer p{font-size:12px;color:var(--muted);}
 .sf-val.green{color:var(--green);}
 
 /* MAIN */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
 
 /* TOPBAR */
 .topbar{
@@ -274,7 +320,7 @@ footer p{font-size:12px;color:var(--muted);}
 .tb-urole{font-size:10px;color:var(--sub);}
 
 /* SCROLLABLE CONTENT */
-.dash-body{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px;}
+.dash-body{flex:1;overflow-y:auto;padding:18px 20px 32px;display:flex;flex-direction:column;gap:16px;min-height:0;}
 
 /* STAT CARDS */
 .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
@@ -597,17 +643,18 @@ footer p{font-size:12px;color:var(--muted);}
       </div>
     </div>
     <nav class="sb-nav">
-      <div class="nav-item active" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-grid-fill"></i><span>Resumen</span></div>
-      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-truck"></i><span>Viajes Activos</span></div>
-      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-map"></i><span>Mapa en Vivo</span></div>
-      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-bell"></i><span>Alertas</span><span class="nav-badge badge" id="nav-alert-badge">0</span></div>
-      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-clock-history"></i><span>Historial de Viajes</span></div>
-      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-capsule"></i><span>Lotes y Medicamentos</span></div>
-      <div class="nav-item" data-view="vehiculos" onclick="showDashView('vehiculos', this)"><i class="bi bi-truck-front"></i><span>Vehículos</span></div>
-      <div class="nav-item" data-view="usuarios" onclick="showDashView('usuarios', this)"><i class="bi bi-people"></i><span>Usuarios</span></div>
-      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-wifi-off"></i><span>Zonas sin Señal</span></div>
-      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-thermometer-half"></i><span>Reglas de Temperatura</span></div>
-      <div class="nav-item" data-view="resumen" onclick="showDashView('resumen', this)"><i class="bi bi-gear"></i><span>Configuración</span></div>
+      <div class="nav-item active" id="nav-resumen" onclick="navPage('resumen')"><i class="bi bi-grid-fill"></i><span>Resumen</span></div>
+      <div class="nav-item"><i class="bi bi-truck"></i><span>Viajes Activos</span></div>
+      <div class="nav-item"><i class="bi bi-map"></i><span>Mapa en Vivo</span></div>
+      <div class="nav-item" id="nav-ia" onclick="navPage('ia')" style="background:rgba(129,140,248,.08);border-left:3px solid var(--indigo);margin-bottom:4px"><i class="bi bi-cpu" style="color:var(--indigo)"></i><span style="color:var(--indigo);font-weight:600">IA Predictiva</span><span class="nav-badge badge" style="background:var(--indigo)">NEW</span></div>
+      <div class="nav-item"><i class="bi bi-bell"></i><span>Alertas</span><span class="nav-badge badge" id="nav-alert-badge">0</span></div>
+      <div class="nav-item"><i class="bi bi-clock-history"></i><span>Historial de Viajes</span></div>
+      <div class="nav-item"><i class="bi bi-capsule"></i><span>Lotes y Medicamentos</span></div>
+      <div class="nav-item"><i class="bi bi-truck-front"></i><span>Vehículos</span></div>
+      <div class="nav-item"><i class="bi bi-people"></i><span>Usuarios</span></div>
+      <div class="nav-item"><i class="bi bi-wifi-off"></i><span>Zonas sin Señal</span></div>
+      <div class="nav-item"><i class="bi bi-thermometer-half"></i><span>Reglas de Temperatura</span></div>
+      <div class="nav-item"><i class="bi bi-gear"></i><span>Configuración</span></div>
     </nav>
     <div class="sb-footer">
       <div class="sf-row">
@@ -647,6 +694,8 @@ footer p{font-size:12px;color:var(--muted);}
     </div>
 
     <div class="dash-body">
+      <!-- ══ VISTA RESUMEN ══ -->
+      <div id="view-resumen">
       <!-- STATS — Bootstrap 5.3 row/col grid -->
       <div class="stats-row view-resumen">
         <div class="sc">
@@ -909,6 +958,44 @@ footer p{font-size:12px;color:var(--muted);}
           </div>
         </div>
       </section>
+      </div><!-- /view-resumen -->
+
+      <!-- ══ VISTA IA PREDICTIVA ══ -->
+      <div id="view-ia" style="display:none">
+      <div class="ia-card" id="ia-card">
+        <div class="ia-card-hdr">
+          <div class="ia-hdr-left">
+            <div class="ia-hdr-icon"><i class="bi bi-cpu"></i></div>
+            <div>
+              <div class="ia-hdr-title">IA Predictiva Local</div>
+              <div class="ia-hdr-sub" id="ia-hdr-sub">Análisis de riesgo térmico con Ollama</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)">
+              <div class="ia-status-dot" id="ia-dot"></div>
+              <span id="ia-status-txt">Sin análisis</span>
+            </div>
+            <button class="ia-btn" id="ia-btn" onclick="iaAnalizar()">
+              <i class="bi bi-play-fill"></i> Analizar con IA
+            </button>
+          </div>
+        </div>
+
+        <div id="ia-body">
+          <div class="ia-empty" id="ia-empty">
+            <i class="bi bi-cpu" style="font-size:28px;display:block;margin-bottom:8px;color:var(--indigo)"></i>
+            <div style="font-weight:600;margin-bottom:4px">Sin análisis disponible</div>
+            <div style="font-size:11px">Presiona "Analizar con IA" para evaluar el riesgo térmico del lote con Ollama local.</div>
+          </div>
+        </div>
+
+        <div class="ia-footer" id="ia-footer" style="display:none">
+          <span id="ia-footer-origen"></span>
+          <span id="ia-footer-time"></span>
+        </div>
+      </div>
+      </div><!-- /view-ia -->
     </div>
   </div>
 </div>
@@ -981,7 +1068,7 @@ function doLogin(){
     document.getElementById('page-login').style.display='none';
     document.getElementById('page-dash').style.display='flex';
     document.getElementById('rfab').style.display='flex';
-    setTimeout(()=>{initDashMap();initCharts();startLoop();},150);
+    setTimeout(()=>{initDashMap();initCharts();startLoop();iaCargarUltimo();},150);
   } else {
     err.style.display='block';
     document.getElementById('l-user').style.borderColor='var(--red)';
@@ -1342,6 +1429,11 @@ function finishSync(){
     addAlertItem('Hoy, '+new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}),
       'Vehículo V-102','crit','Temperatura crítica','Detectada retroactivamente','ab-red',curTemp.toFixed(1)+'°C por '+Math.floor(queueCount/3||5)+' min');
   }
+  // Auto-trigger IA después de sincronización
+  setTimeout(()=>{
+    iaSetStatus('analyzing','Analizando datos post-sync...');
+    iaAnalizar();
+  }, 1500);
 }
 
 function addAlertItem(time,vehicle,cls,type,med,badgeCls,badgeText){
@@ -1545,6 +1637,192 @@ function countUp(id,target){
   const el=document.getElementById(id);let c=0;
   const iv=setInterval(()=>{c=Math.min(c+Math.ceil(target/50),target);el.textContent=c;if(c>=target)clearInterval(iv);},20);
 }
+
+// ══════════════════════════════════════════════════════════
+// ── IA PREDICTIVA LOCAL ────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// ── NAVEGACIÓN DE VISTAS ─────────────────────────────────
+function navPage(page){
+  document.getElementById('view-resumen').style.display = page==='resumen' ? 'flex' : 'none';
+  document.getElementById('view-ia').style.display      = page==='ia'      ? 'flex' : 'none';
+  document.getElementById('nav-resumen').classList.toggle('active', page==='resumen');
+  document.getElementById('nav-ia').classList.toggle('active',      page==='ia');
+  document.querySelector('.topbar h1').textContent = page==='ia' ? 'IA Predictiva Local' : 'Resumen General';
+  document.querySelector('.topbar p').textContent  = page==='ia'
+    ? 'Análisis de riesgo térmico con Ollama — gemma3:4b'
+    : 'Monitoreo en tiempo real de la distribución de insumos médicos';
+  if(page==='ia') iaCargarUltimo();
+}
+
+const IA_VIAJE_ID = 'VJ-2026-047';
+const IA_COLORES  = {
+  seguro:'#22c55e', vigilancia:'#3b82f6', preventivo:'#f59e0b',
+  alto:'#f97316',   critico:'#ef4444',    comprometido:'#a855f7'
+};
+
+function iaAnalizar(){
+  const btn = document.getElementById('ia-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Analizando...';
+  iaSetStatus('analyzing','Analizando con Ollama...');
+  iaShowLoader();
+
+  fetch('/api/ia/analizar-riesgo', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({id_viaje: IA_VIAJE_ID})
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.error) { iaShowError(d.error); return; }
+    iaRenderResult(d);
+    // Trigger auto-análisis si riesgo alto después de sincronizar
+    if(['critico','comprometido','alto'].includes(d.analisis?.nivel_riesgo)){
+      document.getElementById('sc-alerts').style.color='var(--red)';
+    }
+  })
+  .catch(e => iaShowError('Error de conexión: ' + e.message))
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Re-analizar';
+  });
+}
+
+function iaCargarUltimo(){
+  fetch('/api/ia/ultimo-analisis?id_viaje=' + IA_VIAJE_ID)
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok && d.analisis) iaRenderResult({
+        analisis: {
+          nivel_riesgo:         d.analisis.nivel_riesgo,
+          titulo_alerta:        d.analisis.titulo_alerta,
+          mensaje_dashboard:    d.analisis.mensaje_dashboard,
+          resumen_operador:     d.analisis.resumen_operador,
+          prediccion:           {estado: d.analisis.prediccion_estado, tiempo_estimado: d.analisis.prediccion_tiempo, motivo: d.analisis.prediccion_motivo},
+          posibles_causas:      d.analisis.posibles_causas,
+          acciones_recomendadas: d.analisis.acciones_recomendadas,
+          confianza:            d.analisis.confianza,
+          requiere_revision:    d.analisis.requiere_revision,
+        },
+        origen:    d.analisis.origen,
+        modelo:    d.analisis.modelo_ollama,
+        creado_en: d.analisis.creado_en_fmt
+      });
+    })
+    .catch(() => {});
+}
+
+function iaRenderResult(d){
+  const a      = d.analisis || {};
+  const nivel  = a.nivel_riesgo || 'vigilancia';
+  const color  = IA_COLORES[nivel] || '#94a3b8';
+  const pred   = a.prediccion   || {};
+  const recom  = a.acciones_recomendadas || [];
+
+  // Borde coloreado de la tarjeta
+  document.getElementById('ia-card').setAttribute('data-riesgo', nivel);
+
+  // Estado dot
+  const dot = document.getElementById('ia-dot');
+  dot.className = 'ia-status-dot online';
+  dot.style.background = color;
+  dot.style.boxShadow  = `0 0 6px ${color}88`;
+
+  iaSetStatus('online', d.origen === 'fallback_matematico'
+    ? 'Motor matemático base (Ollama no disponible)'
+    : `Modelo: ${d.modelo || 'ollama'}`);
+
+  // Subtítulo header
+  document.getElementById('ia-hdr-sub').textContent =
+    a.titulo_alerta || 'Análisis completado';
+
+  // Cuerpo principal
+  document.getElementById('ia-body').innerHTML = `
+    <div class="ia-card-body">
+
+      <!-- Columna 1: Nivel de riesgo + predicción -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="ia-metric-block">
+          <div class="ia-metric-lbl">Nivel de Riesgo</div>
+          <div style="margin-bottom:8px">
+            <span class="ia-risk-badge ia-risk-${nivel}">
+              <i class="bi bi-shield-exclamation"></i>${nivel.toUpperCase()}
+            </span>
+          </div>
+          <div class="ia-metric-lbl">Confianza</div>
+          <div class="ia-metric-val">${a.confianza || '—'}</div>
+        </div>
+        <div class="ia-metric-block">
+          <div class="ia-metric-lbl">Predicción</div>
+          <div class="ia-metric-val" style="color:${color};font-size:12px">${pred.estado || '—'}</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:4px">${pred.tiempo_estimado || ''}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">${pred.motivo || ''}</div>
+        </div>
+      </div>
+
+      <!-- Columna 2: Mensaje + resumen operador -->
+      <div class="ia-metric-block" style="display:flex;flex-direction:column;gap:10px">
+        <div>
+          <div class="ia-metric-lbl">Diagnóstico</div>
+          <div class="ia-metric-val" style="font-size:12px;line-height:1.6">${a.mensaje_dashboard || '—'}</div>
+        </div>
+        <div>
+          <div class="ia-metric-lbl">Resumen para operador</div>
+          <div style="font-size:11px;color:var(--sub);line-height:1.6">${a.resumen_operador || '—'}</div>
+        </div>
+        ${a.requiere_revision ? `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--amber);margin-top:4px"><i class="bi bi-exclamation-triangle"></i>Requiere revisión antes de entrega</div>` : ''}
+      </div>
+
+      <!-- Columna 3: Recomendaciones -->
+      <div class="ia-metric-block">
+        <div class="ia-metric-lbl">Acciones recomendadas</div>
+        <ul class="ia-recom-list">
+          ${recom.length ? recom.slice(0,5).map(r=>`<li>${r}</li>`).join('') : '<li>Sin recomendaciones</li>'}
+        </ul>
+      </div>
+
+    </div>`;
+
+  // Footer
+  const footer = document.getElementById('ia-footer');
+  footer.style.display = 'flex';
+  document.getElementById('ia-footer-origen').innerHTML =
+    d.origen === 'fallback_matematico'
+      ? '<span style="color:var(--amber)"><i class="bi bi-exclamation-circle"></i> IA no disponible — motor matemático base</span>'
+      : `<span style="color:var(--green)"><i class="bi bi-check-circle"></i> Ollama · ${d.modelo || ''}</span>`;
+  document.getElementById('ia-footer-time').textContent = 'Último análisis: ' + (d.creado_en || new Date().toLocaleString('es-MX'));
+}
+
+function iaShowLoader(){
+  document.getElementById('ia-body').innerHTML = `
+    <div class="ia-loader">
+      <div class="ia-loader-spin"></div>
+      <div>Analizando telemetría con Ollama…</div>
+      <div style="font-size:11px;color:var(--muted)">Esto puede tardar hasta 35 segundos</div>
+    </div>`;
+}
+
+function iaShowError(msg){
+  iaSetStatus('offline','Error al analizar');
+  document.getElementById('ia-body').innerHTML = `
+    <div class="ia-empty">
+      <i class="bi bi-exclamation-triangle" style="font-size:24px;color:var(--amber);display:block;margin-bottom:8px"></i>
+      <div style="font-weight:600;margin-bottom:4px">Error en el análisis IA</div>
+      <div style="font-size:11px">${msg}</div>
+      <div style="font-size:11px;margin-top:8px;color:var(--muted)">Verifica que Ollama esté corriendo:<br><code style="color:var(--blue)">ollama serve</code> y luego <code style="color:var(--blue)">ollama run llama3.2</code></div>
+    </div>`;
+}
+
+function iaSetStatus(state, txt){
+  const dot = document.getElementById('ia-dot');
+  dot.className = 'ia-status-dot ' + state;
+  dot.style.background = '';
+  dot.style.boxShadow  = '';
+  document.getElementById('ia-status-txt').textContent = txt;
+}
+
+// Disparar IA automáticamente cuando ocurre un batch sync
+const _origFinishSync = typeof finishSync === 'function' ? finishSync : null;
 
 // ── INIT ─────────────────────────────────────────────────
 window.addEventListener('load',()=>{

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\christopher\\\\Downloads\\\\hackatec\\\\hackaton\" -Recurse -Force | Select-Object -Property FullName, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"DIR\"}else{\"FILE\"}}} | Sort-Object FullName)",
+      "Bash(Get-Item \"c:\\\\Users\\\\christopher\\\\Downloads\\\\hackatec\\\\hackaton\\\\tinkercad\\\\sensor_frioseguro.ino\")",
+      "Bash(Select-Object Name, Length)",
+      "Bash(php --version)",
+      "PowerShell(php --version 2>&1)",
+      "PowerShell(python --version 2>&1)",
+      "PowerShell(pip show requests 2>&1)",
+      "PowerShell($ini = \"C:\\\\Users\\\\christopher\\\\scoop\\\\apps\\\\php\\\\current\\\\php.ini\"; \\(Get-Content $ini\\) -replace 'allow_url_fopen = Off', 'allow_url_fopen = On' | Set-Content $ini; Select-String \"allow_url_fopen\" $ini)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(python3 -)",
+      "Bash(python -)",
+      "Bash(git rebase *)",
+      "Bash(GIT_EDITOR=true git rebase --continue)"
+    ]
+  }
+}

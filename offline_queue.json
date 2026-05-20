@@ -1,1 +1,695 @@
-[]
+[
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.12,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939837,
+    "longitud_actual": -99.479631,
+    "timestamp_lectura_real": 1779285554
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.14,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939785,
+    "longitud_actual": -99.480671,
+    "timestamp_lectura_real": 1779285559
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.06,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940169,
+    "longitud_actual": -99.480647,
+    "timestamp_lectura_real": 1779285564
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.95,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940104,
+    "longitud_actual": -99.479827,
+    "timestamp_lectura_real": 1779285569
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.01,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939632,
+    "longitud_actual": -99.480666,
+    "timestamp_lectura_real": 1779285574
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.15,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939271,
+    "longitud_actual": -99.479317,
+    "timestamp_lectura_real": 1779285579
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.1,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940036,
+    "longitud_actual": -99.480502,
+    "timestamp_lectura_real": 1779285584
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.96,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939907,
+    "longitud_actual": -99.480682,
+    "timestamp_lectura_real": 1779285589
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.13,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940553,
+    "longitud_actual": -99.480615,
+    "timestamp_lectura_real": 1779285594
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939504,
+    "longitud_actual": -99.479477,
+    "timestamp_lectura_real": 1779285599
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940015,
+    "longitud_actual": -99.479433,
+    "timestamp_lectura_real": 1779285604
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.17,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940742,
+    "longitud_actual": -99.479761,
+    "timestamp_lectura_real": 1779285609
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.11,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939424,
+    "longitud_actual": -99.47973,
+    "timestamp_lectura_real": 1779285614
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939674,
+    "longitud_actual": -99.479276,
+    "timestamp_lectura_real": 1779285619
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.11,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.93933,
+    "longitud_actual": -99.480791,
+    "timestamp_lectura_real": 1779285624
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.07,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.93998,
+    "longitud_actual": -99.479427,
+    "timestamp_lectura_real": 1779285629
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.98,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940706,
+    "longitud_actual": -99.479421,
+    "timestamp_lectura_real": 1779285634
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.08,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940098,
+    "longitud_actual": -99.48,
+    "timestamp_lectura_real": 1779285639
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.1,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940283,
+    "longitud_actual": -99.480519,
+    "timestamp_lectura_real": 1779285644
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.11,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939677,
+    "longitud_actual": -99.479963,
+    "timestamp_lectura_real": 1779285649
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.07,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940163,
+    "longitud_actual": -99.479852,
+    "timestamp_lectura_real": 1779285654
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.03,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939741,
+    "longitud_actual": -99.479496,
+    "timestamp_lectura_real": 1779285659
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.16,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940027,
+    "longitud_actual": -99.479321,
+    "timestamp_lectura_real": 1779285665
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939979,
+    "longitud_actual": -99.480775,
+    "timestamp_lectura_real": 1779285670
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.11,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939779,
+    "longitud_actual": -99.479805,
+    "timestamp_lectura_real": 1779285675
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.15,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940406,
+    "longitud_actual": -99.480581,
+    "timestamp_lectura_real": 1779285680
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.16,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939518,
+    "longitud_actual": -99.480562,
+    "timestamp_lectura_real": 1779285685
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.0,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939361,
+    "longitud_actual": -99.480195,
+    "timestamp_lectura_real": 1779285690
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.87,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939775,
+    "longitud_actual": -99.479826,
+    "timestamp_lectura_real": 1779285695
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.84,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940755,
+    "longitud_actual": -99.479819,
+    "timestamp_lectura_real": 1779285700
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.9,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940737,
+    "longitud_actual": -99.480638,
+    "timestamp_lectura_real": 1779285705
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.04,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939484,
+    "longitud_actual": -99.480326,
+    "timestamp_lectura_real": 1779285710
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.86,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.93965,
+    "longitud_actual": -99.47931,
+    "timestamp_lectura_real": 1779285715
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.76,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940467,
+    "longitud_actual": -99.479874,
+    "timestamp_lectura_real": 1779285720
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.67,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940481,
+    "longitud_actual": -99.479372,
+    "timestamp_lectura_real": 1779285725
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.52,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939446,
+    "longitud_actual": -99.479975,
+    "timestamp_lectura_real": 1779285730
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.39,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940346,
+    "longitud_actual": -99.479764,
+    "timestamp_lectura_real": 1779285735
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.39,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940215,
+    "longitud_actual": -99.480445,
+    "timestamp_lectura_real": 1779285740
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.5,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940331,
+    "longitud_actual": -99.480538,
+    "timestamp_lectura_real": 1779285745
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.65,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940169,
+    "longitud_actual": -99.480495,
+    "timestamp_lectura_real": 1779285750
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.67,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939579,
+    "longitud_actual": -99.479474,
+    "timestamp_lectura_real": 1779285755
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.73,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940722,
+    "longitud_actual": -99.480019,
+    "timestamp_lectura_real": 1779285760
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.78,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940583,
+    "longitud_actual": -99.479301,
+    "timestamp_lectura_real": 1779285765
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.95,
+    "sensor_puerta": 1,
+    "latitud_actual": 18.939631,
+    "longitud_actual": -99.479884,
+    "timestamp_lectura_real": 1779285770
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939541,
+    "longitud_actual": -99.480127,
+    "timestamp_lectura_real": 1779285776
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940564,
+    "longitud_actual": -99.479303,
+    "timestamp_lectura_real": 1779285781
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939778,
+    "longitud_actual": -99.480174,
+    "timestamp_lectura_real": 1779285786
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939309,
+    "longitud_actual": -99.480153,
+    "timestamp_lectura_real": 1779285791
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.2,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939207,
+    "longitud_actual": -99.479943,
+    "timestamp_lectura_real": 1779285796
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 7.03,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939772,
+    "longitud_actual": -99.479937,
+    "timestamp_lectura_real": 1779285801
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.95,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940606,
+    "longitud_actual": -99.479896,
+    "timestamp_lectura_real": 1779285806
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.77,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.93921,
+    "longitud_actual": -99.480416,
+    "timestamp_lectura_real": 1779285811
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.71,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940284,
+    "longitud_actual": -99.48014,
+    "timestamp_lectura_real": 1779285816
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.56,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939835,
+    "longitud_actual": -99.479686,
+    "timestamp_lectura_real": 1779285821
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.59,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939261,
+    "longitud_actual": -99.480012,
+    "timestamp_lectura_real": 1779285826
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.44,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940748,
+    "longitud_actual": -99.479857,
+    "timestamp_lectura_real": 1779285831
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.57,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940095,
+    "longitud_actual": -99.479828,
+    "timestamp_lectura_real": 1779285836
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.54,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940621,
+    "longitud_actual": -99.479401,
+    "timestamp_lectura_real": 1779285841
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.36,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939576,
+    "longitud_actual": -99.479636,
+    "timestamp_lectura_real": 1779285846
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.47,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940153,
+    "longitud_actual": -99.479253,
+    "timestamp_lectura_real": 1779285851
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.49,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940439,
+    "longitud_actual": -99.479228,
+    "timestamp_lectura_real": 1779285856
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.6,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939491,
+    "longitud_actual": -99.479896,
+    "timestamp_lectura_real": 1779285861
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.54,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939353,
+    "longitud_actual": -99.48069,
+    "timestamp_lectura_real": 1779285866
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.56,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939941,
+    "longitud_actual": -99.479355,
+    "timestamp_lectura_real": 1779285871
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.5,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940625,
+    "longitud_actual": -99.4805,
+    "timestamp_lectura_real": 1779285876
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.43,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939359,
+    "longitud_actual": -99.480104,
+    "timestamp_lectura_real": 1779285881
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.27,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.94033,
+    "longitud_actual": -99.480086,
+    "timestamp_lectura_real": 1779285886
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.24,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939644,
+    "longitud_actual": -99.480444,
+    "timestamp_lectura_real": 1779285892
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.41,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.940739,
+    "longitud_actual": -99.480332,
+    "timestamp_lectura_real": 1779285897
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.28,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939832,
+    "longitud_actual": -99.480588,
+    "timestamp_lectura_real": 1779285902
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.41,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939335,
+    "longitud_actual": -99.480542,
+    "timestamp_lectura_real": 1779285907
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.51,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939314,
+    "longitud_actual": -99.479512,
+    "timestamp_lectura_real": 1779285912
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.64,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939951,
+    "longitud_actual": -99.480311,
+    "timestamp_lectura_real": 1779285917
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.52,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939302,
+    "longitud_actual": -99.479453,
+    "timestamp_lectura_real": 1779285922
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.4,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939616,
+    "longitud_actual": -99.47958,
+    "timestamp_lectura_real": 1779285927
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.57,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939954,
+    "longitud_actual": -99.48064,
+    "timestamp_lectura_real": 1779285932
+  },
+  {
+    "viaje_id": "VJ-2026-047",
+    "vehiculo_id": "V-102",
+    "temperatura_actual": 6.58,
+    "sensor_puerta": 0,
+    "latitud_actual": 18.939642,
+    "longitud_actual": -99.479249,
+    "timestamp_lectura_real": 1779285937
+  }
+]
