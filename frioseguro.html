@@ -1176,18 +1176,16 @@ footer p{font-size:12px;color:var(--muted);}
           <!-- Apariencia -->
           <div class="cfg-section">
             <div class="cfg-section-title"><i class="bi bi-palette"></i>Apariencia</div>
-            <div class="cfg-row single" style="margin-bottom:0">
-              <div class="cfg-field">
-                <label>Tema</label>
-                <div class="cfg-theme-opt">
-                  <div class="cfg-theme-card" id="theme-dark" onclick="setTheme('dark')">
-                    <i class="bi bi-moon-stars-fill" style="color:var(--indigo)"></i>
-                    <span>Oscuro</span>
-                  </div>
-                  <div class="cfg-theme-card" id="theme-light" onclick="setTheme('light')">
-                    <i class="bi bi-sun-fill" style="color:var(--amber)"></i>
-                    <span>Claro</span>
-                  </div>
+            <div class="cfg-field" style="margin-bottom:0">
+              <label>Tema</label>
+              <div class="cfg-theme-opt">
+                <div class="cfg-theme-card" id="theme-dark" onclick="setTheme('dark')">
+                  <i class="bi bi-moon-stars-fill" style="color:var(--indigo)"></i>
+                  <span>Oscuro</span>
+                </div>
+                <div class="cfg-theme-card" id="theme-light" onclick="setTheme('light')">
+                  <i class="bi bi-sun-fill" style="color:var(--amber)"></i>
+                  <span>Claro</span>
                 </div>
               </div>
             </div>
@@ -1197,10 +1195,10 @@ footer p{font-size:12px;color:var(--muted);}
           <div class="cfg-section">
             <div class="cfg-section-title"><i class="bi bi-person-circle"></i>Perfil y Sesión</div>
             <div class="cfg-profile-box">
-              <div class="cfg-avatar" id="cfg-avatar-letter">A</div>
+              <div class="cfg-avatar">A</div>
               <div>
-                <div style="font-weight:700;font-size:15px" id="cfg-usuario-nombre">Administrador</div>
-                <div style="font-size:12px;color:var(--sub)" id="cfg-usuario-rol">Rol: admin</div>
+                <div style="font-weight:700;font-size:15px">Administrador</div>
+                <div style="font-size:12px;color:var(--sub)">Rol: admin</div>
               </div>
             </div>
             <div class="cfg-btn-row">
@@ -1210,58 +1208,52 @@ footer p{font-size:12px;color:var(--muted);}
             </div>
           </div>
 
-          <!-- Notificaciones -->
+          <!-- Notificaciones: SMS -->
           <div class="cfg-section">
-            <div class="cfg-section-title"><i class="bi bi-bell"></i>Notificaciones de Alerta</div>
-
-            <div class="cfg-toggle-row">
-              <div>
-                <div class="cfg-toggle-label"><i class="bi bi-envelope" style="color:var(--blue);margin-right:6px"></i>Alertas por correo electrónico</div>
-                <div class="cfg-toggle-sub">Se envía un email cuando hay anomalías de temperatura</div>
-              </div>
-              <label class="cfg-toggle">
-                <input type="checkbox" id="cfg-notif-email-activo" onchange="cfgToggle('notif_email_activo',this.checked)">
-                <span class="cfg-toggle-slider"></span>
-              </label>
-            </div>
-
-            <div class="cfg-row" style="margin-top:14px">
-              <div class="cfg-field">
-                <label>Correo destino de alertas</label>
-                <input type="email" id="cfg-notif-email" placeholder="responsable@empresa.com">
-              </div>
-            </div>
-
-            <div class="cfg-toggle-row">
-              <div>
-                <div class="cfg-toggle-label"><i class="bi bi-whatsapp" style="color:#25d366;margin-right:6px"></i>Alertas por WhatsApp</div>
-                <div class="cfg-toggle-sub">Requiere registrarse en CallMeBot (gratis)</div>
-              </div>
-              <label class="cfg-toggle">
-                <input type="checkbox" id="cfg-notif-wa-activo" onchange="cfgToggle('notif_whatsapp_activo',this.checked)">
-                <span class="cfg-toggle-slider"></span>
-              </label>
-            </div>
-
-            <div class="cfg-row" style="margin-top:14px">
-              <div class="cfg-field">
-                <label>Número WhatsApp (con código de país)</label>
-                <input type="text" id="cfg-notif-wa" placeholder="+525512345678">
-              </div>
-              <div class="cfg-field">
-                <label>API Key de CallMeBot</label>
-                <input type="text" id="cfg-callmebot-key" placeholder="123456">
-              </div>
-            </div>
-            <p class="cfg-note">
-              <i class="bi bi-info-circle"></i>
-              Para activar WhatsApp: guarda el número <strong>+34 644 59 60 79</strong> como "CallMeBot" en tus contactos,
-              envíale el mensaje <strong>"I allow callmebot to send me messages"</strong> y recibirás tu API key en unos segundos.
+            <div class="cfg-section-title"><i class="bi bi-bell-fill"></i>Alertas SMS y WhatsApp</div>
+            <p style="font-size:12px;color:var(--sub);margin-bottom:16px">
+              Ingresa el número de teléfono que recibirá las alertas. El sistema enviará automáticamente un mensaje al detectar anomalías de temperatura, puerta abierta u otras alertas críticas.
             </p>
 
+            <!-- SMS -->
+            <div class="cfg-toggle-row">
+              <div>
+                <div class="cfg-toggle-label"><i class="bi bi-chat-text-fill" style="color:var(--blue);margin-right:6px"></i>Alertas por SMS</div>
+                <div class="cfg-toggle-sub">Mensaje de texto al número configurado</div>
+              </div>
+              <label class="cfg-toggle">
+                <input type="checkbox" id="cfg-sms-activo" onchange="cfgToggle('sms_activo',this.checked)">
+                <span class="cfg-toggle-slider"></span>
+              </label>
+            </div>
+            <div class="cfg-row single" style="margin-top:10px">
+              <div class="cfg-field">
+                <label>Número celular para SMS (con código de país)</label>
+                <input type="tel" id="cfg-sms-num" placeholder="+525512345678">
+              </div>
+            </div>
+
+            <!-- WhatsApp -->
+            <div class="cfg-toggle-row" style="margin-top:6px">
+              <div>
+                <div class="cfg-toggle-label"><i class="bi bi-whatsapp" style="color:#25d366;margin-right:6px"></i>Alertas por WhatsApp</div>
+                <div class="cfg-toggle-sub">Mensaje de WhatsApp al número configurado</div>
+              </div>
+              <label class="cfg-toggle">
+                <input type="checkbox" id="cfg-wa-activo" onchange="cfgToggle('wa_activo',this.checked)">
+                <span class="cfg-toggle-slider"></span>
+              </label>
+            </div>
+            <div class="cfg-row single" style="margin-top:10px">
+              <div class="cfg-field">
+                <label>Número de WhatsApp (con código de país)</label>
+                <input type="tel" id="cfg-wa-num" placeholder="+525512345678">
+              </div>
+            </div>
+
             <div class="cfg-btn-row">
-              <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestEmail()">
-                <i class="bi bi-envelope-check"></i> Probar correo
+              <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestSMS()">
+                <i class="bi bi-chat-text"></i> Probar SMS
               </button>
               <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestWA()">
                 <i class="bi bi-whatsapp"></i> Probar WhatsApp
@@ -1273,40 +1265,49 @@ footer p{font-size:12px;color:var(--muted);}
             <div class="cfg-msg" id="cfg-msg-notif"></div>
           </div>
 
-          <!-- SMTP -->
+          <!-- Credenciales Twilio (sistema) -->
           <div class="cfg-section">
-            <div class="cfg-section-title"><i class="bi bi-server"></i>Configuración SMTP (correo)</div>
-            <div class="cfg-row">
-              <div class="cfg-field">
-                <label>Servidor SMTP</label>
-                <input type="text" id="cfg-smtp-host" placeholder="smtp.gmail.com">
-              </div>
-              <div class="cfg-field">
-                <label>Puerto</label>
-                <input type="number" id="cfg-smtp-port" placeholder="587">
-              </div>
+            <div class="cfg-section-title" style="cursor:pointer" onclick="toggleTwilio()">
+              <i class="bi bi-gear-wide-connected"></i>Configuración del Proveedor (Twilio)
+              <i class="bi bi-chevron-down" id="twilio-chevron" style="margin-left:auto;font-size:12px"></i>
             </div>
-            <div class="cfg-row">
-              <div class="cfg-field">
-                <label>Usuario (correo de envío)</label>
-                <input type="email" id="cfg-smtp-user" placeholder="tuapp@gmail.com">
+            <div id="twilio-panel" style="display:none">
+              <p class="cfg-note" style="margin-bottom:14px">
+                <i class="bi bi-info-circle"></i>
+                Crea una cuenta gratuita en <strong>twilio.com</strong>. Con el trial gratuito obtienes crédito suficiente para demos.
+                Necesitas: Account SID, Auth Token y un número Twilio (se asigna gratis al registrarte).
+              </p>
+              <div class="cfg-row">
+                <div class="cfg-field">
+                  <label>Account SID</label>
+                  <input type="text" id="cfg-twilio-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                </div>
+                <div class="cfg-field">
+                  <label>Auth Token</label>
+                  <input type="password" id="cfg-twilio-token" placeholder="••••••••••••••••••••••••••••••••">
+                </div>
               </div>
-              <div class="cfg-field">
-                <label>Contraseña de aplicación</label>
-                <input type="password" id="cfg-smtp-pass" placeholder="••••••••••••">
+              <div class="cfg-row">
+                <div class="cfg-field">
+                  <label>Número Twilio para SMS</label>
+                  <input type="text" id="cfg-twilio-sms-from" placeholder="+15005550006">
+                </div>
+                <div class="cfg-field">
+                  <label>Número Twilio para WhatsApp</label>
+                  <input type="text" id="cfg-twilio-wa-from" placeholder="+14155238886">
+                </div>
               </div>
+              <p class="cfg-note">
+                <i class="bi bi-whatsapp" style="color:#25d366"></i>
+                Para WhatsApp: activa el <strong>Sandbox de WhatsApp</strong> en Twilio Console → Messaging → Try it out → Send a WhatsApp message. El número sandbox es <strong>+1 415 523 8886</strong>.
+              </p>
+              <div class="cfg-btn-row">
+                <button class="cfg-btn cfg-btn-primary" onclick="cfgGuardarTwilio()">
+                  <i class="bi bi-floppy"></i> Guardar credenciales
+                </button>
+              </div>
+              <div class="cfg-msg" id="cfg-msg-twilio"></div>
             </div>
-            <p class="cfg-note">
-              <i class="bi bi-info-circle"></i>
-              Con Gmail usa una <strong>Contraseña de aplicación</strong> (no tu contraseña normal).
-              Ve a: cuenta Google → Seguridad → Verificación en 2 pasos → Contraseñas de aplicaciones.
-            </p>
-            <div class="cfg-btn-row">
-              <button class="cfg-btn cfg-btn-primary" onclick="cfgGuardarSMTP()">
-                <i class="bi bi-floppy"></i> Guardar SMTP
-              </button>
-            </div>
-            <div class="cfg-msg" id="cfg-msg-smtp"></div>
           </div>
 
         </div><!-- /cfg-wrap -->
@@ -2382,19 +2383,28 @@ function setTheme(t) {
 }
 
 // ── CONFIGURACIÓN ────────────────────────────────────────────────────
+function toggleTwilio() {
+  const p = document.getElementById('twilio-panel');
+  const c = document.getElementById('twilio-chevron');
+  const open = p.style.display === 'none';
+  p.style.display = open ? 'block' : 'none';
+  c.className = open ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+  c.style.marginLeft = 'auto'; c.style.fontSize = '12px';
+}
+
 async function cargarConfig() {
   try {
     const d = await apiRequest('/config');
-    const s = v => document.getElementById(v);
-    if (s('cfg-notif-email'))      s('cfg-notif-email').value          = d.notif_email       || '';
-    if (s('cfg-notif-email-activo')) s('cfg-notif-email-activo').checked = d.notif_email_activo !== '0';
-    if (s('cfg-notif-wa'))         s('cfg-notif-wa').value             = d.notif_whatsapp    || '';
-    if (s('cfg-notif-wa-activo'))  s('cfg-notif-wa-activo').checked    = d.notif_whatsapp_activo !== '0';
-    if (s('cfg-callmebot-key'))    s('cfg-callmebot-key').value        = d.callmebot_apikey  || '';
-    if (s('cfg-smtp-host'))        s('cfg-smtp-host').value            = d.smtp_host         || 'smtp.gmail.com';
-    if (s('cfg-smtp-port'))        s('cfg-smtp-port').value            = d.smtp_port         || '587';
-    if (s('cfg-smtp-user'))        s('cfg-smtp-user').value            = d.smtp_user         || '';
-    // cfg-smtp-pass: no se expone desde la API
+    const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    const c = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val !== '0'; };
+    v('cfg-sms-num',       d.alerta_sms     || '');
+    v('cfg-wa-num',        d.alerta_whatsapp|| '');
+    v('cfg-twilio-sid',    d.twilio_sid     || '');
+    v('cfg-twilio-sms-from', d.twilio_sms_from || '');
+    v('cfg-twilio-wa-from',  d.twilio_wa_from  || '');
+    // twilio_token no se expone
+    c('cfg-sms-activo', d.sms_activo ?? '1');
+    c('cfg-wa-activo',  d.wa_activo  ?? '1');
     applyTheme(localStorage.getItem('frioseguro_theme') || 'dark');
   } catch(e) { console.warn('cargarConfig:', e); }
 }
@@ -2406,39 +2416,37 @@ function cfgToggle(clave, val) {
 async function cfgGuardarNotif() {
   const s = id => document.getElementById(id)?.value?.trim() || '';
   const data = {
-    notif_email:             s('cfg-notif-email'),
-    notif_email_activo:      document.getElementById('cfg-notif-email-activo')?.checked ? '1' : '0',
-    notif_whatsapp:          s('cfg-notif-wa'),
-    notif_whatsapp_activo:   document.getElementById('cfg-notif-wa-activo')?.checked ? '1' : '0',
-    callmebot_apikey:        s('cfg-callmebot-key'),
+    alerta_sms:       s('cfg-sms-num'),
+    sms_activo:       document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
+    alerta_whatsapp:  s('cfg-wa-num'),
+    wa_activo:        document.getElementById('cfg-wa-activo')?.checked ? '1' : '0',
   };
   try {
     await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
-    cfgMsg('cfg-msg-notif', 'Notificaciones guardadas correctamente.', true);
+    cfgMsg('cfg-msg-notif', 'Numeros guardados correctamente.', true);
   } catch(e) { cfgMsg('cfg-msg-notif', 'Error al guardar.', false); }
 }
 
-async function cfgGuardarSMTP() {
+async function cfgGuardarTwilio() {
   const s = id => document.getElementById(id)?.value?.trim() || '';
   const data = {
-    smtp_host: s('cfg-smtp-host'),
-    smtp_port: s('cfg-smtp-port'),
-    smtp_user: s('cfg-smtp-user'),
-    smtp_from: s('cfg-smtp-user'),
-    smtp_pass: s('cfg-smtp-pass'),
+    twilio_sid:      s('cfg-twilio-sid'),
+    twilio_token:    s('cfg-twilio-token'),
+    twilio_sms_from: s('cfg-twilio-sms-from'),
+    twilio_wa_from:  s('cfg-twilio-wa-from'),
   };
   try {
     await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
-    cfgMsg('cfg-msg-smtp', 'Configuración SMTP guardada.', true);
-  } catch(e) { cfgMsg('cfg-msg-smtp', 'Error al guardar.', false); }
+    cfgMsg('cfg-msg-twilio', 'Credenciales Twilio guardadas.', true);
+  } catch(e) { cfgMsg('cfg-msg-twilio', 'Error al guardar.', false); }
 }
 
-async function cfgTestEmail() {
-  cfgMsg('cfg-msg-notif', 'Enviando correo de prueba...', true);
+async function cfgTestSMS() {
+  cfgMsg('cfg-msg-notif', 'Enviando SMS de prueba...', true);
   try {
-    const r = await apiRequest('/config/test-email', {method:'POST', body:'{}'});
+    const r = await apiRequest('/config/test-sms', {method:'POST', body:'{}'});
     cfgMsg('cfg-msg-notif', r.mensaje, r.ok);
-  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexión.', false); }
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexion.', false); }
 }
 
 async function cfgTestWA() {
@@ -2446,7 +2454,7 @@ async function cfgTestWA() {
   try {
     const r = await apiRequest('/config/test-whatsapp', {method:'POST', body:'{}'});
     cfgMsg('cfg-msg-notif', r.mensaje, r.ok);
-  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexión.', false); }
+  } catch(e) { cfgMsg('cfg-msg-notif', 'Error de conexion.', false); }
 }
 
 function cfgMsg(id, msg, ok) {
