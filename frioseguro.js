@@ -640,6 +640,11 @@ function setTopbar(title, subtitle) {
 }
 
 function showDashView(view, el = null) {
+  // Reset inline styles left by navPage('ia')
+  document.getElementById('view-ia').style.display = 'none';
+  document.getElementById('view-resumen').style.display = '';
+  document.getElementById('nav-ia')?.classList.remove('active');
+
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
 
