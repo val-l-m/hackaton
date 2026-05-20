@@ -459,6 +459,7 @@ class BridgeScript:
 #  ENTRY POINT
 # ══════════════════════════════════════════════════════════════════════════════
 def main() -> None:
+    global SERVER_URL, VIAJE_ID  # declarar antes de cualquier uso en esta función
     parser = argparse.ArgumentParser(
         description='FríoSeguro Bridge Script — Fase 1',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -476,7 +477,6 @@ def main() -> None:
     args = parser.parse_args()
 
     # Override globals desde CLI
-    global SERVER_URL, VIAJE_ID
     SERVER_URL = args.server
     VIAJE_ID   = args.viaje
 

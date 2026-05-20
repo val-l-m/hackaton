@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <style>
 :root{
   --bg:#0a1628;--sb:#0d1f35;--card:#0f2540;--card2:#112b47;
@@ -18,6 +19,14 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden;}
+
+/* ── Bootstrap 5.3: neutralizar conflictos de grid y herencia ── */
+/* Bootstrap .row > * sobreescribe padding — lo revertimos con mayor especificidad */
+.dash-body .stats-row > .sc{padding:18px 20px !important;flex-shrink:0;width:auto;max-width:100%;}
+.dash-body .mid-grid > .map-card,.dash-body .mid-grid > .al-panel{padding:0 !important;flex-shrink:0;}
+.dash-body .bot-row > .b-card{padding:0 !important;flex-shrink:0;}
+/* Impedir que Bootstrap .row agregue flex al layout (ya usa CSS grid) */
+.stats-row,.mid-grid,.bot-row{display:grid !important;flex-wrap:unset !important;margin-right:0 !important;margin-left:0 !important;}
 a{text-decoration:none;color:inherit;cursor:pointer;}
 button{cursor:pointer;font-family:var(--font);}
 input{font-family:var(--font);}
@@ -295,7 +304,7 @@ footer p{font-size:12px;color:var(--muted);}
 .map-live-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse-glow 2s infinite;}
 .map-acts{display:flex;gap:6px;}
 .map-btn{width:28px;height:28px;background:var(--card2);border:1px solid var(--border);border-radius:7px;display:grid;place-items:center;cursor:pointer;font-size:13px;color:var(--sub);}
-#dash-map{flex:1;min-height:280px;}
+#dash-map{flex:1;min-height:420px;}
 
 /* Alerts panel */
 .al-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;}
@@ -409,7 +418,7 @@ footer p{font-size:12px;color:var(--muted);}
       <li><a href="#func">Funciones</a></li>
       <li><a href="#meto">Metodología</a></li>
     </ul>
-    <button class="btn-primary" onclick="showLogin()">Acceder al Sistema</button>
+    <button class="btn-primary btn" onclick="showLogin()">Acceder al Sistema</button>
   </nav>
 
   <section class="hero">
@@ -419,8 +428,8 @@ footer p{font-size:12px;color:var(--muted);}
       <h1>Cadena de frío<br>resiliente en<br><em>zonas marginales</em></h1>
       <p>Monitoreo de temperatura y geolocalización para insumos médicos en rutas sin señal del Estado de México. Zero data loss.</p>
       <div class="hero-btns">
-        <button class="btn-primary btn-lg" onclick="showLogin()">Ingresar al Dashboard →</button>
-        <button class="btn-ghost btn-lg" onclick="document.getElementById('prob').scrollIntoView({behavior:'smooth'})">Ver el problema</button>
+        <button class="btn-primary btn btn-lg" onclick="showLogin()">Ingresar al Dashboard →</button>
+        <button class="btn-ghost btn btn-lg" onclick="document.getElementById('prob').scrollIntoView({behavior:'smooth'})">Ver el problema</button>
       </div>
     </div>
     <div class="hero-visual">
@@ -508,17 +517,17 @@ footer p{font-size:12px;color:var(--muted);}
       </div>
       <p>Sistema de Monitoreo de Cadena de Frío</p>
     </div>
-    <div class="f-group">
-      <label class="f-label">Usuario</label>
-      <input class="f-input" type="text" id="l-user" placeholder="operador@isem.gob.mx">
+    <div class="f-group mb-3">
+      <label class="f-label form-label">Usuario</label>
+      <input class="f-input form-control" type="text" id="l-user" placeholder="operador@isem.gob.mx" autocomplete="username">
     </div>
-    <div class="f-group">
-      <label class="f-label">Contraseña</label>
-      <input class="f-input" type="password" id="l-pass" placeholder="••••••••">
+    <div class="f-group mb-3">
+      <label class="f-label form-label">Contraseña</label>
+      <input class="f-input form-control" type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
     </div>
     <div class="f-hint">Demo — usuario: <b>admin</b> &nbsp;|&nbsp; contraseña: <b>admin123</b></div>
     <div class="login-err" id="l-err">⚠ Credenciales incorrectas</div>
-    <button class="btn-primary" style="width:100%;margin-top:16px;padding:12px" onclick="doLogin()">Iniciar Sesión →</button>
+    <button class="btn-primary btn w-100 mt-3" style="padding:12px" onclick="doLogin()">Iniciar Sesión →</button>
     <a class="login-back" onclick="showLanding()">← Volver al inicio</a>
   </div>
 </div>
@@ -557,7 +566,7 @@ footer p{font-size:12px;color:var(--muted);}
       <div class="nav-item active"><i class="bi bi-grid-fill"></i><span>Resumen</span></div>
       <div class="nav-item"><i class="bi bi-truck"></i><span>Viajes Activos</span></div>
       <div class="nav-item"><i class="bi bi-map"></i><span>Mapa en Vivo</span></div>
-      <div class="nav-item"><i class="bi bi-bell"></i><span>Alertas</span><span class="nav-badge" id="nav-alert-badge">3</span></div>
+      <div class="nav-item"><i class="bi bi-bell"></i><span>Alertas</span><span class="nav-badge badge" id="nav-alert-badge">0</span></div>
       <div class="nav-item"><i class="bi bi-clock-history"></i><span>Historial de Viajes</span></div>
       <div class="nav-item"><i class="bi bi-capsule"></i><span>Lotes y Medicamentos</span></div>
       <div class="nav-item"><i class="bi bi-truck-front"></i><span>Vehículos</span></div>
@@ -604,31 +613,31 @@ footer p{font-size:12px;color:var(--muted);}
     </div>
 
     <div class="dash-body">
-      <!-- STATS -->
+      <!-- STATS — Bootstrap 5.3 row/col grid -->
       <div class="stats-row">
         <div class="sc">
           <div class="sc-ico ic-blue"><i class="bi bi-truck"></i></div>
-          <div><div class="sc-lbl">Viajes Activos</div><div class="sc-val">4</div><div class="sc-sub">En curso actualmente</div></div>
+          <div><div class="sc-lbl">Viajes Activos</div><div class="sc-val" id="sc-viajes">0</div><div class="sc-sub">En curso actualmente</div></div>
         </div>
         <div class="sc">
           <div class="sc-ico ic-teal"><i class="bi bi-box-seam"></i></div>
-          <div><div class="sc-lbl">Lotes en Tránsito</div><div class="sc-val">12</div><div class="sc-sub">Distribuidos en rutas</div></div>
+          <div><div class="sc-lbl">Lotes en Tránsito</div><div class="sc-val" id="sc-lotes">0</div><div class="sc-sub">Distribuidos en rutas</div></div>
         </div>
         <div class="sc">
           <div class="sc-ico ic-amber"><i class="bi bi-wifi-off"></i></div>
-          <div><div class="sc-lbl">Vehículos sin Señal</div><div class="sc-val" id="sc-nosig">2</div><div class="sc-sub" id="sc-nosig-s">Sin comunicación</div></div>
+          <div><div class="sc-lbl">Vehículos sin Señal</div><div class="sc-val" id="sc-nosig">0</div><div class="sc-sub" id="sc-nosig-s">Sin comunicación</div></div>
         </div>
         <div class="sc">
           <div class="sc-ico ic-red"><i class="bi bi-exclamation-triangle"></i></div>
-          <div><div class="sc-lbl">Alertas Críticas</div><div class="sc-val" id="sc-alerts">3</div><div class="sc-sub">Requieren atención</div></div>
+          <div><div class="sc-lbl">Alertas Críticas</div><div class="sc-val" id="sc-alerts">0</div><div class="sc-sub">Requieren atención</div></div>
         </div>
         <div class="sc">
           <div class="sc-ico ic-indigo"><i class="bi bi-thermometer-high"></i></div>
-          <div><div class="sc-lbl">Temp. Máxima</div><div class="sc-val" id="sc-tmax" style="color:var(--red)">13.8°C</div><div class="sc-sub">En las últimas 24 h</div></div>
+          <div><div class="sc-lbl">Temp. Máxima</div><div class="sc-val" id="sc-tmax" style="color:var(--muted)">—</div><div class="sc-sub">En las últimas 24 h</div></div>
         </div>
       </div>
 
-      <!-- MAP + ALERTS -->
+      <!-- MAP + ALERTS — Bootstrap 5.3 row/col -->
       <div class="mid-grid">
         <div class="map-card">
           <div class="map-hdr">
@@ -646,39 +655,17 @@ footer p{font-size:12px;color:var(--muted);}
             <a class="al-see">Ver todas</a>
           </div>
           <div class="al-list" id="al-list">
-            <div class="al-item crit">
-              <div class="al-row1">
-                <div class="al-icon-row"><i class="bi bi-exclamation-triangle-fill al-ico"></i><span class="al-type">Temperatura crítica</span></div>
-                <span class="al-time">Hoy, 09:15</span>
-              </div>
-              <div class="al-veh">Vehículo V-102</div>
-              <div class="al-med">Vacuna BCG</div>
-              <span class="al-badge ab-red">13.8°C por 28 min</span>
-            </div>
-            <div class="al-item warn">
-              <div class="al-row1">
-                <div class="al-icon-row"><i class="bi bi-exclamation-circle-fill al-ico"></i><span class="al-type">Temperatura en riesgo</span></div>
-                <span class="al-time">Hoy, 08:47</span>
-              </div>
-              <div class="al-veh">Vehículo V-105</div>
-              <div class="al-med">Insulina</div>
-              <span class="al-badge ab-amber">11.9°C por 12 min</span>
-            </div>
-            <div class="al-item offs">
-              <div class="al-row1">
-                <div class="al-icon-row"><i class="bi bi-wifi-off al-ico"></i><span class="al-type">Pérdida de señal</span></div>
-                <span class="al-time">Hoy, 08:22</span>
-              </div>
-              <div class="al-veh">Vehículo V-103</div>
-              <div class="al-med">Zona rural</div>
-              <span class="al-badge ab-blue">23 min</span>
+            <div id="al-empty" style="padding:28px 16px;text-align:center;color:var(--muted)">
+              <i class="bi bi-shield-check" style="font-size:28px;display:block;margin-bottom:8px;color:var(--green)"></i>
+              <div style="font-size:13px">Sin alertas activas</div>
+              <div style="font-size:11px;margin-top:4px">El sistema monitorea en tiempo real</div>
             </div>
           </div>
           <div class="al-footer">Ver todas las alertas <i class="bi bi-arrow-right"></i></div>
         </div>
       </div>
 
-      <!-- BOTTOM ROW -->
+      <!-- BOTTOM ROW — Bootstrap 5.3 row/col -->
       <div class="bot-row">
         <!-- Temp chart -->
         <div class="b-card">
@@ -715,15 +702,15 @@ footer p{font-size:12px;color:var(--muted);}
           <div class="dest-list">
             <div class="dest-item">
               <div class="di-left"><i class="bi bi-geo-alt di-ico"></i><div><div class="di-name">Puesto de Salud San Miguel</div><div class="di-com">Comunidad San Miguel</div></div></div>
-              <div class="di-right"><div class="di-eta">ETA 10:45</div><div class="di-badge db-g"><i class="bi bi-truck" style="font-size:9px"></i>En ruta</div></div>
+              <div class="di-right"><div class="di-eta">ETA 10:45</div><div class="di-badge db-g badge"><i class="bi bi-truck" style="font-size:9px"></i>En ruta</div></div>
             </div>
             <div class="dest-item">
               <div class="di-left"><i class="bi bi-geo-alt di-ico"></i><div><div class="di-name">Centro de Salud La Esperanza</div><div class="di-com">Comunidad La Esperanza</div></div></div>
-              <div class="di-right"><div class="di-eta">ETA 12:30</div><div class="di-badge db-g"><i class="bi bi-truck" style="font-size:9px"></i>En ruta</div></div>
+              <div class="di-right"><div class="di-eta">ETA 12:30</div><div class="di-badge db-g badge"><i class="bi bi-truck" style="font-size:9px"></i>En ruta</div></div>
             </div>
             <div class="dest-item">
               <div class="di-left"><i class="bi bi-geo-alt di-ico"></i><div><div class="di-name">Puesto de Salud El Progreso</div><div class="di-com">Comunidad El Progreso</div></div></div>
-              <div class="di-right"><div class="di-eta">ETA 14:15</div><div class="di-badge db-b"><i class="bi bi-wifi-off" style="font-size:9px"></i>Sin señal</div></div>
+              <div class="di-right"><div class="di-eta">ETA 14:15</div><div class="di-badge db-b badge"><i class="bi bi-wifi-off" style="font-size:9px"></i>Sin señal</div></div>
             </div>
           </div>
           <div class="dest-footer">Ver todos los destinos <i class="bi bi-arrow-right"></i></div>
@@ -733,15 +720,18 @@ footer p{font-size:12px;color:var(--muted);}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
 <script>
 // ── STATE ──────────────────────────────────────────────
-let ruralMode=false,queueCount=0,alertCount=3;
-let heroMap,dashMap,vMarker,offPoly;
+let ruralMode=false,queueCount=0,alertCount=0;
+let heroMap,dashMap,vMarker,offPoly,waitMsg;
+let v102Line=null,v102OffLine=null,v102AlertMarkers=[];
 let tempChart,donutChart;
-let curTemp=5.8,curLat=19.1400,curLng=-99.5800;
-let tData=[4.2,5.0,5.8,6.1,5.5,5.2,5.8],tLabels=['08:15','08:20','08:30','08:45','09:00','09:15','09:30'];
+let curTemp=5.0,curLat=19.2920,curLng=-99.6570;
+let tData=[],tLabels=[];
+let lastTelCount=0;
 
 // Routes
 const V102_on=[[19.292,-99.657],[19.260,-99.645],[19.230,-99.628],[19.200,-99.612],[19.175,-99.600],[19.150,-99.584]];
@@ -803,7 +793,7 @@ function initHeroMap(){
 // ── DASH MAP ─────────────────────────────────────────────
 function initDashMap(){
   if(dashMap)return;
-  dashMap=L.map('dash-map',{zoomControl:true}).setView([19.15,-99.57],9);
+  dashMap=L.map('dash-map',{zoomControl:true}).setView([19.15,-99.58],11);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©CartoDB'}).addTo(dashMap);
 
   // Legend
@@ -824,28 +814,19 @@ function initDashMap(){
   };
   legend.addTo(dashMap);
 
-  // Routes
-  L.polyline(V102_on,{color:'#22c55e',weight:4,opacity:.9}).addTo(dashMap);
-  L.polyline(V102_risk,{color:'#f59e0b',weight:4,opacity:.9}).addTo(dashMap);
-  L.polyline(V102_crit,{color:'#ef4444',weight:4,opacity:.95}).addTo(dashMap);
-  L.polyline([...V102_off,...V103_off],{color:'#3b82f6',weight:3.5,dashArray:'8 5',opacity:.85}).addTo(dashMap);
-  L.polyline(V101_route,{color:'#22c55e',weight:4,opacity:.9}).addTo(dashMap);
-  L.polyline(V105_route,{color:'#f59e0b',weight:4,opacity:.85}).addTo(dashMap);
-
-  // Vehicles
-  addVeh(dashMap,[19.265,-99.665],'V-101','#22c55e');
-  addVeh(dashMap,V102_crit[V102_crit.length-1],'V-102','#ef4444',true);
-  addVeh(dashMap,[19.020,-99.440],'V-103','#3b82f6');
-  addVeh(dashMap,[19.125,-99.460],'V-105','#f59e0b');
-
-  // Control points
+  // Destinos fijos (puntos de control geográficos reales)
   addCtrl(dashMap,ctrlSanMiguel,'Puesto de Salud<br>San Miguel');
   addCtrl(dashMap,ctrlLaEsperanza,'Centro de Salud<br>La Esperanza');
 
-  // Alert marker
-  addAlert(dashMap,alertPt);
-
-  vMarker=L.marker(V102_crit[V102_crit.length-1],{icon:vIcon('V-102','#ef4444',true)}).addTo(dashMap);
+  // Mensaje de espera hasta que lleguen datos
+  waitMsg=L.control({position:'bottomleft'});
+  waitMsg.onAdd=()=>{
+    const d=L.DomUtil.create('div');
+    d.id='map-wait-msg';
+    d.innerHTML='<div style="background:rgba(10,22,40,.9);border:1px solid #1a3a5c;border-radius:8px;padding:10px 14px;font-size:12px;color:#94a3b8"><i class="bi bi-broadcast" style="color:#3b82f6;margin-right:6px"></i>Esperando telemetría del vehículo...</div>';
+    return d;
+  };
+  waitMsg.addTo(dashMap);
 }
 
 function vIcon(label,color,alert=false){
@@ -862,12 +843,13 @@ function addCtrl(map,pos,label){
   const ic=L.divIcon({html:`<div style="font-size:18px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))">📍</div>`,className:'',iconAnchor:[9,18]});
   L.marker(pos,{icon:ic}).bindPopup(label).addTo(map);
 }
-function addAlert(map,pos){
+function addAlert(map,pos,label=''){
   const ic=L.divIcon({
     html:`<div style="background:#ef4444;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 0 6px rgba(239,68,68,.25),0 0 16px rgba(239,68,68,.5)">⚠</div>`,
     iconSize:[30,30],iconAnchor:[15,15],className:''
   });
-  L.marker(pos,{icon:ic}).bindPopup(`<b>⚠ Alerta Térmica</b><br>13.8°C · 28 min<br><small>${pos[0]}, ${pos[1]}</small>`).addTo(map);
+  const m=L.marker(pos,{icon:ic}).bindPopup(`<b>⚠ Alerta Térmica</b>${label?'<br>'+label:''}<br><small>${pos[0].toFixed(4)}, ${pos[1].toFixed(4)}</small>`).addTo(map);
+  return m;
 }
 
 // ── CHARTS ───────────────────────────────────────────────
@@ -925,23 +907,139 @@ function changeVehicle(v){
   if(tempChart&&presets[v]){tempChart.data.datasets[0].data=presets[v];tempChart.update();}
 }
 
+// ── API CALLS ─────────────────────────────────────────────
+function fetchDashboard(){
+  fetch('/api/dashboard')
+    .then(r=>r.json())
+    .then(d=>{
+      document.getElementById('sc-viajes').textContent = d.viajes_activos ?? 0;
+      document.getElementById('sc-lotes').textContent  = d.lotes_transito ?? 0;
+      document.getElementById('sc-nosig').textContent  = d.vehiculos_sin_senal ?? 0;
+      const ac = d.alertas_criticas ?? 0;
+      document.getElementById('sc-alerts').textContent = ac;
+      document.getElementById('nav-alert-badge').textContent = ac;
+      document.getElementById('tb-nb').textContent = ac;
+      alertCount = ac;
+      if(d.temp_maxima_24h > 0){
+        const tmax = document.getElementById('sc-tmax');
+        tmax.textContent = d.temp_maxima_24h.toFixed(1)+'°C';
+        tmax.style.color = d.temp_maxima_24h > 8 ? 'var(--red)' : 'var(--green)';
+      }
+    })
+    .catch(()=>{});
+}
+
+function fetchAlertas(){
+  fetch('/api/alertas')
+    .then(r=>r.json())
+    .then(d=>{
+      if(!d.alertas || d.alertas.length===0) return;
+      const list = document.getElementById('al-list');
+      list.innerHTML = '';
+      d.alertas.slice(0,6).forEach(a=>{
+        const cls  = a.tipo==='temperatura_critica'?'crit':a.tipo==='temperatura_riesgo'?'warn':'offs';
+        const icon = cls==='crit'?'bi-exclamation-triangle-fill':cls==='warn'?'bi-exclamation-circle-fill':'bi-wifi-off';
+        const bg   = cls==='crit'?'ab-red':'crit'?'ab-red':cls==='warn'?'ab-amber':'ab-blue';
+        const val  = a.valor ? a.valor.toFixed(1)+'°C' : '—';
+        const t    = new Date(a.timestamp*1000).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+        list.innerHTML += `<div class="al-item ${cls}">
+          <div class="al-row1">
+            <div class="al-icon-row"><i class="bi ${icon} al-ico"></i><span class="al-type">${a.tipo.replace(/_/g,' ')}</span></div>
+            <span class="al-time">Hoy, ${t}</span>
+          </div>
+          <div class="al-veh">Vehículo ${a.vehiculo_id||'—'}</div>
+          <div class="al-med">${a.medicamento||'—'}</div>
+          <span class="al-badge ${bg} badge">${val}</span>
+        </div>`;
+      });
+    })
+    .catch(()=>{});
+}
+
+// ── MAP DATA FROM API ─────────────────────────────────────
+function fetchMapData(){
+  if(!dashMap) return;
+  fetch('/api/viaje/VJ-2026-047')
+    .then(r=>r.json())
+    .then(d=>{
+      if(!d.telemetria||d.telemetria.length===0) return;
+      if(d.telemetria.length===lastTelCount) return; // sin cambios
+      lastTelCount=d.telemetria.length;
+
+      // Ocultar mensaje de espera
+      const wm=document.getElementById('map-wait-msg');
+      if(wm) wm.style.display='none';
+
+      // Separar segmentos: online vs offline (sincronizado_nube=1)
+      const onPts=[],offPts=[];
+      d.telemetria.forEach(t=>{
+        const pt=[t.latitud_actual,t.longitud_actual];
+        if(t.sincronizado_nube) offPts.push(pt);
+        else onPts.push(pt);
+      });
+
+      // Redibujar líneas
+      if(v102Line){dashMap.removeLayer(v102Line);}
+      if(v102OffLine){dashMap.removeLayer(v102OffLine);}
+
+      const estado=d.viaje?d.viaje.estado:'activo';
+      const onColor=estado==='alerta'?'#ef4444':estado==='sin_senal'?'#f59e0b':'#22c55e';
+
+      if(onPts.length>1)
+        v102Line=L.polyline(onPts,{color:onColor,weight:4,opacity:.95}).addTo(dashMap);
+      if(offPts.length>1)
+        v102OffLine=L.polyline(offPts,{color:'#3b82f6',weight:4,dashArray:'8 5',opacity:.9}).addTo(dashMap);
+
+      // Mover/crear marcador del vehículo en última posición
+      const all=d.telemetria;
+      const last=all[all.length-1];
+      const lastPos=[last.latitud_actual,last.longitud_actual];
+      const isAlert=estado==='alerta'||last.lote_comprometido;
+      const markerColor=isAlert?'#ef4444':ruralMode?'#3b82f6':'#22c55e';
+
+      if(vMarker){
+        vMarker.setLatLng(lastPos);
+        vMarker.setIcon(vIcon('V-102',markerColor,isAlert));
+      } else {
+        vMarker=L.marker(lastPos,{icon:vIcon('V-102',markerColor,isAlert)})
+          .bindPopup(`<b>V-102</b><br>${d.viaje?d.viaje.medicamento:''}<br>GPS: ${lastPos[0].toFixed(4)}, ${lastPos[1].toFixed(4)}`)
+          .addTo(dashMap);
+        dashMap.setView(lastPos,13);
+      }
+
+      // Marcadores ⚠ en coordenadas con temperatura crítica
+      v102AlertMarkers.forEach(m=>dashMap.removeLayer(m));
+      v102AlertMarkers=[];
+      all.filter(t=>t.lote_comprometido).forEach(t=>{
+        const m=addAlert(dashMap,[t.latitud_actual,t.longitud_actual],
+          t.temperatura_actual.toFixed(1)+'°C');
+        v102AlertMarkers.push(m);
+      });
+
+      // Actualizar temperatura actual
+      curTemp=last.temperatura_actual;
+      curLat=last.latitud_actual; curLng=last.longitud_actual;
+    })
+    .catch(()=>{});
+}
+
 // ── TELEMETRY LOOP ────────────────────────────────────────
 function startLoop(){
+  // Llamada inmediata al arrancar
+  fetchDashboard();
+  fetchAlertas();
+  fetchMapData();
+  // Polling al servidor real
+  setInterval(fetchDashboard, 5000);
+  setInterval(fetchAlertas,   8000);
+  setInterval(fetchMapData,   4000);
+
+  // Simulación local de temperatura para la gráfica
   setInterval(()=>{
-    if(ruralMode){curTemp+=Math.random()*.3+.02;queueCount++;}
-    else{curTemp+=(Math.random()*.4-.2);curTemp=Math.max(3.5,Math.min(curTemp,7.5));}
+    if(ruralMode){curTemp+=Math.random()*.3+.02; queueCount++;}
+    else{curTemp+=(Math.random()*.4-.2); curTemp=Math.max(3.5,Math.min(curTemp,7.5));}
     curTemp=Math.max(0,Math.min(curTemp,19));
-
-    const ts=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
-
-    // Update temp max
-    if(ruralMode&&curTemp>8){
-      const tmax=document.getElementById('sc-tmax');
-      tmax.textContent=curTemp.toFixed(1)+'°C';
-    }
-    // Update queue display
     document.getElementById('rfab-q').textContent=queueCount;
-
   },2000);
 }
 
