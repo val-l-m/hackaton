@@ -317,7 +317,7 @@ final class ConfigRepo
 }
 
 /* ============================================================================
- | NOTIFICADOR  (Email via Resend API — gratis, solo se configura una vez)
+ | NOTIFICADOR  (WhatsApp via CallMeBot — 100% gratis, sin cuentas de pago)
  ============================================================================ */
 
 final class Notificador
@@ -325,57 +325,43 @@ final class Notificador
     private ConfigRepo $cfg;
     public function __construct() { $this->cfg = new ConfigRepo(); }
 
-    // ── Resend API (resend.com — 3000 emails/mes gratis) ─────────────
-    private function enviarEmail(string $para, string $asunto, string $cuerpo): array
+    // ── CallMeBot WhatsApp API ────────────────────────────────────────
+    public function enviarSMS(string $mensaje): bool
     {
-        $apiKey = trim($this->cfg->get('resend_api_key'));
-        $from   = trim($this->cfg->get('resend_from', 'FrioSeguro <alertas@frioseguro.app>'));
+        $phone  = trim($this->cfg->get('wa_phone'));
+        $apikey = trim($this->cfg->get('wa_apikey'));
+        if ($phone === '' || $apikey === '') return false;
 
-        if ($apiKey === '') return ['ok' => false, 'error' => 'API key de Resend no configurada en config.local.php'];
+        $url = 'https://api.callmebot.com/whatsapp.php?' . http_build_query([
+            'phone'  => $phone,
+            'text'   => $mensaje,
+            'apikey' => $apikey,
+        ]);
 
-        $ch = curl_init('https://api.resend.com/emails');
+        $ch = curl_init($url);
         curl_setopt_array($ch, [
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => json_encode([
-                'from'    => $from,
-                'to'      => [$para],
-                'subject' => $asunto,
-                'text'    => $cuerpo,
-            ]),
-            CURLOPT_HTTPHEADER     => [
-                'Authorization: Bearer ' . $apiKey,
-                'Content-Type: application/json',
-            ],
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 15,
             CURLOPT_SSL_VERIFYPEER => false,
         ]);
-
-        $res  = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $err  = curl_error($ch);
+        $res = curl_exec($ch);
+        $err = curl_error($ch);
         curl_close($ch);
 
-        if ($res === false || $err) return ['ok' => false, 'error' => "Red: $err"];
-        $json = json_decode($res, true);
-        if ($code === 200 || $code === 201) return ['ok' => true];
-        return ['ok' => false, 'error' => ($json['message'] ?? $json['name'] ?? "HTTP $code")];
-    }
-
-    public function enviarSMS(string $mensaje): bool
-    {
-        $para = trim($this->cfg->get('alerta_email'));
-        if ($para === '') return false;
-        return $this->enviarEmail($para, '⚠️ FríoSeguro — Alerta', $mensaje)['ok'];
+        return $res !== false && $err === '' && stripos($res, 'error') === false;
     }
 
     public function probarSMS(string $mensaje): array
     {
-        $para = trim($this->cfg->get('alerta_email'));
-        if ($para === '') return ['ok' => false, 'error' => 'Ingresa un correo electrónico en la configuración.'];
-        $r = $this->enviarEmail($para, '✅ FríoSeguro — Prueba', $mensaje);
-        if ($r['ok']) return ['ok' => true, 'mensaje' => "Correo enviado a $para. Revisa tu bandeja de entrada."];
-        return $r;
+        $phone  = trim($this->cfg->get('wa_phone'));
+        $apikey = trim($this->cfg->get('wa_apikey'));
+        if ($phone === '') return ['ok' => false, 'error' => 'Ingresa tu número de WhatsApp.'];
+        if ($apikey === '') return ['ok' => false, 'error' => 'Ingresa tu API key de CallMeBot.'];
+
+        $ok = $this->enviarSMS($mensaje);
+        return $ok
+            ? ['ok' => true,  'mensaje' => "WhatsApp enviado a $phone. Revisa tu celular."]
+            : ['ok' => false, 'error'   => 'No se pudo enviar. Verifica tu número y API key.'];
     }
 
     public function alertar(string $tipo, string $descripcion, float $valor, string $viajeId, array $extra = []): void
@@ -1988,8 +1974,7 @@ try {
         $data = jsonBody();
         $cfg  = new ConfigRepo();
         $permitidos = [
-            'alerta_email','sms_activo',
-            'resend_api_key','resend_from',
+            'wa_phone','wa_apikey','sms_activo',
             'idioma','nombre_sistema',
         ];
         foreach ($permitidos as $k) {

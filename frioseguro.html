@@ -1596,20 +1596,20 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
             </div>
           </div>
 
-          <!-- Notificaciones: Email -->
+          <!-- Notificaciones: WhatsApp via CallMeBot -->
           <div class="cfg-section">
             <div class="cfg-section-title">
-              <i class="bi bi-envelope-fill"></i>Alertas por Correo Electrónico
+              <i class="bi bi-whatsapp" style="color:#25d366"></i>Alertas por WhatsApp
               <span style="background:var(--green);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px;font-weight:700">GRATIS</span>
             </div>
             <p style="font-size:12px;color:var(--sub);margin-bottom:18px">
-              El sistema envía un correo automáticamente cuando detecta una anomalía. Funciona en cualquier dispositivo sin instalar nada.
+              Recibe un mensaje de WhatsApp automáticamente cuando el sistema detecte anomalías críticas.
             </p>
 
             <div class="cfg-toggle-row">
               <div>
-                <div class="cfg-toggle-label"><i class="bi bi-bell-fill" style="color:var(--blue);margin-right:6px"></i>Activar alertas por correo</div>
-                <div class="cfg-toggle-sub">Se enviará un email cuando se detecte temperatura crítica, puerta abierta u otras anomalías</div>
+                <div class="cfg-toggle-label"><i class="bi bi-whatsapp" style="color:#25d366;margin-right:6px"></i>Activar alertas por WhatsApp</div>
+                <div class="cfg-toggle-sub">Mensaje instantáneo al detectar temperatura crítica, puerta abierta u otra anomalía</div>
               </div>
               <label class="cfg-toggle">
                 <input type="checkbox" id="cfg-sms-activo" onchange="cfgToggle('sms_activo',this.checked)">
@@ -1617,16 +1617,29 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
               </label>
             </div>
 
-            <div class="cfg-row single" style="margin-top:16px">
+            <div class="cfg-row" style="margin-top:16px">
               <div class="cfg-field">
-                <label>Correo electrónico que recibirá las alertas</label>
-                <input type="email" id="cfg-alerta-email" placeholder="operador@empresa.com">
+                <label>Número de WhatsApp (con código de país)</label>
+                <input type="tel" id="cfg-wa-phone" placeholder="+525512345678">
+              </div>
+              <div class="cfg-field">
+                <label>API Key de CallMeBot</label>
+                <input type="text" id="cfg-wa-apikey" placeholder="1234567">
+              </div>
+            </div>
+
+            <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:4px">
+              <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Cómo obtener tu API Key (2 min, una sola vez)</div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
+                <div><span style="background:var(--blue);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">1</span>Guarda <strong>+34 644 59 60 79</strong> en contactos como <strong>CallMeBot</strong></div>
+                <div><span style="background:var(--blue);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">2</span>Envíale por WhatsApp: <strong style="background:rgba(59,130,246,.1);padding:1px 6px;border-radius:4px">I allow callmebot to send me messages</strong></div>
+                <div><span style="background:var(--green);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">✓</span>Te responderá con tu API Key en segundos — cópiala aquí arriba</div>
               </div>
             </div>
 
             <div class="cfg-btn-row">
               <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestSMS()">
-                <i class="bi bi-send"></i> Enviar correo de prueba
+                <i class="bi bi-whatsapp"></i> Enviar WhatsApp de prueba
               </button>
               <button class="cfg-btn cfg-btn-primary" onclick="cfgGuardarNotif()">
                 <i class="bi bi-floppy"></i> Guardar
@@ -2941,8 +2954,9 @@ async function cargarConfig() {
     const d = await apiRequest('/config');
     const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     const c = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val !== '0'; };
-    v('cfg-alerta-email', d.alerta_email || '');
-    c('cfg-sms-activo',  d.sms_activo   ?? '1');
+    v('cfg-wa-phone',  d.wa_phone  || '');
+    v('cfg-wa-apikey', d.wa_apikey || '');
+    c('cfg-sms-activo', d.sms_activo ?? '1');
     applyTheme(localStorage.getItem('frioseguro_theme') || 'dark');
   } catch(e) { console.warn('cargarConfig:', e); }
 }
@@ -2952,19 +2966,20 @@ function cfgToggle(clave, val) {
 }
 
 async function cfgGuardarNotif() {
-  const s    = id => document.getElementById(id)?.value?.trim() || '';
+  const s = id => document.getElementById(id)?.value?.trim() || '';
   const data = {
-    alerta_email: s('cfg-alerta-email'),
-    sms_activo:   document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
+    wa_phone:   s('cfg-wa-phone'),
+    wa_apikey:  s('cfg-wa-apikey'),
+    sms_activo: document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
   };
   try {
     await apiRequest('/config', {method:'POST', body: JSON.stringify(data)});
-    cfgMsg('cfg-msg-notif', 'Guardado. Usa "Enviar correo de prueba" para verificar.', true);
+    cfgMsg('cfg-msg-notif', 'Guardado. Usa "Enviar WhatsApp de prueba" para verificar.', true);
   } catch(e) { cfgMsg('cfg-msg-notif', 'Error al guardar.', false); }
 }
 
 async function cfgTestSMS() {
-  cfgMsg('cfg-msg-notif', 'Enviando correo de prueba...', true);
+  cfgMsg('cfg-msg-notif', 'Enviando WhatsApp de prueba...', true);
   try {
     const r = await apiRequest('/config/test-sms', {method:'POST', body:'{}'});
     cfgMsg('cfg-msg-notif', r.mensaje, r.ok);
