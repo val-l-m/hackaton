@@ -312,6 +312,21 @@ final class Notificador
     private ConfigRepo $cfg;
     public function __construct() { $this->cfg = new ConfigRepo(); }
 
+    // Normaliza cualquier número mexicano a formato E.164 (+521XXXXXXXXXX)
+    private function normalizarNumero(string $num): string
+    {
+        $n = preg_replace('/\D/', '', $num);
+        // Quitar doble código: 5252... → 52...
+        if (str_starts_with($n, '5252')) $n = substr($n, 2);
+        // Agregar +52 si solo son 10 dígitos
+        if (strlen($n) === 10) $n = '52' . $n;
+        // Algunos números mexicanos móviles necesitan 521 (no solo 52)
+        if (strlen($n) === 12 && str_starts_with($n, '52') && !str_starts_with($n, '521')) {
+            $n = '521' . substr($n, 2);
+        }
+        return '+' . $n;
+    }
+
     // ── SMS via Twilio (cURL — funciona en XAMPP) ────────────────────
     private function twilioSMS(string $to, string $body): array
     {
@@ -320,8 +335,10 @@ final class Notificador
         $from  = trim($this->cfg->get('twilio_sms_from'));
 
         if ($sid === '' || $token === '' || $from === '') {
-            return ['ok' => false, 'error' => 'Faltan credenciales Twilio (SID, Token o numero de envio).'];
+            return ['ok' => false, 'error' => 'Configura el Account SID, Auth Token y numero Twilio primero.'];
         }
+
+        $toNorm = $this->normalizarNumero($to);
 
         $url = "https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json";
 
@@ -329,7 +346,11 @@ final class Notificador
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
             CURLOPT_USERPWD        => "$sid:$token",
-            CURLOPT_POSTFIELDS     => http_build_query(['To' => $to, 'From' => $from, 'Body' => $body]),
+            CURLOPT_POSTFIELDS     => http_build_query([
+                'To'   => $toNorm,
+                'From' => $from,
+                'Body' => $body,
+            ]),
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => 20,
             CURLOPT_SSL_VERIFYPEER => false,
@@ -342,16 +363,16 @@ final class Notificador
         curl_close($ch);
 
         if ($res === false || $err !== '') {
-            return ['ok' => false, 'error' => "Error de red: $err"];
+            return ['ok' => false, 'error' => "Error de conexion: $err"];
         }
 
         $json = json_decode($res, true);
         if (isset($json['sid'])) {
-            return ['ok' => true];
+            return ['ok' => true, 'to' => $toNorm];
         }
 
-        $msg = $json['message'] ?? $json['detail'] ?? substr($res, 0, 200);
-        return ['ok' => false, 'error' => "Twilio: $msg (HTTP $code)"];
+        $msg = $json['message'] ?? $json['detail'] ?? substr($res, 0, 300);
+        return ['ok' => false, 'error' => "Twilio ($code): $msg"];
     }
 
     public function enviarSMS(string $mensaje): bool
@@ -364,8 +385,10 @@ final class Notificador
     public function probarSMS(string $mensaje): array
     {
         $to = trim($this->cfg->get('alerta_sms'));
-        if ($to === '') return ['ok' => false, 'error' => 'No hay numero destino configurado.'];
-        return $this->twilioSMS($to, $mensaje);
+        if ($to === '') return ['ok' => false, 'error' => 'Ingresa un numero de celular en la configuracion.'];
+        $r = $this->twilioSMS($to, $mensaje);
+        if ($r['ok']) $r['mensaje'] = 'SMS enviado a ' . $r['to'] . '. Revisa tu telefono.';
+        return $r;
     }
 
     public function alertar(string $tipo, string $descripcion, float $valor, string $viajeId, array $extra = []): void
@@ -1989,13 +2012,11 @@ try {
     }
 
     if ($method === 'POST' && $uri === '/config/test-sms') {
-        $msg    = "FRIOSEGURO - Prueba SMS\nSistema activo.\nFecha: " . date('d/m/Y H:i:s');
+        $msg    = "FRIOSEGURO - Prueba\nSistema de alertas activo.\n" . date('d/m/Y H:i:s');
         $result = (new Notificador())->probarSMS($msg);
         respond([
             'ok'     => $result['ok'],
-            'mensaje' => $result['ok']
-                ? 'SMS enviado correctamente. Revisa tu telefono.'
-                : ($result['error'] ?? 'No se pudo enviar.'),
+            'mensaje' => $result['mensaje'] ?? $result['error'] ?? 'Error desconocido.',
         ]);
     }
 
