@@ -262,6 +262,96 @@ final class Database
                 $stmt->execute($row);
             }
         }
+
+        // ── Seed usuarios ────────────────────────────────────────────────────
+        $count = $db->query("SELECT COUNT(*) FROM usuarios")->fetchColumn();
+        if ((int)$count === 0) {
+            $hash = password_hash('MedicMaps2026!', PASSWORD_DEFAULT);
+            $seed = [
+                ['Dr. Carlos Ramírez',  'carlos.ramirez@medicmaps.mx',  '55 1234 5678', 'administrador'],
+                ['Lic. Ana López',      'ana.lopez@medicmaps.mx',        '55 2345 6789', 'supervisor'],
+                ['Juan Martínez',       'juan.martinez@medicmaps.mx',    '55 3456 7890', 'operador'],
+                ['María González',      'maria.gonzalez@medicmaps.mx',   '55 4567 8901', 'operador'],
+            ];
+            $stmt = $db->prepare("INSERT INTO usuarios (nombre, email, password_hash, telefono, rol) VALUES (?,?,?,?,?)");
+            foreach ($seed as $r) $stmt->execute([$r[0], $r[1], $hash, $r[2], $r[3]]);
+        }
+
+        // ── Seed vehículos ───────────────────────────────────────────────────
+        $count = $db->query("SELECT COUNT(*) FROM vehiculos")->fetchColumn();
+        if ((int)$count === 0) {
+            $seed = [
+                ['VH-001', 'MEX-102-A', 'NP300 Refrigerada',  'Nissan',   2024, 'Juan Martínez', 800.0],
+                ['VH-002', 'MEX-205-B', 'Transit Refrigerada', 'Ford',     2023, 'Pedro Sánchez', 1200.0],
+                ['VH-003', 'MEX-317-C', 'Sprinter Cargo',      'Mercedes', 2025, 'Luis Torres',   1500.0],
+                ['VH-004', 'MEX-412-D', 'Master Frigotrans',   'Renault',  2024, 'Rosa Méndez',   2000.0],
+            ];
+            $stmt = $db->prepare("INSERT INTO vehiculos (id, placas, modelo, marca, anio, conductor, capacidad) VALUES (?,?,?,?,?,?,?)");
+            foreach ($seed as $r) $stmt->execute($r);
+        }
+
+        // ── Seed viajes ─────────────────────────────────────────────────────
+        $count = $db->query("SELECT COUNT(*) FROM viajes")->fetchColumn();
+        if ((int)$count === 0) {
+            $seed = [
+                ['VJ-2026-047', 'VH-001', 'Insulina',          'Centro Médico IMSS CDMX',     'Hospital Regional Toluca',    2.0, 8.0, 'activo'],
+                ['VJ-2026-048', 'VH-002', 'Vacunas (general)', 'Bodega Sector Salud CDMX',    'Centro Comunitario Sultepec', 2.0, 8.0, 'completado'],
+                ['VJ-2026-049', 'VH-003', 'Plasma sanguíneo',  'Banco de Sangre IMSS CDMX',   'Hospital General Tenancingo', 1.0, 6.0, 'activo'],
+            ];
+            $stmt = $db->prepare("INSERT INTO viajes (id, vehiculo_id, medicamento, origen, destino, temp_min, temp_max, estado) VALUES (?,?,?,?,?,?,?,?)");
+            foreach ($seed as $r) $stmt->execute($r);
+        }
+
+        // ── Seed análisis IA ─────────────────────────────────────────────────
+        $count = $db->query("SELECT COUNT(*) FROM analisis_ia_riesgo")->fetchColumn();
+        if ((int)$count === 0) {
+            $stmt = $db->prepare("
+                INSERT INTO analisis_ia_riesgo
+                  (id_viaje, vehiculo, medicamento, modelo_ollama, origen,
+                   nivel_riesgo, titulo_alerta, mensaje_dashboard, resumen_operador,
+                   explicacion_tecnica, prediccion_estado, prediccion_tiempo, prediccion_motivo,
+                   posibles_causas, acciones_recomendadas, resumen_auditoria, confianza,
+                   requiere_revision, indice_danio_termico, temperatura_actual, temperatura_maxima,
+                   tiempo_fuera_de_rango_minutos, datos_entrada)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ");
+            $stmt->execute([
+                'VJ-2026-047',
+                'VH-001 (MEX-102-A)',
+                'Insulina',
+                'gemma3:4b',
+                'seed',
+                'preventivo',
+                'Riesgo térmico preventivo — temperatura en límite superior',
+                'La unidad VH-001 transporta Insulina con temperatura en 7.1 °C (límite: 8 °C). Tendencia ascendente de +0.8 °C en los últimos 20 min. Tramo con pérdida de señal GPS entre km 38–46 (zona montañosa Sierra de Sultepec, sin cobertura celular históricamente).',
+                'Temperatura a 7.1 °C con margen de 0.9 °C antes del límite crítico. Si la tendencia continúa, se prevé excursión térmica en 18–25 minutos. El tramo sin señal impide telemetría continua precisamente en la zona de mayor riesgo.',
+                'IDT (Índice de Daño Térmico): 0.31/10. La temperatura sube +0.8 °C cada 20 min. Carga calórica externa elevada (28 °C ambiente). La cobertura celular cae a 0 entre km 38 y 46 de la ruta Toluca–Sultepec según historial de los últimos 30 viajes. Altitud media del tramo: 2,300 msnm, reduce eficiencia del compresor.',
+                'vigilancia',
+                '18 — 25 minutos antes de posible excursión',
+                'Tendencia ascendente sostenida + zona sin cobertura próxima. Alta probabilidad de excursión si el sellado del compartimento no es óptimo o si la puerta es abierta durante la espera en el punto de control.',
+                json_encode([
+                    'Temperatura ambiente exterior elevada (28 °C) en zona montañosa',
+                    'Posible degradación del sellado del compartimento refrigerado',
+                    'Zona sin señal GPS/celular entre km 38 y 46 (Sierra de Sultepec)',
+                    'Reducción de eficiencia del compresor por altitud (2,300 msnm)',
+                ]),
+                json_encode([
+                    'Contactar al operador Juan Martínez al (55) 3456-7890 de inmediato',
+                    'Verificar sellado del compartimento y estado del sistema de refrigeración',
+                    'Activar protocolo de revisión en Punto de Control La Esperanza (km 35)',
+                    'Preparar vehículo de respaldo VH-004 (MEX-412-D) ante excursión térmica',
+                    'Documentar la hora de entrada y salida de la zona sin señal',
+                ]),
+                'Análisis para VJ-2026-047 / VH-001 (MEX-102-A) / Insulina / Ruta CDMX→Toluca→Sultepec. IDT 0.31 — supervisión activa requerida en los próximos 30 min.',
+                'alta',
+                1,
+                0.31,
+                7.1,
+                8.0,
+                0,
+                json_encode(['viaje_id' => 'VJ-2026-047', 'medicamento' => 'Insulina', 'rango' => '2–8 °C', 'temp_actual' => 7.1, 'tendencia' => '+0.8°C/20min']),
+            ]);
+        }
     }
 }
 
@@ -1624,7 +1714,7 @@ $uri = parse_url(
     PHP_URL_PATH
 );
 
-$uri = preg_replace('#^/api#', '', $uri);
+$uri = preg_replace('#^.*/api#', '', $uri);
 
 $uri = rtrim($uri, '/');
 

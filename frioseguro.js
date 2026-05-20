@@ -15,7 +15,10 @@ let tData=[],tLabels=[];
 let lastTelCount=0;
 
 
-const API_BASE = window.location.origin + '/api';
+const API_BASE = (() => {
+  const base = window.location.pathname.replace(/\/frioseguro\.html.*$/, '');
+  return window.location.origin + base + '/api';
+})();
 const apiUrl = (endpoint) => `${API_BASE}${endpoint}`;
 
 async function apiRequest(endpoint, options = {}) {

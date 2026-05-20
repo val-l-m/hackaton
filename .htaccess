@@ -1,0 +1,7 @@
+Options -Indexes
+RewriteEngine On
+
+# Route /api/* to api.php (keeps REQUEST_URI intact for internal routing)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api(/.*)?$ api.php [L,QSA]
