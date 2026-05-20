@@ -1215,21 +1215,38 @@ footer p{font-size:12px;color:var(--muted);}
               Ingresa el número de teléfono que recibirá las alertas. El sistema enviará automáticamente un mensaje al detectar anomalías de temperatura, puerta abierta u otras alertas críticas.
             </p>
 
-            <!-- SMS -->
+            <!-- ntfy.sh — push gratuito -->
             <div class="cfg-toggle-row">
               <div>
-                <div class="cfg-toggle-label"><i class="bi bi-chat-text-fill" style="color:var(--blue);margin-right:6px"></i>Alertas por SMS</div>
-                <div class="cfg-toggle-sub">Mensaje de texto al número configurado</div>
+                <div class="cfg-toggle-label">
+                  <i class="bi bi-phone-vibrate-fill" style="color:var(--blue);margin-right:6px"></i>
+                  Alertas push al celular <span style="background:var(--green);color:#fff;font-size:10px;padding:2px 7px;border-radius:20px;margin-left:6px;font-weight:700">GRATIS</span>
+                </div>
+                <div class="cfg-toggle-sub">Notificación instantánea en el celular via ntfy.sh — sin costo, sin límites</div>
               </div>
               <label class="cfg-toggle">
                 <input type="checkbox" id="cfg-sms-activo" onchange="cfgToggle('sms_activo',this.checked)">
                 <span class="cfg-toggle-slider"></span>
               </label>
             </div>
-            <div class="cfg-row single" style="margin-top:10px">
+
+            <div class="cfg-row single" style="margin-top:12px">
               <div class="cfg-field">
-                <label>Número celular para SMS (con código de país)</label>
-                <input type="tel" id="cfg-sms-num" placeholder="+525512345678">
+                <label>Canal de notificación (puedes escribir cualquier nombre único)</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input type="text" id="cfg-ntfy-topic" placeholder="frioseguro-alertas-2026" style="flex:1">
+                  <button class="cfg-btn cfg-btn-ghost" style="white-space:nowrap;padding:9px 14px" onclick="cfgGenerarTopic()">
+                    <i class="bi bi-shuffle"></i> Generar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:4px">
+              <div style="font-size:12px;font-weight:700;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Cómo activarlo en tu celular (1 minuto)</div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text)">
+                <div><span style="background:var(--blue);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">1</span>Descarga la app <strong>ntfy</strong> en Play Store o App Store (gratis)</div>
+                <div><span style="background:var(--blue);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">2</span>Abre la app → botón <strong>+</strong> → escribe el nombre del canal de arriba</div>
+                <div><span style="background:var(--blue);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-right:8px">3</span>Guarda y presiona <strong>Probar push</strong> — deberías recibir la notificación al instante</div>
               </div>
             </div>
 
@@ -1253,7 +1270,7 @@ footer p{font-size:12px;color:var(--muted);}
 
             <div class="cfg-btn-row">
               <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestSMS()">
-                <i class="bi bi-chat-text"></i> Probar SMS
+                <i class="bi bi-phone-vibrate"></i> Probar push
               </button>
               <button class="cfg-btn cfg-btn-ghost" onclick="cfgTestWA()">
                 <i class="bi bi-whatsapp"></i> Probar WhatsApp
@@ -2397,7 +2414,7 @@ async function cargarConfig() {
     const d = await apiRequest('/config');
     const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
     const c = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val !== '0'; };
-    v('cfg-sms-num',       d.alerta_sms     || '');
+    v('cfg-ntfy-topic',    d.ntfy_topic     || '');
     v('cfg-wa-num',        d.alerta_whatsapp|| '');
     v('cfg-twilio-sid',    d.twilio_sid     || '');
     v('cfg-twilio-sms-from', d.twilio_sms_from || '');
@@ -2413,10 +2430,16 @@ function cfgToggle(clave, val) {
   apiRequest('/config', {method:'POST', body: JSON.stringify({[clave]: val ? '1' : '0'})}).catch(()=>{});
 }
 
+function cfgGenerarTopic() {
+  const rand = Math.random().toString(36).slice(2, 10);
+  const el = document.getElementById('cfg-ntfy-topic');
+  if (el) el.value = `frioseguro-${rand}`;
+}
+
 async function cfgGuardarNotif() {
   const s = id => document.getElementById(id)?.value?.trim() || '';
   const data = {
-    alerta_sms:       s('cfg-sms-num'),
+    ntfy_topic:       s('cfg-ntfy-topic'),
     sms_activo:       document.getElementById('cfg-sms-activo')?.checked ? '1' : '0',
     alerta_whatsapp:  s('cfg-wa-num'),
     wa_activo:        document.getElementById('cfg-wa-activo')?.checked ? '1' : '0',
@@ -2442,7 +2465,7 @@ async function cfgGuardarTwilio() {
 }
 
 async function cfgTestSMS() {
-  cfgMsg('cfg-msg-notif', 'Enviando SMS de prueba...', true);
+  cfgMsg('cfg-msg-notif', 'Enviando notificacion push de prueba...', true);
   try {
     const r = await apiRequest('/config/test-sms', {method:'POST', body:'{}'});
     cfgMsg('cfg-msg-notif', r.mensaje, r.ok);

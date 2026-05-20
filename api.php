@@ -301,11 +301,24 @@ final class Notificador
         return isset($json['sid']);
     }
 
+    // ── ntfy.sh — push gratuito (sin cuenta, sin límites) ────────────
     public function enviarSMS(string $mensaje): bool
     {
-        $to = trim($this->cfg->get('alerta_sms'));
-        if ($to === '') return false;
-        return $this->twilio($to, $mensaje, false);
+        $topic = trim($this->cfg->get('ntfy_topic'));
+        if ($topic === '') return false;
+
+        $ctx = stream_context_create(['http' => [
+            'method'  => 'POST',
+            'header'  => "Content-Type: text/plain; charset=utf-8\r\n"
+                       . "Title: FrioSeguro - Alerta\r\n"
+                       . "Priority: urgent\r\n"
+                       . "Tags: warning,thermometer\r\n",
+            'content' => $mensaje,
+            'timeout' => 10,
+            'ignore_errors' => true,
+        ]]);
+        $res = @file_get_contents("https://ntfy.sh/$topic", false, $ctx);
+        return $res !== false;
     }
 
     public function enviarWhatsapp(string $mensaje): bool
@@ -1776,7 +1789,7 @@ try {
         $data = jsonBody();
         $cfg  = new ConfigRepo();
         $permitidos = [
-            'alerta_sms','sms_activo',
+            'ntfy_topic','sms_activo',
             'alerta_whatsapp','wa_activo',
             'twilio_sid','twilio_token','twilio_sms_from','twilio_wa_from',
             'idioma','nombre_sistema',
