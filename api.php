@@ -741,24 +741,6 @@ function ctrlDashboard(): array
  | ROUTER
  ============================================================================ */
 
-function required(array $data, array $fields): void
-{
-    foreach ($fields as $f) {
-        if (!isset($data[$f])) {
-            http_response_code(422);
-            echo json_encode(['error' => "Campo requerido: {$f}"]);
-            exit;
-        }
-    }
-}
-
-function respond(array $data, int $code = 200): never
-{
-    http_response_code($code);
-    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    exit;
-}
-
 // ══════════════════════════════════════════════════════════════════════════════
 //  CONFIGURACIÓN IA
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1277,20 +1259,6 @@ if ($uri === '') {
 }
 
 try {
-    $result = match(true) {
-        $method === 'POST' && $uri === '/telemetria'             => ctrlTelemetriaStore(),
-        $method === 'POST' && $uri === '/telemetria/batch'       => ctrlTelemetriaBatch(),
-        $method === 'GET'  && $uri === '/dashboard'              => ctrlDashboard(),
-        $method === 'GET'  && $uri === '/alertas'                => ctrlAlertas(),
-        $method === 'POST' && $uri === '/viaje'                  => ctrlViajeCreate(),
-        $method === 'GET'  && str_starts_with($uri, '/viaje/')   => ctrlViajeGet(basename($uri)),
-        $method === 'POST' && $uri === '/ia/analizar-riesgo'     => ctrlIaAnalizarRiesgo(),
-        $method === 'GET'  && $uri === '/ia/ultimo-analisis'     => ctrlIaUltimoAnalisis(),
-        default => (function() {
-            http_response_code(404);
-            return ['error' => 'Endpoint no encontrado', 'uri' => $_SERVER['REQUEST_URI']];
-        })()
-    };
 
     /* =========================
        DASHBOARD
@@ -1525,6 +1493,18 @@ try {
         respond([
             'ok' => $ok
         ]);
+    }
+
+    /* =========================
+       IA
+    ========================= */
+
+    if ($method === 'POST' && $uri === '/ia/analizar-riesgo') {
+        respond(ctrlIaAnalizarRiesgo());
+    }
+
+    if ($method === 'GET' && $uri === '/ia/ultimo-analisis') {
+        respond(ctrlIaUltimoAnalisis());
     }
 
     /* =========================
