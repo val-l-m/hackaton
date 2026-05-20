@@ -76,7 +76,7 @@ $resultado = json_decode($res, true);
 
 <div class="card">
   <h2>Respuesta del servidor</h2>
-  <pre><?=htmlspecialchars(json_encode($resultado,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)??$res?></pre>
+  <pre><?=htmlspecialchars(json_encode($resultado,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE)??$res)?></pre>
 </div>
 </body>
 </html>
