@@ -223,7 +223,45 @@ final class Database
                 valor          TEXT,
                 actualizado_en INTEGER DEFAULT (unixepoch())
             );
+
+            CREATE TABLE IF NOT EXISTS medicamentos (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre      TEXT    NOT NULL UNIQUE,
+                descripcion TEXT,
+                temp_min    REAL    NOT NULL DEFAULT 2.0,
+                temp_max    REAL    NOT NULL DEFAULT 8.0,
+                activo      INTEGER NOT NULL DEFAULT 1,
+                created_at  INTEGER NOT NULL DEFAULT (unixepoch())
+            );
         ");
+
+        // Seed de medicamentos comunes si la tabla está vacía
+        $count = Database::get()->query("SELECT COUNT(*) FROM medicamentos")->fetchColumn();
+        if ((int)$count === 0) {
+            $seed = [
+                ['Insulina',                  'Hormona para control de glucemia',                   2.0,  8.0],
+                ['Vacunas (general)',          'Vacunas biológicas de uso general',                 2.0,  8.0],
+                ['Plasma sanguíneo',           'Hemoderivado para transfusiones',                   1.0,  6.0],
+                ['Oncológicos (quimio)',        'Medicamentos para tratamiento de cáncer',           2.0,  8.0],
+                ['Antibióticos líquidos',      'Suspensiones y soluciones antibióticas',            2.0,  8.0],
+                ['Eritropoyetina (EPO)',        'Factor estimulante de eritropoyesis',               2.0,  8.0],
+                ['Hormona de crecimiento',     'Somatropina para déficit de GH',                    2.0,  8.0],
+                ['Interferón',                 'Inmunomodulador biológico',                         2.0,  8.0],
+                ['Trastuzumab (Herceptin)',    'Anticuerpo monoclonal onco-hematología',            2.0,  8.0],
+                ['Rituximab',                  'Anticuerpo anti-CD20 para linfomas',                2.0,  8.0],
+                ['Factores de coagulación',   'Concentrados FVIII / FIX para hemofilia',           2.0,  8.0],
+                ['Inmunoglobulinas IV',        'Inmunoglobulinas para inmunodeficiencias',          2.0,  8.0],
+                ['Semen/óvulos criogénicos',  'Material reproductivo en nitrógeno líquido',      -196.0, -150.0],
+                ['Tejidos para trasplante',   'Hueso, piel y tendones preservados',               -80.0,  -18.0],
+                ['Reagentes de laboratorio',  'Soluciones enzimáticas y kits diagnósticos',        2.0,  8.0],
+            ];
+            $stmt = Database::get()->prepare(
+                "INSERT INTO medicamentos (nombre, descripcion, temp_min, temp_max) VALUES (?,?,?,?)"
+            );
+            foreach ($seed as $row) {
+                $stmt->execute($row);
+            }
+        }
     }
 }
 
@@ -782,6 +820,74 @@ final class UsuarioRepo
     }
 }
 
+/* ============================================================================
+ | MEDICAMENTO REPO
+ ============================================================================ */
+
+final class MedicamentoRepo
+{
+    private PDO $db;
+    public function __construct() { $this->db = Database::get(); }
+
+    public function all(): array
+    {
+        return $this->db
+            ->query("SELECT * FROM medicamentos ORDER BY nombre ASC")
+            ->fetchAll();
+    }
+
+    public function find(int $id): array|false
+    {
+        $stmt = $this->db->prepare("SELECT * FROM medicamentos WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+
+    public function create(array $d): int
+    {
+        $stmt = $this->db->prepare(
+            "INSERT INTO medicamentos (nombre, descripcion, temp_min, temp_max, activo)
+             VALUES (?, ?, ?, ?, ?)"
+        );
+        $stmt->execute([
+            trim($d['nombre']),
+            trim($d['descripcion'] ?? ''),
+            (float)$d['temp_min'],
+            (float)$d['temp_max'],
+            isset($d['activo']) ? (int)$d['activo'] : 1,
+        ]);
+        return (int)$this->db->lastInsertId();
+    }
+
+    public function update(int $id, array $d): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE medicamentos
+             SET nombre = ?, descripcion = ?, temp_min = ?, temp_max = ?, activo = ?
+             WHERE id = ?"
+        );
+        return $stmt->execute([
+            trim($d['nombre']),
+            trim($d['descripcion'] ?? ''),
+            (float)$d['temp_min'],
+            (float)$d['temp_max'],
+            isset($d['activo']) ? (int)$d['activo'] : 1,
+            $id,
+        ]);
+    }
+
+    public function delete(int $id): bool
+    {
+        return $this->db
+            ->prepare("DELETE FROM medicamentos WHERE id = ?")
+            ->execute([$id]);
+    }
+}
+
+/* ============================================================================
+ | VEHICULO REPO
+ ============================================================================ */
+
 final class VehiculoRepo
 {
     private PDO $db;
@@ -1009,6 +1115,61 @@ function ctrlViajesActivos(): array
         $row['sensor_puerta']     = (int)($row['sensor_puerta'] ?? 0);
         $row['sincronizado_nube'] = (int)($row['sincronizado_nube'] ?? 0);
         $row['lote_comprometido'] = (int)($row['lote_comprometido'] ?? 0);
+    }
+    unset($row);
+
+    return [
+        'viajes'    => $viajes,
+        'total'     => count($viajes),
+        'timestamp' => $now,
+    ];
+}
+
+/** GET /api/viajes-historial */
+function ctrlViajesHistorial(): array
+{
+    $db  = Database::get();
+    $now = time();
+
+    $stmt = $db->prepare("
+        SELECT
+            v.id            AS viaje_id,
+            v.vehiculo_id,
+            v.medicamento,
+            v.origen,
+            v.destino,
+            v.temp_min,
+            v.temp_max,
+            v.estado        AS viaje_estado,
+            v.created_at    AS viaje_created,
+            vh.placas,
+            vh.marca,
+            vh.modelo,
+            vh.conductor,
+            COUNT(t.id)                                           AS total_lecturas,
+            MIN(t.temperatura_actual)                             AS temp_minima,
+            MAX(t.temperatura_actual)                             AS temp_maxima,
+            ROUND(AVG(t.temperatura_actual), 2)                   AS temp_promedio,
+            MIN(t.timestamp_lectura_real)                         AS primera_lectura,
+            MAX(t.timestamp_lectura_real)                         AS ultima_lectura,
+            SUM(CASE WHEN t.lote_comprometido = 1 THEN 1 ELSE 0 END) AS lecturas_criticas
+        FROM viajes v
+        LEFT JOIN vehiculos vh ON vh.id = v.vehiculo_id
+        LEFT JOIN telemetria_serial t ON t.viaje_id = v.id
+        WHERE v.estado != 'activo'
+        GROUP BY v.id
+        ORDER BY v.created_at DESC
+        LIMIT 100
+    ");
+    $stmt->execute();
+    $viajes = $stmt->fetchAll();
+
+    foreach ($viajes as &$row) {
+        foreach (['temp_min','temp_max','temp_minima','temp_maxima','temp_promedio'] as $k) {
+            if ($row[$k] !== null) $row[$k] = round((float)$row[$k], 2);
+        }
+        $row['total_lecturas']    = (int)($row['total_lecturas'] ?? 0);
+        $row['lecturas_criticas'] = (int)($row['lecturas_criticas'] ?? 0);
     }
     unset($row);
 
@@ -1562,6 +1723,10 @@ try {
         respond(ctrlViajesActivos());
     }
 
+    if ($method === 'GET' && $uri === '/viajes-historial') {
+        respond(ctrlViajesHistorial());
+    }
+
     /* =========================
        VIAJES
     ========================= */
@@ -1757,6 +1922,33 @@ try {
         respond([
             'ok' => $ok
         ]);
+    }
+
+    /* =========================
+       MEDICAMENTOS
+    ========================= */
+
+    if ($method === 'GET' && $uri === '/medicamentos') {
+        respond(['medicamentos' => (new MedicamentoRepo())->all()]);
+    }
+
+    if ($method === 'POST' && $uri === '/medicamentos') {
+        $data = jsonBody();
+        required($data, ['nombre', 'temp_min', 'temp_max']);
+        $id = (new MedicamentoRepo())->create($data);
+        respond(['ok' => true, 'id' => $id]);
+    }
+
+    if ($method === 'PUT' && str_starts_with($uri, '/medicamentos/')) {
+        $id = basename($uri);
+        $ok = (new MedicamentoRepo())->update((int)$id, jsonBody());
+        respond(['ok' => $ok]);
+    }
+
+    if ($method === 'DELETE' && str_starts_with($uri, '/medicamentos/')) {
+        $id = basename($uri);
+        $ok = (new MedicamentoRepo())->delete((int)$id);
+        respond(['ok' => $ok]);
     }
 
     /* =========================

@@ -500,6 +500,25 @@ footer p{font-size:12px;color:var(--muted);}
 .va-last-conn{font-size:11px;color:var(--sub);}
 .va-last-conn.fresh{color:var(--green);}
 .va-empty-row td{padding:40px;text-align:center;color:var(--muted);font-size:13px;}
+.va-tabs{display:flex;gap:4px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:4px;align-self:flex-start;}
+.va-tab{background:transparent;color:var(--sub);border:none;padding:8px 18px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s;font-family:var(--font);}
+.va-tab:hover{color:var(--text);background:rgba(255,255,255,.04);}
+.va-tab.active{background:var(--blue-grad);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(37,99,235,.3);}
+.va-tab-badge{background:rgba(255,255,255,.3);padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700;min-width:18px;text-align:center;}
+.va-hist-table{width:100%;border-collapse:collapse;font-size:12px;min-width:820px;}
+.va-hist-table thead th{padding:10px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);white-space:nowrap;font-family:var(--mono);}
+.va-hist-table tbody tr{border-bottom:1px solid rgba(26,58,92,.5);transition:background .15s;}
+.va-hist-table tbody tr:hover{background:rgba(59,130,246,.04);}
+.va-hist-table tbody tr:last-child{border-bottom:none;}
+.va-hist-table tbody td{padding:11px 14px;vertical-align:middle;}
+.va-estado-hist{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.va-estado-hist.completado{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);}
+.va-estado-hist.cancelado{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.va-estado-hist.otro{background:rgba(71,85,105,.12);color:var(--muted);border:1px solid rgba(71,85,105,.25);}
+.va-alerta-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.va-alerta-pill.ok{background:rgba(34,197,94,.12);color:var(--green);}
+.va-alerta-pill.warn{background:rgba(245,158,11,.12);color:var(--amber);}
+.va-alerta-pill.crit{background:rgba(239,68,68,.12);color:var(--red);}
 
 /* ═══════════ CRUD VIEWS: USUARIOS / VEHÍCULOS ═══════════ */
 .dash-view{display:none;animation:fadeUp .25s ease;}
@@ -745,16 +764,14 @@ footer p{font-size:12px;color:var(--muted);}
     </div>
     <nav class="sb-nav">
       <div class="nav-item active" id="nav-resumen" onclick="navPage('resumen')"><i class="bi bi-grid-fill"></i><span>Resumen</span></div>
-      <div class="nav-item" id="nav-viajes-activos" onclick="showDashView('viajes-activos', this)"><i class="bi bi-truck"></i><span>Viajes Activos</span></div>
+      <div class="nav-item" id="nav-viajes-activos" onclick="showDashView('viajes-activos', this)"><i class="bi bi-truck"></i><span>Viajes</span></div>
       <div class="nav-item" onclick="navPending('Mapa en Vivo')"><i class="bi bi-map"></i><span>Mapa en Vivo</span></div>
       <div class="nav-item" id="nav-ia" onclick="navPage('ia')" style="background:rgba(129,140,248,.08);border-left:3px solid var(--indigo);margin-bottom:4px"><i class="bi bi-cpu" style="color:var(--indigo)"></i><span style="color:var(--indigo);font-weight:600">IA Predictiva</span><span class="nav-badge badge" style="background:var(--indigo)">NEW</span></div>
       <div class="nav-item" onclick="navPending('Alertas')"><i class="bi bi-bell"></i><span>Alertas</span><span class="nav-badge badge" id="nav-alert-badge">0</span></div>
-      <div class="nav-item" onclick="navPending('Historial de Viajes')"><i class="bi bi-clock-history"></i><span>Historial de Viajes</span></div>
-      <div class="nav-item" onclick="navPending('Lotes y Medicamentos')"><i class="bi bi-capsule"></i><span>Lotes y Medicamentos</span></div>
+      <div class="nav-item" id="nav-medicamentos" onclick="showDashView('medicamentos', this)"><i class="bi bi-capsule-pill"></i><span>Medicamentos</span></div>
       <div class="nav-item" id="nav-vehiculos" onclick="showDashView('vehiculos', this)"><i class="bi bi-truck-front"></i><span>Vehículos</span></div>
       <div class="nav-item" id="nav-usuarios" onclick="showDashView('usuarios', this)"><i class="bi bi-people"></i><span>Usuarios</span></div>
       <div class="nav-item" onclick="navPending('Zonas sin Señal')"><i class="bi bi-wifi-off"></i><span>Zonas sin Señal</span></div>
-      <div class="nav-item" onclick="navPending('Reglas de Temperatura')"><i class="bi bi-thermometer-half"></i><span>Reglas de Temperatura</span></div>
       <div class="nav-item" id="nav-config" onclick="showDashView('config',this)"><i class="bi bi-gear"></i><span>Configuración</span></div>
     </nav>
     <div class="sb-footer">
@@ -980,6 +997,79 @@ footer p{font-size:12px;color:var(--muted);}
         </div>
       </section>
 
+      <!-- MÓDULO MEDICAMENTOS -->
+      <section id="view-medicamentos" class="dash-view crud-page">
+        <div class="crud-header">
+          <div>
+            <h2>Medicamentos y Control de Temperatura</h2>
+            <p>Catálogo de medicamentos con sus rangos de temperatura permitidos. El sistema genera alertas automáticas cuando un viaje sale del rango configurado.</p>
+          </div>
+          <button class="btn-ghost" onclick="resetMedicamentoForm()"><i class="bi bi-plus-circle"></i> Nuevo medicamento</button>
+        </div>
+
+        <div id="medicamentos-msg" class="crud-alert"></div>
+
+        <div class="crud-grid">
+          <form class="crud-form" id="formMedicamento">
+            <div class="crud-form-title"><i class="bi bi-capsule-pill" style="color:var(--blue)"></i><span id="med-form-title">Registrar medicamento</span></div>
+            <input type="hidden" id="med_id">
+
+            <div class="f-group">
+              <label class="f-label">Nombre del medicamento</label>
+              <input class="f-input" type="text" id="med_nombre" placeholder="Ej. Insulina, Vacuna Pfizer..." required>
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Descripción</label>
+              <input class="f-input" type="text" id="med_descripcion" placeholder="Uso clínico, tipo, etc.">
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Temperatura mínima (°C)</label>
+              <input class="f-input" type="number" step="0.1" id="med_temp_min" placeholder="2.0" required>
+            </div>
+
+            <div class="f-group">
+              <label class="f-label">Temperatura máxima (°C)</label>
+              <input class="f-input" type="number" step="0.1" id="med_temp_max" placeholder="8.0" required>
+            </div>
+
+            <div class="f-group" id="med_activo_group" style="display:none">
+              <label class="f-label">Estado</label>
+              <select class="f-input" id="med_activo">
+                <option value="1">Activo</option>
+                <option value="0">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="crud-actions">
+              <button type="submit" class="btn-primary" id="btnMedGuardar">Guardar</button>
+              <button type="button" class="btn-ghost" onclick="resetMedicamentoForm()">Cancelar</button>
+            </div>
+          </form>
+
+          <div class="crud-table-card">
+            <div class="crud-form-title"><i class="bi bi-thermometer-half" style="color:var(--teal)"></i>Catálogo de medicamentos</div>
+            <div class="crud-table-wrap">
+              <table class="crud-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Rango de temperatura</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaMedicamentos">
+                  <tr><td colspan="5" class="crud-empty">Cargando medicamentos...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- CRUD VEHÍCULOS -->
       <section id="view-vehiculos" class="dash-view crud-page">
         <div class="crud-header">
@@ -1060,72 +1150,128 @@ footer p{font-size:12px;color:var(--muted);}
         </div>
       </section>
 
-      <!-- VIAJES ACTIVOS -->
+      <!-- VIAJES (Activos + Historial) -->
       <section id="view-viajes-activos" class="dash-view">
         <div class="va-page">
 
+          <!-- Cabecera -->
           <div class="va-header">
             <div>
-              <div class="va-title"><i class="bi bi-truck" style="color:var(--blue)"></i>Viajes Activos</div>
-              <div class="va-subtitle">Monitoreo en tiempo real de todas las unidades en circulación — haz clic en una fila para verla en el mapa</div>
+              <div class="va-title"><i class="bi bi-truck" style="color:var(--blue)"></i>Viajes</div>
+              <div class="va-subtitle">Gestión completa de rutas — monitoreo en tiempo real e historial de viajes</div>
             </div>
-            <button class="va-refresh" onclick="cargarViajesActivos()">
+            <button class="va-refresh" id="va-refresh-btn" onclick="refrescarViajesTab()">
               <i class="bi bi-arrow-clockwise" id="va-refresh-icon"></i> Actualizar
             </button>
           </div>
 
-          <div class="va-stats">
-            <div class="va-stat">
-              <div class="va-stat-icon blue"><i class="bi bi-truck"></i></div>
-              <div><div class="va-stat-val" id="va-total">—</div><div class="va-stat-lbl">Total activos</div></div>
-            </div>
-            <div class="va-stat">
-              <div class="va-stat-icon green"><i class="bi bi-reception-4"></i></div>
-              <div><div class="va-stat-val" id="va-en-ruta">—</div><div class="va-stat-lbl">En Ruta</div></div>
-            </div>
-            <div class="va-stat">
-              <div class="va-stat-icon amber"><i class="bi bi-pause-circle"></i></div>
-              <div><div class="va-stat-val" id="va-detenido">—</div><div class="va-stat-lbl">Detenidos</div></div>
-            </div>
-            <div class="va-stat">
-              <div class="va-stat-icon red"><i class="bi bi-wifi-off"></i></div>
-              <div><div class="va-stat-val" id="va-sin-senal">—</div><div class="va-stat-lbl">Sin Señal</div></div>
-            </div>
+          <!-- Tabs -->
+          <div class="va-tabs">
+            <button class="va-tab active" id="tab-activos" onclick="switchViajesTab('activos')">
+              <i class="bi bi-truck"></i> Activos
+              <span class="va-tab-badge" id="tab-badge-activos">0</span>
+            </button>
+            <button class="va-tab" id="tab-historial" onclick="switchViajesTab('historial')">
+              <i class="bi bi-clock-history"></i> Historial
+            </button>
           </div>
 
-          <div class="va-table-card">
-            <div class="va-table-hdr">
-              <div class="va-table-title">
-                <i class="bi bi-table" style="color:var(--teal)"></i>
-                Unidades en Circulación
+          <!-- ── PANEL ACTIVOS ── -->
+          <div id="panel-activos" style="display:flex;flex-direction:column;gap:14px;flex:1">
+
+            <div class="va-stats">
+              <div class="va-stat">
+                <div class="va-stat-icon blue"><i class="bi bi-truck"></i></div>
+                <div><div class="va-stat-val" id="va-total">—</div><div class="va-stat-lbl">Total activos</div></div>
               </div>
-              <span style="font-size:11px;color:var(--muted)" id="va-last-update"></span>
+              <div class="va-stat">
+                <div class="va-stat-icon green"><i class="bi bi-reception-4"></i></div>
+                <div><div class="va-stat-val" id="va-en-ruta">—</div><div class="va-stat-lbl">En Ruta</div></div>
+              </div>
+              <div class="va-stat">
+                <div class="va-stat-icon amber"><i class="bi bi-pause-circle"></i></div>
+                <div><div class="va-stat-val" id="va-detenido">—</div><div class="va-stat-lbl">Detenidos</div></div>
+              </div>
+              <div class="va-stat">
+                <div class="va-stat-icon red"><i class="bi bi-wifi-off"></i></div>
+                <div><div class="va-stat-val" id="va-sin-senal">—</div><div class="va-stat-lbl">Sin Señal</div></div>
+              </div>
             </div>
-            <div class="va-table-wrap">
-              <table class="va-table">
-                <thead>
-                  <tr>
-                    <th>Vehículo</th>
-                    <th>Viaje / Medicamento</th>
-                    <th>Ruta</th>
-                    <th>Temperatura</th>
-                    <th>Estado</th>
-                    <th>Última Conexión</th>
-                    <th>Conductor</th>
-                    <th>Mapa</th>
-                  </tr>
-                </thead>
-                <tbody id="tablaViajesActivos">
-                  <tr class="va-empty-row">
-                    <td colspan="8">
-                      <i class="bi bi-hourglass-split" style="font-size:22px;display:block;margin-bottom:8px"></i>
-                      Cargando viajes...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+
+            <div class="va-table-card">
+              <div class="va-table-hdr">
+                <div class="va-table-title">
+                  <i class="bi bi-table" style="color:var(--teal)"></i>
+                  Unidades en Circulación
+                </div>
+                <span style="font-size:11px;color:var(--muted)" id="va-last-update"></span>
+              </div>
+              <div class="va-table-wrap">
+                <table class="va-table">
+                  <thead>
+                    <tr>
+                      <th>Vehículo</th>
+                      <th>Viaje / Medicamento</th>
+                      <th>Ruta</th>
+                      <th>Temperatura</th>
+                      <th>Estado</th>
+                      <th>Última Conexión</th>
+                      <th>Conductor</th>
+                      <th>Mapa</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaViajesActivos">
+                    <tr class="va-empty-row">
+                      <td colspan="8">
+                        <i class="bi bi-hourglass-split" style="font-size:22px;display:block;margin-bottom:8px"></i>
+                        Cargando viajes...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+
+          </div><!-- /panel-activos -->
+
+          <!-- ── PANEL HISTORIAL ── -->
+          <div id="panel-historial" style="display:none;flex:1">
+
+            <div class="va-table-card">
+              <div class="va-table-hdr">
+                <div class="va-table-title">
+                  <i class="bi bi-clock-history" style="color:var(--indigo)"></i>
+                  Historial de Viajes
+                </div>
+                <span style="font-size:11px;color:var(--muted)" id="va-hist-update"></span>
+              </div>
+              <div class="va-table-wrap">
+                <table class="va-hist-table">
+                  <thead>
+                    <tr>
+                      <th>Vehículo</th>
+                      <th>Viaje / Medicamento</th>
+                      <th>Ruta</th>
+                      <th>Periodo</th>
+                      <th>Temp. Máx.</th>
+                      <th>Lecturas</th>
+                      <th>Resultado</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaHistorial">
+                    <tr class="va-empty-row">
+                      <td colspan="8">
+                        <i class="bi bi-clock-history" style="font-size:22px;display:block;margin-bottom:8px"></i>
+                        Cargando historial...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div><!-- /panel-historial -->
 
         </div>
       </section>
@@ -1782,15 +1928,25 @@ function showDashView(view, el = null) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   if (el) el.classList.add('active');
 
-  const resumenItems  = document.querySelectorAll('.view-resumen');
-  const usuarios      = document.getElementById('view-usuarios');
-  const vehiculos     = document.getElementById('view-vehiculos');
-  const viajesActivos = document.getElementById('view-viajes-activos');
+  const resumenItems    = document.querySelectorAll('.view-resumen');
+  const usuarios        = document.getElementById('view-usuarios');
+  const vehiculos       = document.getElementById('view-vehiculos');
+  const medicamentos    = document.getElementById('view-medicamentos');
+  const viajesActivos   = document.getElementById('view-viajes-activos');
 
   usuarios?.classList.remove('active');
   vehiculos?.classList.remove('active');
+  medicamentos?.classList.remove('active');
   viajesActivos?.classList.remove('active');
   document.getElementById('view-config')?.classList.remove('active');
+
+  if (view === 'medicamentos') {
+    resumenItems.forEach(x => x.classList.add('hidden-resumen'));
+    medicamentos?.classList.add('active');
+    setTopbar('Medicamentos y Control de Temperatura', 'Catálogo de medicamentos con rangos de temperatura — el sistema genera alertas automáticas por viaje');
+    cargarMedicamentos();
+    return;
+  }
 
   if (view === 'usuarios') {
     resumenItems.forEach(x => x.classList.add('hidden-resumen'));
@@ -1811,8 +1967,8 @@ function showDashView(view, el = null) {
   if (view === 'viajes-activos') {
     resumenItems.forEach(x => x.classList.add('hidden-resumen'));
     viajesActivos?.classList.add('active');
-    setTopbar('Viajes Activos', 'Monitoreo en tiempo real de vehículos en circulación');
-    cargarViajesActivos();
+    setTopbar('Viajes', 'Monitoreo activo e historial de rutas de distribución');
+    switchViajesTab('activos');
     return;
   }
 
@@ -1907,6 +2063,72 @@ async function eliminarUsuario(id) {
 }
 
 // VEHÍCULOS
+// ── MEDICAMENTOS ─────────────────────────────────────────────
+async function cargarMedicamentos() {
+  const tbody = document.getElementById('tablaMedicamentos');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="5" class="crud-empty">Cargando medicamentos...</td></tr>';
+  try {
+    const data = await apiRequest('/medicamentos');
+    const meds = data.medicamentos || [];
+    if (!meds.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="crud-empty">No hay medicamentos registrados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = meds.map(m => {
+      const rangeColor = m.temp_min < 0 ? 'var(--indigo)' : (m.temp_max <= 8 ? 'var(--blue)' : 'var(--amber)');
+      return `
+      <tr>
+        <td style="font-weight:600"><i class="bi bi-capsule-pill" style="color:${rangeColor};margin-right:5px"></i>${esc(m.nombre)}</td>
+        <td>
+          <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.12);color:${rangeColor};border-radius:20px;padding:2px 10px;font-size:12px;font-weight:600">
+            <i class="bi bi-thermometer-half"></i> ${m.temp_min} °C — ${m.temp_max} °C
+          </span>
+        </td>
+        <td style="color:var(--muted);font-size:12px">${esc(m.descripcion || '—')}</td>
+        <td><span class="crud-badge ${m.activo ? 'activo' : 'inactivo'}">${m.activo ? 'Activo' : 'Inactivo'}</span></td>
+        <td>
+          <button class="btn-blue-soft" onclick='editarMedicamento(${JSON.stringify(m)})'><i class="bi bi-pencil"></i></button>
+          <button class="btn-danger-soft" onclick="eliminarMedicamento(${m.id})"><i class="bi bi-trash"></i></button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" class="crud-empty">${esc(err.message)}</td></tr>`;
+  }
+}
+
+function resetMedicamentoForm() {
+  document.getElementById('formMedicamento')?.reset();
+  document.getElementById('med_id').value = '';
+  document.getElementById('med_activo_group').style.display = 'none';
+  document.getElementById('med-form-title').textContent = 'Registrar medicamento';
+  document.getElementById('btnMedGuardar').textContent = 'Guardar';
+}
+
+function editarMedicamento(m) {
+  document.getElementById('med_id').value = m.id;
+  document.getElementById('med_nombre').value = m.nombre || '';
+  document.getElementById('med_descripcion').value = m.descripcion || '';
+  document.getElementById('med_temp_min').value = m.temp_min ?? '';
+  document.getElementById('med_temp_max').value = m.temp_max ?? '';
+  document.getElementById('med_activo').value = m.activo ? '1' : '0';
+  document.getElementById('med_activo_group').style.display = 'block';
+  document.getElementById('med-form-title').textContent = 'Modificar medicamento';
+  document.getElementById('btnMedGuardar').textContent = 'Actualizar';
+}
+
+async function eliminarMedicamento(id) {
+  if (!confirm('¿Eliminar este medicamento del catálogo?')) return;
+  try {
+    await apiRequest(`/medicamentos/${id}`, { method: 'DELETE' });
+    showCrudMsg('medicamentos-msg', 'Medicamento eliminado correctamente.');
+    cargarMedicamentos();
+  } catch (err) {
+    showCrudMsg('medicamentos-msg', err.message, false);
+  }
+}
+
 async function cargarVehiculos() {
   const tbody = document.getElementById('tablaVehiculos');
   if (!tbody) return;
@@ -1972,7 +2194,119 @@ async function eliminarVehiculo(id) {
   }
 }
 
-// ── VIAJES ACTIVOS ─────────────────────────────────────────
+// ── VIAJES (ACTIVOS + HISTORIAL) ──────────────────────────
+let _viajesTab = 'activos';
+
+function switchViajesTab(tab) {
+  _viajesTab = tab;
+  const panelActivos   = document.getElementById('panel-activos');
+  const panelHistorial = document.getElementById('panel-historial');
+  document.getElementById('tab-activos').classList.toggle('active',   tab === 'activos');
+  document.getElementById('tab-historial').classList.toggle('active', tab === 'historial');
+  if (panelActivos)   panelActivos.style.display   = tab === 'activos'   ? 'flex' : 'none';
+  if (panelHistorial) panelHistorial.style.display = tab === 'historial' ? 'block' : 'none';
+  if (tab === 'activos')   cargarViajesActivos();
+  if (tab === 'historial') cargarHistorialViajes();
+}
+
+function refrescarViajesTab() {
+  if (_viajesTab === 'activos')   cargarViajesActivos();
+  if (_viajesTab === 'historial') cargarHistorialViajes();
+}
+
+async function cargarHistorialViajes() {
+  const tbody = document.getElementById('tablaHistorial');
+  if (!tbody) return;
+
+  const icon = document.getElementById('va-refresh-icon');
+  if (icon) icon.style.animation = 'spin 1s linear infinite';
+
+  try {
+    const data   = await apiRequest('/viajes-historial');
+    const viajes = data.viajes || [];
+
+    document.getElementById('va-hist-update').textContent =
+      'Actualizado: ' + new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+    if (!viajes.length) {
+      tbody.innerHTML = `<tr class="va-empty-row"><td colspan="8">
+        <i class="bi bi-clock-history" style="font-size:24px;display:block;margin-bottom:8px;color:var(--muted)"></i>
+        No hay viajes en el historial.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = viajes.map(v => {
+      // Periodo
+      let periodo = '—';
+      if (v.primera_lectura && v.ultima_lectura) {
+        const fmt = ts => new Date(ts * 1000).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'});
+        periodo = fmt(v.primera_lectura) + ' – ' + fmt(v.ultima_lectura);
+      } else if (v.viaje_created) {
+        periodo = new Date(v.viaje_created * 1000).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'2-digit'});
+      }
+
+      // Temp máxima con color
+      const tmax = v.temp_maxima != null ? parseFloat(v.temp_maxima) : null;
+      const tmaxClass = tmax == null ? 'na' : tmax > v.temp_max ? 'crit' : tmax > v.temp_max * 0.9 ? 'warn' : 'ok';
+      const tmaxStr   = tmax != null ? tmax.toFixed(1) + ' °C' : '—';
+
+      // Resultado (alertas/lecturas críticas)
+      let resHtml;
+      if (!v.total_lecturas) {
+        resHtml = '<span class="va-alerta-pill ok"><i class="bi bi-dash"></i> Sin datos</span>';
+      } else if (v.lecturas_criticas > 0) {
+        resHtml = `<span class="va-alerta-pill crit"><i class="bi bi-exclamation-triangle-fill"></i> ${v.lecturas_criticas} alertas</span>`;
+      } else {
+        resHtml = '<span class="va-alerta-pill ok"><i class="bi bi-check-circle-fill"></i> Sin alertas</span>';
+      }
+
+      // Estado badge
+      const est   = (v.viaje_estado || 'otro').toLowerCase();
+      const estCls = est === 'completado' ? 'completado' : est === 'cancelado' ? 'cancelado' : 'otro';
+      const estIcon = est === 'completado' ? 'bi-check-circle' : est === 'cancelado' ? 'bi-x-circle' : 'bi-archive';
+
+      return `<tr>
+        <td>
+          <div class="va-veh-cell">
+            <span class="va-veh-badge">${esc(v.vehiculo_id)}</span>
+            <div>
+              <div style="font-size:12px;font-weight:600">${esc(v.placas || '—')}</div>
+              <div class="va-veh-sub">${esc((v.marca||'') + ' ' + (v.modelo||'')).trim() || '—'}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div style="font-size:12px;font-weight:500">${esc(v.viaje_id)}</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:2px"><i class="bi bi-capsule" style="font-size:10px"></i> ${esc(v.medicamento)}</div>
+        </td>
+        <td>
+          <div class="va-ruta">
+            <span class="va-r-loc">${esc(v.origen)}</span>
+            <i class="bi bi-arrow-right va-r-arr"></i>
+            <span class="va-r-loc">${esc(v.destino)}</span>
+          </div>
+        </td>
+        <td style="font-size:11px;color:var(--sub);white-space:nowrap">${periodo}</td>
+        <td><span class="va-temp ${tmaxClass}" style="font-size:12px">${tmaxStr}</span></td>
+        <td style="font-size:12px;color:var(--sub)">${v.total_lecturas || '—'}</td>
+        <td>${resHtml}</td>
+        <td>
+          <span class="va-estado-hist ${estCls}">
+            <i class="bi ${estIcon}"></i> ${esc(v.viaje_estado || '—')}
+          </span>
+        </td>
+      </tr>`;
+    }).join('');
+
+  } catch (err) {
+    tbody.innerHTML = `<tr class="va-empty-row"><td colspan="8">
+      <i class="bi bi-exclamation-triangle" style="font-size:22px;display:block;margin-bottom:8px;color:var(--red)"></i>
+      ${esc(err.message)}</td></tr>`;
+  } finally {
+    if (icon) icon.style.animation = '';
+  }
+}
+
 async function cargarViajesActivos() {
   const tbody = document.getElementById('tablaViajesActivos');
   if (!tbody) return;
@@ -1993,6 +2327,8 @@ async function cargarViajesActivos() {
     document.getElementById('va-en-ruta').textContent  = enRuta;
     document.getElementById('va-detenido').textContent = detenido;
     document.getElementById('va-sin-senal').textContent= sinSenal;
+    const badge = document.getElementById('tab-badge-activos');
+    if (badge) badge.textContent = total;
     document.getElementById('va-last-update').textContent =
       'Actualizado: ' + new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
@@ -2363,6 +2699,35 @@ window.addEventListener('load',()=>{
       cargarVehiculos();
     } catch (err) {
       showCrudMsg('vehiculos-msg', err.message, false);
+    }
+  });
+
+  document.getElementById('formMedicamento')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('med_id').value;
+    const tMin = parseFloat(document.getElementById('med_temp_min').value);
+    const tMax = parseFloat(document.getElementById('med_temp_max').value);
+    if (tMin >= tMax) {
+      showCrudMsg('medicamentos-msg', 'La temperatura mínima debe ser menor que la máxima.', false);
+      return;
+    }
+    const payload = {
+      nombre:      document.getElementById('med_nombre').value.trim(),
+      descripcion: document.getElementById('med_descripcion').value.trim(),
+      temp_min:    tMin,
+      temp_max:    tMax,
+      activo:      parseInt(document.getElementById('med_activo').value || '1'),
+    };
+    try {
+      await apiRequest(id ? `/medicamentos/${id}` : '/medicamentos', {
+        method: id ? 'PUT' : 'POST',
+        body: JSON.stringify(payload)
+      });
+      showCrudMsg('medicamentos-msg', id ? 'Medicamento actualizado correctamente.' : 'Medicamento registrado correctamente.');
+      resetMedicamentoForm();
+      cargarMedicamentos();
+    } catch (err) {
+      showCrudMsg('medicamentos-msg', err.message, false);
     }
   });
 
