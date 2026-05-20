@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FríoSeguro — Cadena de Frío Resiliente</title>
+<title>MedicMaps — Tecnología que protege vidas</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -23,7 +23,7 @@ body.light-mode{
   --text:#0f172a;--sub:#475569;--muted:#94a3b8;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden;}
 
 /* ── Bootstrap 5.3: neutralizar conflictos de grid y herencia ── */
 /* Bootstrap .row > * sobreescribe padding — lo revertimos con mayor especificidad */
@@ -386,7 +386,7 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
 
 /* ═══════════ DASHBOARD ═══════════ */
 #page-dash{height:100vh;display:flex;overflow:hidden;}
-#page-landing{overflow-y:auto;}
+#page-landing{height:100vh;overflow-y:auto;}
 
 /* SIDEBAR */
 .sidebar{
@@ -749,16 +749,16 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
   <!-- NAV -->
   <nav class="land-nav">
     <div class="brand">
-      <div class="brand-shield"><i class="bi bi-shield-fill"></i></div>
+      <div class="brand-shield"><i class="bi bi-heart-pulse-fill"></i></div>
       <div>
-        <div class="brand-name">Frío<span>Seguro</span></div>
-        <div class="brand-tag">Cadena de frío, siempre segura</div>
+        <div class="brand-name">Medic<span>Maps</span></div>
+        <div class="brand-tag">Tecnología que protege vidas</div>
       </div>
     </div>
     <ul>
       <li><a href="#prob">El Problema</a></li>
-      <li><a href="#func">Solución</a></li>
-      <li><a href="#meto">Metodología</a></li>
+      <li><a href="#solucion">Solución</a></li>
+      <li><a href="#servicios">Servicios</a></li>
     </ul>
     <button class="btn-nav-cta" onclick="showLogin()"><i class="bi bi-box-arrow-in-right"></i> Acceder</button>
   </nav>
@@ -770,14 +770,13 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
     <div class="hero-content">
       <div class="hero-badge">
         <div class="badge-dot"></div>
-        <span class="badge-txt">OFFLINE-FIRST · EDOMEX 2026</span>
+        <span class="badge-txt">HACKATEC 2026 · EDOMEX</span>
       </div>
       <h1>
-        <span class="h1-white">Cadena de frío</span><br>
-        <span class="h1-white">resiliente en</span><br>
-        <span class="h1-blue">zonas marginales</span>
+        <span class="h1-white">Tecnología que</span><br>
+        <span class="h1-blue">protege vidas</span>
       </h1>
-      <p class="hero-desc">Monitoreo de temperatura y geolocalización para insumos médicos en rutas sin señal del Estado de México. Zero data loss garantizado.</p>
+      <p class="hero-desc">MedicMaps protege medicamentos sensibles a la temperatura durante el transporte, combinando dispositivos inteligentes, sistemas de enfriamiento de respaldo y monitoreo en tiempo real, incluso sin señal celular.</p>
       <div class="hero-btns">
         <button class="btn-hero-primary" onclick="showLogin()">
           <i class="bi bi-speedometer2"></i> Ingresar al Dashboard
@@ -810,15 +809,15 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
   <div class="land-stats">
     <div class="ls-item">
       <div class="ls-icon i1"><i class="bi bi-truck"></i></div>
-      <div><div class="num" id="l1">0</div><div class="lbl">Viajes monitoreados</div></div>
+      <div><div class="num" id="l1">0</div><div class="lbl">Envíos monitoreados</div></div>
     </div>
     <div class="ls-item">
       <div class="ls-icon i2"><i class="bi bi-exclamation-triangle"></i></div>
       <div><div class="num" id="l2">0</div><div class="lbl">Alertas térmicas detectadas</div></div>
     </div>
     <div class="ls-item">
-      <div class="ls-icon i3"><i class="bi bi-geo-alt"></i></div>
-      <div><div class="num" id="l3">0</div><div class="lbl">Municipios cubiertos</div></div>
+      <div class="ls-icon i3"><i class="bi bi-capsule-pill"></i></div>
+      <div><div class="num" id="l3">0</div><div class="lbl">Medicamentos protegidos</div></div>
     </div>
     <div class="ls-item">
       <div class="ls-icon i4"><i class="bi bi-wifi-off"></i></div>
@@ -831,97 +830,222 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
     <div class="prob-grid">
       <div class="prob-text">
         <div class="s-tag"><i class="bi bi-exclamation-circle"></i> EL PROBLEMA</div>
-        <h2 class="s-title">Cuando el camión desaparece del radar</h2>
-        <p>Los vehículos del ISEM recorren rutas donde la cobertura celular es inexistente. Los sistemas convencionales asumen conectividad permanente.</p>
-        <div class="prob-quote">"Durante las 2–3 horas que el transporte pasa incomunicado en la sierra, las vacunas sufren un choque térmico invisible."</div>
-        <p>Para cuando el camión recupera señal, el daño ya es irreversible. Sin registro continuo, el lote se aplica como si estuviera en perfecto estado.</p>
+        <h2 class="s-title">Cada ruptura en la cadena de frío cuesta vidas</h2>
+        <p>Durante el transporte de medicamentos pueden ocurrir fallas en la refrigeración o pérdidas de señal que impiden saber qué sucedió realmente en el trayecto.</p>
+        <div class="prob-quote">"Sin un registro confiable, los medicamentos pueden echarse a perder, generan pérdidas económicas y se pone en riesgo la salud de los pacientes sin evidencia para auditorías."</div>
+        <p>Esta problemática es especialmente crítica en zonas rurales y rutas de difícil acceso del Estado de México, donde la conectividad es limitada y el transporte es la única vía.</p>
       </div>
       <div class="scenario">
         <div class="sc-label">Escenario real — Toluca → Sultepec</div>
         <div class="tl">
           <div class="tl-dot dg"></div>
-          <div class="tl-t"><strong>06:00 — Salida central</strong><span>Online. Temp: 4.2°C. GPS activo.</span></div>
+          <div class="tl-t"><strong>06:00 — Salida del almacén</strong><span>Online. Insulina a 5.2°C. GPS activo.</span></div>
         </div>
         <div class="tl">
           <div class="tl-dot da"></div>
-          <div class="tl-t"><strong>08:30 — Zona marginal</strong><span>Sin señal. Sistema convencional pierde el rastro.</span></div>
+          <div class="tl-t"><strong>08:30 — Zona sin cobertura</strong><span>Sin señal. Sistema convencional pierde el rastro.</span></div>
         </div>
         <div class="tl">
           <div class="tl-dot dr"></div>
-          <div class="tl-t"><strong>09:15 — Falla de refrigeración</strong><span>Temperatura sube a 14°C. Nadie lo sabe.</span></div>
+          <div class="tl-t"><strong>09:15 — Falla de refrigeración</strong><span>Temperatura sube a 14°C. Nadie lo sabe aún.</span></div>
         </div>
         <div class="tl">
           <div class="tl-dot dg"></div>
-          <div class="tl-t"><strong>11:00 — Señal recuperada</strong><span>FríoSeguro sincroniza 147 registros. Alerta georreferenciada generada.</span></div>
+          <div class="tl-t"><strong>11:00 — Señal recuperada</strong><span>MedicMaps Sentinel sincroniza 147 registros. Alerta georreferenciada generada.</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SOLUCIÓN / FEATURES -->
-  <section class="section" id="func">
-    <div class="s-tag"><i class="bi bi-cpu"></i> SOLUCIÓN</div>
-    <h2 class="s-title">Seis pilares de resiliencia</h2>
-    <p class="s-sub">Arquitectura Offline-First diseñada para las condiciones del territorio mexiquense. Cada componente funciona sin internet.</p>
-    <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);">
-      <div class="feat-card f1">
-        <div class="feat-ico fi1"><i class="bi bi-hdd-stack"></i></div>
-        <h3>Almacenamiento Offline</h3>
-        <p>Cola local SQLite. Cada lectura se guarda con timestamp real independiente de conectividad. Zero data loss garantizado.</p>
+  <!-- SOLUCIÓN -->
+  <section class="section" id="solucion">
+    <div class="s-tag"><i class="bi bi-shield-check"></i> NUESTRA SOLUCIÓN</div>
+    <h2 class="s-title">Tres componentes, trazabilidad total</h2>
+    <p class="s-sub">MedicMaps garantiza la cadena de frío con hardware inteligente, sistema de enfriamiento de respaldo y una plataforma web de monitoreo.</p>
+
+    <!-- Sentinel -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:28px;align-items:start;">
+      <div class="feat-card f1" style="border-left:3px solid #60a5fa;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+          <div class="feat-ico fi1" style="margin:0"><i class="bi bi-cpu-fill"></i></div>
+          <div>
+            <div style="font-size:10px;color:#60a5fa;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">HARDWARE</div>
+            <h3 style="margin:0;font-size:18px;">MedicMaps Sentinel</h3>
+          </div>
+        </div>
+        <p style="color:rgba(255,255,255,.55);font-size:13px;line-height:1.75;margin-bottom:16px;">La caja negra de la cadena de frío. Dispositivo compacto instalado en vehículos refrigerados que registra todo lo que ocurre durante el transporte.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:12px 14px;">
+            <div style="font-size:18px;color:#60a5fa;margin-bottom:4px;"><i class="bi bi-thermometer-half"></i></div>
+            <div style="font-size:12px;font-weight:600;color:#fff;">Temperatura</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);">Interna continua</div>
+          </div>
+          <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:12px 14px;">
+            <div style="font-size:18px;color:#60a5fa;margin-bottom:4px;"><i class="bi bi-geo-alt-fill"></i></div>
+            <div style="font-size:12px;font-weight:600;color:#fff;">GPS</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);">Ubicación exacta</div>
+          </div>
+          <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:12px 14px;">
+            <div style="font-size:18px;color:#60a5fa;margin-bottom:4px;"><i class="bi bi-door-open-fill"></i></div>
+            <div style="font-size:12px;font-weight:600;color:#fff;">Apertura de puerta</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);">Sensor de acceso</div>
+          </div>
+          <div style="background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:12px 14px;">
+            <div style="font-size:18px;color:#60a5fa;margin-bottom:4px;"><i class="bi bi-hdd-stack-fill"></i></div>
+            <div style="font-size:12px;font-weight:600;color:#fff;">Offline-First</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);">Zero data loss</div>
+          </div>
+        </div>
       </div>
-      <div class="feat-card f2">
-        <div class="feat-ico fi2"><i class="bi bi-thermometer-half"></i></div>
-        <h3>Telemetría Térmica</h3>
-        <p>Monitoreo continuo de temperatura. Algoritmo de degradación evalúa retroactivamente si el lote superó los umbrales permitidos.</p>
+
+      <div class="feat-card f3" style="border-left:3px solid #2dd4bf;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+          <div class="feat-ico fi3" style="margin:0"><i class="bi bi-snow2"></i></div>
+          <div>
+            <div style="font-size:10px;color:#2dd4bf;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">HARDWARE</div>
+            <h3 style="margin:0;font-size:18px;">CryoCore</h3>
+          </div>
+        </div>
+        <p style="color:rgba(255,255,255,.55);font-size:13px;line-height:1.75;margin-bottom:16px;">Sistema de enfriamiento de emergencia que mantiene la temperatura segura si el sistema principal de refrigeración falla, protegiendo vacunas e insulina durante el trayecto.</p>
+        <div style="background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.2);border-radius:12px;padding:16px;">
+          <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:8px;font-family:var(--mono);letter-spacing:.5px;">OBJETIVO PRINCIPAL</div>
+          <div style="font-size:14px;font-weight:600;color:#fff;line-height:1.6;">Evitar que vacunas, insulina y medicamentos críticos se deterioren ante una falla del sistema principal de refrigeración.</div>
+        </div>
       </div>
-      <div class="feat-card f3">
-        <div class="feat-ico fi3"><i class="bi bi-geo-alt"></i></div>
-        <h3>Georreferenciación</h3>
-        <p>Leaflet + OpenStreetMap con línea verde online y trazado naranja offline. Marcador exacto de la anomalía térmica detectada.</p>
+    </div>
+
+    <!-- Plataforma Web -->
+    <div class="feat-card f4" style="border-left:3px solid #c084fc;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="feat-ico fi4" style="margin:0"><i class="bi bi-display"></i></div>
+          <div>
+            <div style="font-size:10px;color:#c084fc;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">PLATAFORMA WEB</div>
+            <h3 style="margin:0;font-size:18px;">Dashboard de Control</h3>
+          </div>
+        </div>
       </div>
-      <div class="feat-card f4">
-        <div class="feat-ico fi4"><i class="bi bi-cpu"></i></div>
-        <h3>IA Predictiva Local</h3>
-        <p>Análisis de riesgo con Ollama corriendo localmente. Sin nube. Evalúa daño acumulado y predice el estado final del lote.</p>
-      </div>
-      <div class="feat-card f5">
-        <div class="feat-ico fi5"><i class="bi bi-bell"></i></div>
-        <h3>Alertas en Tiempo Real</h3>
-        <p>Notificaciones automáticas por excursión térmica, puerta abierta y pérdida de señal. Clasificadas por nivel de severidad.</p>
-      </div>
-      <div class="feat-card f6">
-        <div class="feat-ico fi6"><i class="bi bi-capsule-pill"></i></div>
-        <h3>Control por Medicamento</h3>
-        <p>Catálogo de medicamentos con rangos de temperatura específicos. El sistema adapta los umbrales de alerta por tipo de carga.</p>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">
+        <div style="text-align:center;padding:14px 10px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15);border-radius:10px;">
+          <i class="bi bi-map" style="font-size:20px;color:#c084fc;display:block;margin-bottom:6px;"></i>
+          <div style="font-size:11px;font-weight:600;color:#fff;">Rutas en vivo</div>
+        </div>
+        <div style="text-align:center;padding:14px 10px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15);border-radius:10px;">
+          <i class="bi bi-bell-fill" style="font-size:20px;color:#c084fc;display:block;margin-bottom:6px;"></i>
+          <div style="font-size:11px;font-weight:600;color:#fff;">Alertas instantáneas</div>
+        </div>
+        <div style="text-align:center;padding:14px 10px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15);border-radius:10px;">
+          <i class="bi bi-file-earmark-bar-graph" style="font-size:20px;color:#c084fc;display:block;margin-bottom:6px;"></i>
+          <div style="font-size:11px;font-weight:600;color:#fff;">Reportes históricos</div>
+        </div>
+        <div style="text-align:center;padding:14px 10px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15);border-radius:10px;">
+          <i class="bi bi-shield-check" style="font-size:20px;color:#c084fc;display:block;margin-bottom:6px;"></i>
+          <div style="font-size:11px;font-weight:600;color:#fff;">Auditoría completa</div>
+        </div>
+        <div style="text-align:center;padding:14px 10px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.15);border-radius:10px;">
+          <i class="bi bi-cpu" style="font-size:20px;color:#c084fc;display:block;margin-bottom:6px;"></i>
+          <div style="font-size:11px;font-weight:600;color:#fff;">IA Predictiva</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- METODOLOGÍA -->
-  <section class="section s-bg2" id="meto">
-    <div class="s-tag"><i class="bi bi-diagram-3"></i> METODOLOGÍA</div>
-    <h2 class="s-title">4 fases de operación</h2>
-    <p class="s-sub">Flujo completo desde la captura offline hasta la auditoría georreferenciada en el centro de control.</p>
-    <div class="meto-grid">
-      <div class="meto-card">
-        <div class="meto-num">FASE 01</div>
-        <h4>Simulación de cobertura</h4>
-        <p>Wokwi/Tinkercad + MODO_RURAL corta HTTP y mantiene lectura continua a JSON local en el dispositivo.</p>
+  <!-- SERVICIOS / CLIENTES -->
+  <section class="section s-bg2" id="servicios">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;">
+      <div>
+        <div class="s-tag"><i class="bi bi-briefcase"></i> SERVICIOS INCLUIDOS</div>
+        <h2 class="s-title">Todo lo que necesitas</h2>
+        <p class="s-sub" style="margin-bottom:28px;">Una solución completa desde la instalación hasta el soporte continuo.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;">
+            <i class="bi bi-tools" style="color:#60a5fa;font-size:16px;flex-shrink:0;"></i>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#fff;">Instalación profesional</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);">Configuración completa en el vehículo</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;">
+            <i class="bi bi-wrench-adjustable" style="color:#fbbf24;font-size:16px;flex-shrink:0;"></i>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#fff;">Mantenimiento preventivo</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);">Revisiones programadas periódicas</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;">
+            <i class="bi bi-headset" style="color:#4ade80;font-size:16px;flex-shrink:0;"></i>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#fff;">Soporte técnico 24/7</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);">Asistencia cuando más lo necesitas</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;">
+            <i class="bi bi-mortarboard" style="color:#c084fc;font-size:16px;flex-shrink:0;"></i>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#fff;">Capacitación incluida</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);">Entrenamiento para tu equipo operativo</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;">
+            <i class="bi bi-arrow-repeat" style="color:#2dd4bf;font-size:16px;flex-shrink:0;"></i>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#fff;">Actualizaciones continuas</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.4);">Suscripción mensual o anual</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="meto-card">
-        <div class="meto-num">FASE 02</div>
-        <h4>Backend de reconciliación</h4>
-        <p>PHP 8.3 procesa el batch histórico offline y evalúa el algoritmo de degradación térmica acumulada.</p>
+
+      <div>
+        <div class="s-tag"><i class="bi bi-building"></i> CLIENTES OBJETIVO</div>
+        <h2 class="s-title">¿Para quién es MedicMaps?</h2>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px;">
+          <div style="padding:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;text-align:center;">
+            <i class="bi bi-truck" style="font-size:28px;color:#60a5fa;display:block;margin-bottom:10px;"></i>
+            <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Logística farmacéutica</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);">Empresas de distribución de medicamentos</div>
+          </div>
+          <div style="padding:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;text-align:center;">
+            <i class="bi bi-hospital" style="font-size:28px;color:#f87171;display:block;margin-bottom:10px;"></i>
+            <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Hospitales y clínicas</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);">Instituciones del sector salud</div>
+          </div>
+          <div style="padding:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;text-align:center;">
+            <i class="bi bi-eyedropper" style="font-size:28px;color:#fbbf24;display:block;margin-bottom:10px;"></i>
+            <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Laboratorios</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);">Investigación y manufactura farmacéutica</div>
+          </div>
+          <div style="padding:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;text-align:center;">
+            <i class="bi bi-bank2" style="font-size:28px;color:#4ade80;display:block;margin-bottom:10px;"></i>
+            <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;">Inst. de salud pública</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);">IMSS, ISSSTE, ISEM y similares</div>
+          </div>
+        </div>
       </div>
-      <div class="meto-card">
-        <div class="meto-num">FASE 03</div>
-        <h4>Mapa de cobertura</h4>
-        <p>Línea verde continua (online) y trazado naranja/rojo punteado (offline) sobre OpenStreetMap.</p>
+    </div>
+  </section>
+
+  <!-- BENEFICIOS -->
+  <section class="section">
+    <div style="text-align:center;max-width:620px;margin:0 auto 52px;">
+      <div class="s-tag" style="display:inline-flex;"><i class="bi bi-stars"></i> BENEFICIOS</div>
+      <h2 class="s-title">Por qué elegir MedicMaps</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card f1">
+        <div class="feat-ico fi1"><i class="bi bi-graph-down-arrow"></i></div>
+        <h3>Reduce pérdidas por temperatura</h3>
+        <p>Detecta excursiones térmicas en el momento en que ocurren, no cuando ya es demasiado tarde para actuar.</p>
       </div>
-      <div class="meto-card">
-        <div class="meto-num">FASE 04</div>
-        <h4>Puntos críticos</h4>
-        <p>Leaflet.js renderiza marcadores de alerta en las coordenadas exactas donde ocurrió la anomalía.</p>
+      <div class="feat-card f5">
+        <div class="feat-ico fi5"><i class="bi bi-patch-check-fill"></i></div>
+        <h3>Evidencia completa del trayecto</h3>
+        <p>Cada lectura queda registrada con timestamp y coordenadas GPS. Auditorías e impugnaciones respaldadas por datos.</p>
+      </div>
+      <div class="feat-card f6">
+        <div class="feat-ico fi6"><i class="bi bi-heart-pulse"></i></div>
+        <h3>Protección de pacientes</h3>
+        <p>Garantiza que vacunas, insulina y medicamentos críticos lleguen en condiciones óptimas a quienes los necesitan.</p>
       </div>
     </div>
   </section>
@@ -930,7 +1054,7 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
   <section class="cta">
     <div class="cta-inner">
       <h2>Protege cada dosis.<br><span>En cada kilómetro.</span></h2>
-      <p>Sistema de auditoría de cadena de frío para las rutas marginales del Estado de México. Desarrollado en HACKATEC 2026.</p>
+      <p>Sistema de monitoreo de cadena de frío desarrollado en HACKATEC 2026 — TESC Izcalli, Estado de México.</p>
       <button class="btn-cta" onclick="showLogin()">
         <i class="bi bi-box-arrow-in-right"></i> Acceder al Sistema
       </button>
@@ -940,9 +1064,9 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
   <!-- FOOTER -->
   <footer>
     <div class="brand">
-      <div class="brand-shield" style="width:28px;height:28px;font-size:13px"><i class="bi bi-shield-fill"></i></div>
+      <div class="brand-shield" style="width:28px;height:28px;font-size:13px"><i class="bi bi-heart-pulse-fill"></i></div>
       <div>
-        <div class="brand-name" style="font-size:14px">Frío<span>Seguro</span></div>
+        <div class="brand-name" style="font-size:14px">Medic<span>Maps</span></div>
       </div>
     </div>
     <p>INNOVATEC / HACKATEC 2026 — TESC Izcalli</p>
@@ -952,7 +1076,7 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
 </div>
 
 <!-- ═══════════════════ LOGIN ═══════════════════ -->
-<div id="page-login">
+<div id="page-login" style="display:none">
   <div class="login-bg"></div><div class="login-glow"></div>
   <div class="login-card">
     <div class="lc-top">
@@ -978,7 +1102,7 @@ footer p{font-size:12px;color:rgba(255,255,255,.25);}
 </div>
 
 <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
-<div id="page-dash">
+<div id="page-dash" style="display:none">
   <!-- SYNC OVERLAY -->
   <div class="sync-ov" id="sync-ov">
     <div class="sync-spin"></div>
