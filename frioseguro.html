@@ -23,7 +23,7 @@ body.light-mode{
   --text:#0f172a;--sub:#475569;--muted:#94a3b8;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);}
 
 /* ── Bootstrap 5.3: neutralizar conflictos de grid y herencia ── */
 /* Bootstrap .row > * sobreescribe padding — lo revertimos con mayor especificidad */
@@ -98,128 +98,267 @@ input{font-family:var(--font);}
 #page-login{display:none;}
 #page-dash{display:none;}
 
+/* NAV */
 .land-nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:16px 56px;
-  background:rgba(10,22,40,.9);backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--border);
+  padding:0 60px;height:64px;
+  background:rgba(5,13,26,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.07);
 }
 .brand{display:flex;align-items:center;gap:10px;}
 .brand-shield{
-  width:36px;height:36px;background:var(--blue-grad);border-radius:9px;
-  display:grid;place-items:center;color:#fff;font-size:18px;
-  box-shadow:0 4px 12px rgba(37,99,235,.4);
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#1d4ed8,#2563eb);
+  display:grid;place-items:center;color:#fff;font-size:17px;
+  box-shadow:0 0 20px rgba(37,99,235,.5);
 }
-.brand-name{font-size:20px;font-weight:700;letter-spacing:-.3px;}
-.brand-name span{color:var(--blue);}
-.brand-tag{font-size:9px;color:var(--muted);margin-top:1px;}
-.land-nav ul{display:flex;gap:30px;list-style:none;}
-.land-nav ul a{font-size:13px;color:var(--sub);transition:color .2s;}
-.land-nav ul a:hover{color:var(--text);}
+.brand-name{font-size:19px;font-weight:800;letter-spacing:-.5px;color:#fff;}
+.brand-name span{background:linear-gradient(90deg,#60a5fa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.brand-tag{font-size:9px;color:rgba(255,255,255,.3);margin-top:1px;letter-spacing:.5px;}
+.land-nav ul{display:flex;gap:32px;list-style:none;}
+.land-nav ul a{font-size:13px;color:rgba(255,255,255,.5);transition:color .2s;font-weight:500;}
+.land-nav ul a:hover{color:#fff;}
+.land-nav .btn-nav-cta{
+  background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+  color:#fff;border:none;padding:9px 22px;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  box-shadow:0 4px 15px rgba(37,99,235,.4);transition:all .2s;
+}
+.land-nav .btn-nav-cta:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.5);}
 
-/* Hero */
+/* HERO */
 .hero{
   min-height:100vh;display:flex;align-items:center;
-  padding:110px 56px 70px;position:relative;overflow:hidden;
+  padding:100px 60px 80px;position:relative;overflow:hidden;
+  background:#050d1a;
 }
-.hero-glow{
+.hero-aurora{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 50%,rgba(37,99,235,.18) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% 20%,rgba(14,165,233,.12) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 50% at 60% 90%,rgba(99,102,241,.08) 0%,transparent 50%);
+}
+.hero-dots{
   position:absolute;inset:0;
-  background:radial-gradient(ellipse at 25% 55%,rgba(37,99,235,.1) 0%,transparent 55%),
-             radial-gradient(ellipse at 80% 20%,rgba(20,184,166,.06) 0%,transparent 50%);
+  background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:32px 32px;
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black 40%,transparent 80%);
 }
-.hero-grid{
-  position:absolute;inset:0;
-  background-image:linear-gradient(rgba(26,58,92,.35) 1px,transparent 1px),
-                   linear-gradient(90deg,rgba(26,58,92,.35) 1px,transparent 1px);
-  background-size:48px 48px;
-  mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);
+.hero-content{
+  max-width:600px;position:relative;z-index:2;
+  animation:fadeUp .7s cubic-bezier(.16,1,.3,1);
 }
-.hero-content{max-width:620px;position:relative;z-index:1;animation:fadeUp .6s ease;}
-.hero-pill{
-  display:inline-flex;align-items:center;gap:7px;
-  background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);
-  border-radius:100px;padding:5px 14px;
-  font-family:var(--mono);font-size:10px;color:var(--blue);
-  margin-bottom:26px;letter-spacing:.5px;
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.3);
+  border-radius:100px;padding:6px 16px;margin-bottom:28px;
 }
-.pill-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse-glow 2s infinite;}
-.hero h1{font-size:clamp(36px,5vw,62px);font-weight:800;letter-spacing:-2px;line-height:1.06;margin-bottom:20px;}
-.hero h1 em{color:var(--blue);font-style:normal;}
-.hero p{font-size:16px;color:var(--sub);line-height:1.75;max-width:500px;margin-bottom:36px;}
-.hero-btns{display:flex;gap:12px;}
-.btn-lg{padding:13px 32px;font-size:15px;border-radius:10px;}
+.badge-dot{width:7px;height:7px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px rgba(34,197,94,.6);animation:pulse-glow 2s infinite;}
+.badge-txt{font-family:var(--mono);font-size:10px;color:#60a5fa;letter-spacing:1px;font-weight:600;}
+.hero h1{
+  font-size:clamp(40px,5.5vw,70px);font-weight:900;
+  letter-spacing:-3px;line-height:1.0;margin-bottom:22px;color:#fff;
+}
+.hero h1 .h1-white{color:#fff;}
+.hero h1 .h1-blue{
+  background:linear-gradient(135deg,#60a5fa,#38bdf8,#818cf8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-desc{
+  font-size:16px;color:rgba(255,255,255,.55);
+  line-height:1.8;max-width:480px;margin-bottom:40px;
+}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-hero-primary{
+  background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+  color:#fff;border:none;padding:14px 32px;border-radius:10px;
+  font-size:15px;font-weight:700;cursor:pointer;
+  box-shadow:0 8px 30px rgba(37,99,235,.45);transition:all .25s;
+  display:flex;align-items:center;gap:8px;
+}
+.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(37,99,235,.55);}
+.btn-hero-ghost{
+  background:transparent;color:rgba(255,255,255,.7);
+  border:1px solid rgba(255,255,255,.15);padding:14px 28px;border-radius:10px;
+  font-size:15px;font-weight:600;cursor:pointer;transition:all .25s;
+}
+.btn-hero-ghost:hover{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.3);}
 
-/* Hero right visual */
+/* Hero visual */
 .hero-visual{
-  position:absolute;right:56px;top:50%;transform:translateY(-50%);
-  width:460px;height:360px;z-index:1;border-radius:16px;overflow:hidden;
-  border:1px solid var(--border2);
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  position:absolute;right:60px;top:50%;transform:translateY(-50%);
+  width:480px;height:380px;z-index:2;border-radius:18px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(37,99,235,.2),inset 0 1px 0 rgba(255,255,255,.08);
 }
 #hero-map{width:100%;height:100%;}
 .hero-hud{
   position:absolute;bottom:14px;left:12px;right:12px;
-  background:rgba(10,22,40,.9);backdrop-filter:blur(8px);
-  border:1px solid var(--border2);border-radius:10px;
-  padding:10px 16px;display:flex;justify-content:space-between;
+  background:rgba(5,13,26,.9);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);border-radius:12px;
+  padding:12px 18px;display:flex;justify-content:space-between;align-items:center;
   z-index:1000;
 }
-.hud-item .hv{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green);}
-.hud-item .hl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.hud-item{text-align:center;}
+.hud-item .hv{font-family:var(--mono);font-size:14px;font-weight:700;color:#22c55e;}
+.hud-item .hl{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}
 
-/* Stats */
+/* STATS BAR */
 .land-stats{
-  padding:26px 56px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:0 60px;
+  background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(14,165,233,.06));
+  border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);
   display:flex;
 }
-.ls-item{flex:1;padding:0 36px;border-right:1px solid var(--border);}
+.ls-item{
+  flex:1;padding:32px 40px;border-right:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;gap:16px;
+}
 .ls-item:first-child{padding-left:0;}
 .ls-item:last-child{border-right:none;}
-.ls-item .num{font-size:32px;font-weight:800;color:var(--blue);letter-spacing:-1px;}
-.ls-item .lbl{font-size:12px;color:var(--sub);margin-top:2px;}
+.ls-icon{
+  width:46px;height:46px;border-radius:12px;flex-shrink:0;
+  display:grid;place-items:center;font-size:20px;
+}
+.ls-icon.i1{background:rgba(37,99,235,.15);color:#60a5fa;}
+.ls-icon.i2{background:rgba(239,68,68,.12);color:#f87171;}
+.ls-icon.i3{background:rgba(20,184,166,.12);color:#2dd4bf;}
+.ls-icon.i4{background:rgba(245,158,11,.12);color:#fbbf24;}
+.ls-item .num{font-size:34px;font-weight:900;color:#fff;letter-spacing:-1.5px;line-height:1;}
+.ls-item .lbl{font-size:12px;color:rgba(255,255,255,.4);margin-top:3px;line-height:1.3;}
 
-/* Sections */
-.section{padding:80px 56px;}
-.s-bg2{background:rgba(13,31,53,.5);}
-.s-tag{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
-.s-title{font-size:clamp(26px,3vw,40px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;}
-.s-sub{font-size:15px;color:var(--sub);line-height:1.75;max-width:540px;margin-bottom:48px;}
+/* SECTIONS */
+.section{padding:96px 60px;}
+.s-bg2{background:rgba(255,255,255,.02);}
+.s-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:10px;color:#60a5fa;
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;
+  background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.2);
+  padding:4px 12px;border-radius:100px;
+}
+.s-title{font-size:clamp(28px,3.5vw,44px);font-weight:900;letter-spacing:-2px;line-height:1.05;margin-bottom:16px;color:#fff;}
+.s-sub{font-size:16px;color:rgba(255,255,255,.5);line-height:1.8;max-width:520px;margin-bottom:52px;}
 
-/* Features */
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+/* FEATURES */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
 .feat-card{
-  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;
+  position:relative;border-radius:18px;padding:32px;overflow:hidden;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.07);
+  transition:all .3s cubic-bezier(.16,1,.3,1);
+}
+.feat-card::after{
+  content:'';position:absolute;inset:0;border-radius:18px;opacity:0;
+  transition:opacity .3s;pointer-events:none;
+}
+.feat-card.f1::after{background:radial-gradient(ellipse at 0% 0%,rgba(37,99,235,.12),transparent 60%);}
+.feat-card.f2::after{background:radial-gradient(ellipse at 0% 0%,rgba(245,158,11,.1),transparent 60%);}
+.feat-card.f3::after{background:radial-gradient(ellipse at 0% 0%,rgba(20,184,166,.1),transparent 60%);}
+.feat-card.f4::after{background:radial-gradient(ellipse at 0% 0%,rgba(168,85,247,.1),transparent 60%);}
+.feat-card.f5::after{background:radial-gradient(ellipse at 0% 0%,rgba(239,68,68,.1),transparent 60%);}
+.feat-card.f6::after{background:radial-gradient(ellipse at 0% 0%,rgba(34,197,94,.1),transparent 60%);}
+.feat-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.15);box-shadow:0 20px 50px rgba(0,0,0,.3);}
+.feat-card:hover::after{opacity:1;}
+.feat-ico{
+  width:52px;height:52px;border-radius:14px;display:grid;place-items:center;
+  margin-bottom:20px;font-size:22px;position:relative;z-index:1;
+}
+.fi1{background:rgba(37,99,235,.15);color:#60a5fa;}
+.fi2{background:rgba(245,158,11,.15);color:#fbbf24;}
+.fi3{background:rgba(20,184,166,.15);color:#2dd4bf;}
+.fi4{background:rgba(168,85,247,.15);color:#c084fc;}
+.fi5{background:rgba(239,68,68,.15);color:#f87171;}
+.fi6{background:rgba(34,197,94,.15);color:#4ade80;}
+.feat-card h3{font-size:17px;font-weight:700;margin-bottom:10px;letter-spacing:-.3px;color:#fff;position:relative;z-index:1;}
+.feat-card p{font-size:13px;color:rgba(255,255,255,.45);line-height:1.75;position:relative;z-index:1;}
+
+/* PROBLEM */
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;}
+.prob-text p{font-size:15px;color:rgba(255,255,255,.5);line-height:1.9;margin-bottom:18px;}
+.prob-quote{
+  border-left:3px solid #ef4444;padding:18px 22px;
+  background:rgba(239,68,68,.07);border-radius:0 10px 10px 0;
+  font-size:14px;font-style:italic;margin:24px 0;color:rgba(255,255,255,.7);
+  box-shadow:inset 0 0 0 1px rgba(239,68,68,.1);
+}
+.scenario{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;padding:28px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.sc-label{
+  font-family:var(--mono);font-size:9px;color:#fbbf24;
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;
+  background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);
+  display:inline-block;padding:4px 10px;border-radius:6px;
+}
+.tl{display:flex;gap:14px;margin-bottom:20px;align-items:flex-start;position:relative;}
+.tl:not(:last-child)::after{
+  content:'';position:absolute;left:4px;top:18px;bottom:-14px;
+  width:1px;background:rgba(255,255,255,.08);
+}
+.tl-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0;position:relative;z-index:1;}
+.dg{background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,.5);}
+.da{background:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.5);}
+.dr{background:#ef4444;box-shadow:0 0 8px rgba(239,68,68,.5);}
+.tl-t strong{display:block;font-family:var(--mono);font-size:11px;margin-bottom:4px;color:#fff;letter-spacing:-.2px;}
+.tl-t span{font-size:12px;color:rgba(255,255,255,.45);}
+
+/* METODOLOGÍA */
+.meto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px;}
+.meto-card{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:16px;padding:28px 22px;
   transition:all .3s;position:relative;overflow:hidden;
 }
-.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s;}
-.feat-card.f1::before{background:var(--blue)}.feat-card.f2::before{background:var(--amber)}.feat-card.f3::before{background:var(--teal)}
-.feat-card:hover{border-color:var(--border2);transform:translateY(-3px);}
-.feat-card:hover::before{opacity:1;}
-.feat-ico{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;margin-bottom:16px;font-size:20px;}
-.fi1{background:rgba(59,130,246,.12);color:var(--blue)}.fi2{background:rgba(245,158,11,.12);color:var(--amber)}.fi3{background:rgba(20,184,166,.12);color:var(--teal)}
-.feat-card h3{font-size:16px;font-weight:700;margin-bottom:9px;letter-spacing:-.2px;}
-.feat-card p{font-size:13px;color:var(--sub);line-height:1.7;}
-
-/* Problem */
-.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;}
-.prob-text p{font-size:15px;color:var(--sub);line-height:1.8;margin-bottom:16px;}
-.prob-quote{border-left:3px solid var(--red);padding:16px 20px;background:rgba(239,68,68,.06);border-radius:0 8px 8px 0;font-size:14px;font-style:italic;margin:22px 0;}
-.scenario{background:var(--card);border:1px solid var(--border2);border-radius:14px;padding:24px;}
-.sc-label{font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:18px;}
-.tl{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start;}
-.tl-dot{width:9px;height:9px;border-radius:50%;margin-top:4px;flex-shrink:0;}
-.dg{background:var(--green)}.da{background:var(--amber)}.dr{background:var(--red)}
-.tl-t strong{display:block;font-family:var(--mono);font-size:11px;margin-bottom:2px;}
-.tl-t span{font-size:11px;color:var(--muted);}
+.meto-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#1d4ed8,#0ea5e9);
+}
+.meto-card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.14);}
+.meto-num{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.25);letter-spacing:2px;margin-bottom:12px;}
+.meto-card h4{font-size:13px;font-weight:700;margin-bottom:8px;color:#fff;}
+.meto-card p{font-size:12px;color:rgba(255,255,255,.4);line-height:1.65;}
 
 /* CTA */
-.cta{text-align:center;padding:100px 56px;position:relative;overflow:hidden;}
-.cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(37,99,235,.08) 0%,transparent 60%);}
-.cta h2{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-2px;margin-bottom:16px;position:relative;}
-.cta p{font-size:15px;color:var(--sub);margin-bottom:32px;position:relative;}
-footer{padding:24px 56px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-footer p{font-size:12px;color:var(--muted);}
+.cta{
+  text-align:center;padding:110px 60px;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,transparent,rgba(37,99,235,.06) 50%,transparent);
+}
+.cta::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(37,99,235,.1) 0%,transparent 65%);
+}
+.cta-inner{position:relative;z-index:1;}
+.cta h2{font-size:clamp(32px,4.5vw,56px);font-weight:900;letter-spacing:-2.5px;margin-bottom:18px;color:#fff;line-height:1.0;}
+.cta h2 span{
+  background:linear-gradient(135deg,#60a5fa,#38bdf8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.cta p{font-size:16px;color:rgba(255,255,255,.45);margin-bottom:36px;max-width:500px;margin-inline:auto;line-height:1.7;}
+.btn-cta{
+  background:linear-gradient(135deg,#1d4ed8,#0ea5e9);
+  color:#fff;border:none;padding:16px 40px;border-radius:12px;
+  font-size:16px;font-weight:700;cursor:pointer;
+  box-shadow:0 10px 40px rgba(37,99,235,.5);transition:all .25s;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.btn-cta:hover{transform:translateY(-3px);box-shadow:0 16px 50px rgba(37,99,235,.6);}
+
+/* FOOTER */
+footer{
+  padding:28px 60px;
+  border-top:1px solid rgba(255,255,255,.06);
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(5,13,26,.8);
+}
+footer p{font-size:12px;color:rgba(255,255,255,.25);}
+
+/* btn-lg compat */
+.btn-lg{padding:13px 32px;font-size:15px;border-radius:10px;}
 
 /* ═══════════ LOGIN ═══════════ */
 #page-login{
@@ -247,6 +386,7 @@ footer p{font-size:12px;color:var(--muted);}
 
 /* ═══════════ DASHBOARD ═══════════ */
 #page-dash{height:100vh;display:flex;overflow:hidden;}
+#page-landing{overflow-y:auto;}
 
 /* SIDEBAR */
 .sidebar{
@@ -605,6 +745,8 @@ footer p{font-size:12px;color:var(--muted);}
 
 <!-- ═══════════════════ LANDING ═══════════════════ -->
 <div id="page-landing">
+
+  <!-- NAV -->
   <nav class="land-nav">
     <div class="brand">
       <div class="brand-shield"><i class="bi bi-shield-fill"></i></div>
@@ -615,95 +757,198 @@ footer p{font-size:12px;color:var(--muted);}
     </div>
     <ul>
       <li><a href="#prob">El Problema</a></li>
-      <li><a href="#func">Funciones</a></li>
+      <li><a href="#func">Solución</a></li>
       <li><a href="#meto">Metodología</a></li>
     </ul>
-    <button class="btn-primary btn" onclick="showLogin()">Acceder al Sistema</button>
+    <button class="btn-nav-cta" onclick="showLogin()"><i class="bi bi-box-arrow-in-right"></i> Acceder</button>
   </nav>
 
+  <!-- HERO -->
   <section class="hero">
-    <div class="hero-glow"></div><div class="hero-grid"></div>
+    <div class="hero-aurora"></div>
+    <div class="hero-dots"></div>
     <div class="hero-content">
-      <div class="hero-pill"><div class="pill-dot"></div>OFFLINE-FIRST · EDOMEX 2026</div>
-      <h1>Cadena de frío<br>resiliente en<br><em>zonas marginales</em></h1>
-      <p>Monitoreo de temperatura y geolocalización para insumos médicos en rutas sin señal del Estado de México. Zero data loss.</p>
+      <div class="hero-badge">
+        <div class="badge-dot"></div>
+        <span class="badge-txt">OFFLINE-FIRST · EDOMEX 2026</span>
+      </div>
+      <h1>
+        <span class="h1-white">Cadena de frío</span><br>
+        <span class="h1-white">resiliente en</span><br>
+        <span class="h1-blue">zonas marginales</span>
+      </h1>
+      <p class="hero-desc">Monitoreo de temperatura y geolocalización para insumos médicos en rutas sin señal del Estado de México. Zero data loss garantizado.</p>
       <div class="hero-btns">
-        <button class="btn-primary btn btn-lg" onclick="showLogin()">Ingresar al Dashboard →</button>
-        <button class="btn-ghost btn btn-lg" onclick="document.getElementById('prob').scrollIntoView({behavior:'smooth'})">Ver el problema</button>
+        <button class="btn-hero-primary" onclick="showLogin()">
+          <i class="bi bi-speedometer2"></i> Ingresar al Dashboard
+        </button>
+        <button class="btn-hero-ghost" onclick="document.getElementById('prob').scrollIntoView({behavior:'smooth'})">
+          Ver el problema <i class="bi bi-arrow-down"></i>
+        </button>
       </div>
     </div>
     <div class="hero-visual">
       <div id="hero-map"></div>
       <div class="hero-hud">
-        <div class="hud-item"><div class="hv" id="h-temp">5.8°C</div><div class="hl">Temperatura</div></div>
-        <div class="hud-item"><div class="hv" style="color:var(--amber)">SIN SEÑAL</div><div class="hl">Modo Rural</div></div>
-        <div class="hud-item"><div class="hv">47</div><div class="hl">En cola</div></div>
+        <div class="hud-item">
+          <div class="hv" id="h-temp">5.8°C</div>
+          <div class="hl">Temperatura</div>
+        </div>
+        <div class="hud-item">
+          <div class="hv" style="color:#f59e0b">SIN SEÑAL</div>
+          <div class="hl">Modo Rural</div>
+        </div>
+        <div class="hud-item">
+          <div class="hv" style="color:#818cf8">47</div>
+          <div class="hl">En cola</div>
+        </div>
       </div>
     </div>
   </section>
 
+  <!-- STATS -->
   <div class="land-stats">
-    <div class="ls-item"><div class="num" id="l1">0</div><div class="lbl">Viajes monitoreados</div></div>
-    <div class="ls-item"><div class="num" id="l2">0</div><div class="lbl">Alertas térmicas detectadas</div></div>
-    <div class="ls-item"><div class="num" id="l3">0</div><div class="lbl">Municipios cubiertos</div></div>
-    <div class="ls-item"><div class="num" id="l4">0</div><div class="lbl">Horas de operación offline</div></div>
+    <div class="ls-item">
+      <div class="ls-icon i1"><i class="bi bi-truck"></i></div>
+      <div><div class="num" id="l1">0</div><div class="lbl">Viajes monitoreados</div></div>
+    </div>
+    <div class="ls-item">
+      <div class="ls-icon i2"><i class="bi bi-exclamation-triangle"></i></div>
+      <div><div class="num" id="l2">0</div><div class="lbl">Alertas térmicas detectadas</div></div>
+    </div>
+    <div class="ls-item">
+      <div class="ls-icon i3"><i class="bi bi-geo-alt"></i></div>
+      <div><div class="num" id="l3">0</div><div class="lbl">Municipios cubiertos</div></div>
+    </div>
+    <div class="ls-item">
+      <div class="ls-icon i4"><i class="bi bi-wifi-off"></i></div>
+      <div><div class="num" id="l4">0</div><div class="lbl">Horas de operación offline</div></div>
+    </div>
   </div>
 
+  <!-- PROBLEMA -->
   <section class="section s-bg2" id="prob">
     <div class="prob-grid">
       <div class="prob-text">
-        <div class="s-tag">// EL PROBLEMA</div>
+        <div class="s-tag"><i class="bi bi-exclamation-circle"></i> EL PROBLEMA</div>
         <h2 class="s-title">Cuando el camión desaparece del radar</h2>
         <p>Los vehículos del ISEM recorren rutas donde la cobertura celular es inexistente. Los sistemas convencionales asumen conectividad permanente.</p>
         <div class="prob-quote">"Durante las 2–3 horas que el transporte pasa incomunicado en la sierra, las vacunas sufren un choque térmico invisible."</div>
         <p>Para cuando el camión recupera señal, el daño ya es irreversible. Sin registro continuo, el lote se aplica como si estuviera en perfecto estado.</p>
       </div>
       <div class="scenario">
-        <div class="sc-label">ESCENARIO — TOLUCA → SULTEPEC</div>
-        <div class="tl"><div class="tl-dot dg"></div><div class="tl-t"><strong>06:00 — Salida central</strong><span>Online. Temp: 4.2°C. GPS activo.</span></div></div>
-        <div class="tl"><div class="tl-dot da"></div><div class="tl-t"><strong>08:30 — Zona marginal</strong><span>⚡ Sin señal. Sistema pierde el rastro.</span></div></div>
-        <div class="tl"><div class="tl-dot dr"></div><div class="tl-t"><strong>09:15 — Falla refrigeración</strong><span>🌡 Temp sube a 14°C. Nadie lo sabe.</span></div></div>
-        <div class="tl"><div class="tl-dot dg"></div><div class="tl-t"><strong>11:00 — Señal recuperada</strong><span>FríoSeguro sincroniza 147 registros. Alerta georreferenciada ✓</span></div></div>
+        <div class="sc-label">Escenario real — Toluca → Sultepec</div>
+        <div class="tl">
+          <div class="tl-dot dg"></div>
+          <div class="tl-t"><strong>06:00 — Salida central</strong><span>Online. Temp: 4.2°C. GPS activo.</span></div>
+        </div>
+        <div class="tl">
+          <div class="tl-dot da"></div>
+          <div class="tl-t"><strong>08:30 — Zona marginal</strong><span>Sin señal. Sistema convencional pierde el rastro.</span></div>
+        </div>
+        <div class="tl">
+          <div class="tl-dot dr"></div>
+          <div class="tl-t"><strong>09:15 — Falla de refrigeración</strong><span>Temperatura sube a 14°C. Nadie lo sabe.</span></div>
+        </div>
+        <div class="tl">
+          <div class="tl-dot dg"></div>
+          <div class="tl-t"><strong>11:00 — Señal recuperada</strong><span>FríoSeguro sincroniza 147 registros. Alerta georreferenciada generada.</span></div>
+        </div>
       </div>
     </div>
   </section>
 
+  <!-- SOLUCIÓN / FEATURES -->
   <section class="section" id="func">
-    <div class="s-tag">// SOLUCIÓN</div>
-    <h2 class="s-title">Tres pilares de resiliencia</h2>
-    <p class="s-sub">Arquitectura Offline-First diseñada para las condiciones del territorio mexiquense.</p>
-    <div class="feat-grid">
-      <div class="feat-card f1"><div class="feat-ico fi1"><i class="bi bi-hdd-stack"></i></div><h3>Almacenamiento Offline</h3><p>Cola local SQLite. Cada lectura se guarda con timestamp real independiente de conectividad. Zero data loss garantizado.</p></div>
-      <div class="feat-card f2"><div class="feat-ico fi2"><i class="bi bi-thermometer-half"></i></div><h3>Telemetría Térmica</h3><p>Monitoreo continuo de temperatura y puerta. Algoritmo de degradación evalúa retroactivamente si el lote superó umbrales.</p></div>
-      <div class="feat-card f3"><div class="feat-ico fi3"><i class="bi bi-geo-alt"></i></div><h3>Georreferenciación</h3><p>Leaflet + OpenStreetMap: verde online, naranja punteado offline. Marcador exacto de la anomalía térmica.</p></div>
+    <div class="s-tag"><i class="bi bi-cpu"></i> SOLUCIÓN</div>
+    <h2 class="s-title">Seis pilares de resiliencia</h2>
+    <p class="s-sub">Arquitectura Offline-First diseñada para las condiciones del territorio mexiquense. Cada componente funciona sin internet.</p>
+    <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);">
+      <div class="feat-card f1">
+        <div class="feat-ico fi1"><i class="bi bi-hdd-stack"></i></div>
+        <h3>Almacenamiento Offline</h3>
+        <p>Cola local SQLite. Cada lectura se guarda con timestamp real independiente de conectividad. Zero data loss garantizado.</p>
+      </div>
+      <div class="feat-card f2">
+        <div class="feat-ico fi2"><i class="bi bi-thermometer-half"></i></div>
+        <h3>Telemetría Térmica</h3>
+        <p>Monitoreo continuo de temperatura. Algoritmo de degradación evalúa retroactivamente si el lote superó los umbrales permitidos.</p>
+      </div>
+      <div class="feat-card f3">
+        <div class="feat-ico fi3"><i class="bi bi-geo-alt"></i></div>
+        <h3>Georreferenciación</h3>
+        <p>Leaflet + OpenStreetMap con línea verde online y trazado naranja offline. Marcador exacto de la anomalía térmica detectada.</p>
+      </div>
+      <div class="feat-card f4">
+        <div class="feat-ico fi4"><i class="bi bi-cpu"></i></div>
+        <h3>IA Predictiva Local</h3>
+        <p>Análisis de riesgo con Ollama corriendo localmente. Sin nube. Evalúa daño acumulado y predice el estado final del lote.</p>
+      </div>
+      <div class="feat-card f5">
+        <div class="feat-ico fi5"><i class="bi bi-bell"></i></div>
+        <h3>Alertas en Tiempo Real</h3>
+        <p>Notificaciones automáticas por excursión térmica, puerta abierta y pérdida de señal. Clasificadas por nivel de severidad.</p>
+      </div>
+      <div class="feat-card f6">
+        <div class="feat-ico fi6"><i class="bi bi-capsule-pill"></i></div>
+        <h3>Control por Medicamento</h3>
+        <p>Catálogo de medicamentos con rangos de temperatura específicos. El sistema adapta los umbrales de alerta por tipo de carga.</p>
+      </div>
     </div>
   </section>
 
+  <!-- METODOLOGÍA -->
   <section class="section s-bg2" id="meto">
-    <div class="s-tag">// METODOLOGÍA</div>
+    <div class="s-tag"><i class="bi bi-diagram-3"></i> METODOLOGÍA</div>
     <h2 class="s-title">4 fases de operación</h2>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);border-radius:14px;overflow:hidden;margin-top:36px;">
-      <div style="background:var(--card);padding:28px 22px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:9px">FASE 01</div><h4 style="font-size:13px;font-weight:700;margin-bottom:7px">Simulación de cobertura</h4><p style="font-size:12px;color:var(--sub);line-height:1.6">Wokwi/Tinkercad + MODO_RURAL corta HTTP y mantiene lectura a JSON local.</p></div>
-      <div style="background:var(--card);padding:28px 22px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:9px">FASE 02</div><h4 style="font-size:13px;font-weight:700;margin-bottom:7px">Backend reconciliación</h4><p style="font-size:12px;color:var(--sub);line-height:1.6">PHP 8.3 procesa batch histórico y evalúa algoritmo de degradación térmica.</p></div>
-      <div style="background:var(--card);padding:28px 22px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:9px">FASE 03</div><h4 style="font-size:13px;font-weight:700;margin-bottom:7px">Mapa de cobertura</h4><p style="font-size:12px;color:var(--sub);line-height:1.6">Bootstrap 5.3: línea verde (online) y punteada naranja/roja (offline).</p></div>
-      <div style="background:var(--card);padding:28px 22px"><div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:9px">FASE 04</div><h4 style="font-size:13px;font-weight:700;margin-bottom:7px">Puntos críticos</h4><p style="font-size:12px;color:var(--sub);line-height:1.6">Leaflet.js renderiza marcadores ⚠ en coordenadas exactas de la anomalía.</p></div>
+    <p class="s-sub">Flujo completo desde la captura offline hasta la auditoría georreferenciada en el centro de control.</p>
+    <div class="meto-grid">
+      <div class="meto-card">
+        <div class="meto-num">FASE 01</div>
+        <h4>Simulación de cobertura</h4>
+        <p>Wokwi/Tinkercad + MODO_RURAL corta HTTP y mantiene lectura continua a JSON local en el dispositivo.</p>
+      </div>
+      <div class="meto-card">
+        <div class="meto-num">FASE 02</div>
+        <h4>Backend de reconciliación</h4>
+        <p>PHP 8.3 procesa el batch histórico offline y evalúa el algoritmo de degradación térmica acumulada.</p>
+      </div>
+      <div class="meto-card">
+        <div class="meto-num">FASE 03</div>
+        <h4>Mapa de cobertura</h4>
+        <p>Línea verde continua (online) y trazado naranja/rojo punteado (offline) sobre OpenStreetMap.</p>
+      </div>
+      <div class="meto-card">
+        <div class="meto-num">FASE 04</div>
+        <h4>Puntos críticos</h4>
+        <p>Leaflet.js renderiza marcadores de alerta en las coordenadas exactas donde ocurrió la anomalía.</p>
+      </div>
     </div>
   </section>
 
+  <!-- CTA -->
   <section class="cta">
-    <h2>Protege cada dosis.<br>En cada kilómetro.</h2>
-    <p>Sistema de auditoría de cadena de frío para las rutas marginales del Estado de México.</p>
-    <button class="btn-primary btn-lg" onclick="showLogin()">Acceder al Sistema →</button>
+    <div class="cta-inner">
+      <h2>Protege cada dosis.<br><span>En cada kilómetro.</span></h2>
+      <p>Sistema de auditoría de cadena de frío para las rutas marginales del Estado de México. Desarrollado en HACKATEC 2026.</p>
+      <button class="btn-cta" onclick="showLogin()">
+        <i class="bi bi-box-arrow-in-right"></i> Acceder al Sistema
+      </button>
+    </div>
   </section>
 
+  <!-- FOOTER -->
   <footer>
-    <div class="brand" style="font-size:14px">
-      <div class="brand-shield" style="width:26px;height:26px;font-size:13px"><i class="bi bi-shield-fill"></i></div>
-      <div><div class="brand-name" style="font-size:14px">Frío<span>Seguro</span></div></div>
+    <div class="brand">
+      <div class="brand-shield" style="width:28px;height:28px;font-size:13px"><i class="bi bi-shield-fill"></i></div>
+      <div>
+        <div class="brand-name" style="font-size:14px">Frío<span>Seguro</span></div>
+      </div>
     </div>
     <p>INNOVATEC / HACKATEC 2026 — TESC Izcalli</p>
-    <p style="font-family:var(--mono);font-size:10px">v1.0.0-alpha</p>
+    <p style="font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.2)">v1.0.0-alpha</p>
   </footer>
+
 </div>
 
 <!-- ═══════════════════ LOGIN ═══════════════════ -->
